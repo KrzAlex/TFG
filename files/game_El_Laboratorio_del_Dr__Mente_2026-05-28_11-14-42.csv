@@ -1,0 +1,11 @@
+timestamp,state,concentration,mellow,alpha,beta,theta,delta,gamma,signal_quality,gyro_y,gyro_z,acc_x,acc_y,acc_z,blink,jaw_clench,nod,shake,robot_action,room_index,room_title,escape_room_name,module_type,temi_speaking
+1779959680581,NEUTRAL,0.0,0.0,0.0,0.0,0.0,0.0,0.0,4.0,-2.6393127,-0.83740234,0.2746582,-0.1875,0.94610596,0,0,0,0,"Esperando",1,"Bienvenida","El Laboratorio del Dr. Mente",RobotAnimModule,0
+1779959680836,NEUTRAL,0.0,0.0,0.0,0.0,0.0,0.0,0.0,4.0,-2.8785706,-0.39627075,0.27752686,-0.18450928,0.947876,0,0,0,0,"Esperando",1,"Bienvenida","El Laboratorio del Dr. Mente",RobotAnimModule,0
+1779959681081,NEUTRAL,0.0,0.0,0.0,0.0,0.0,0.0,0.0,4.0,-2.6168823,-1.3832092,0.27209473,-0.18743896,0.95391846,0,0,0,0,"Esperando",1,"Bienvenida","El Laboratorio del Dr. Mente",RobotAnimModule,0
+1779959681331,NEUTRAL,0.0,0.0,0.0,0.0,0.0,0.0,0.0,4.0,-3.8356018,2.123413,0.35424805,-0.19494629,0.96118164,0,0,0,0,"Esperando",1,"Bienvenida","El Laboratorio del Dr. Mente",RobotAnimModule,0
+1779959681581,NEUTRAL,0.0,0.0,0.0,0.0,0.0,0.0,0.0,4.0,-4.216919,1.5925598,0.21325684,-0.22741699,0.93914795,0,0,0,0,"Esperando",1,"Bienvenida","El Laboratorio del Dr. Mente",RobotAnimModule,0
+1779959681831,NEUTRAL,0.0,0.0,0.0,0.0,0.0,0.0,0.0,4.0,-10.048828,0.6654358,0.23742676,-0.20898438,0.9574585,0,0,0,0,"Esperando",1,"Bienvenida","El Laboratorio del Dr. Mente",RobotAnimModule,0
+1779959682081,NEUTRAL,0.0,0.0,0.0,0.0,0.0,0.0,0.0,4.0,-4.949646,-3.7234497,0.24456787,-0.21594238,0.93414307,0,0,0,0,"Esperando",1,"Bienvenida","El Laboratorio del Dr. Mente",RobotAnimModule,0
+1779959682331,NEUTRAL,0.0,0.0,0.0,0.0,0.0,0.0,0.0,4.0,-5.637512,-0.18692017,0.25653076,-0.21923828,0.93304443,0,0,0,0,"Esperando",1,"Bienvenida","El Laboratorio del Dr. Mente",RobotAnimModule,1
+1779959682581,NEUTRAL,0.0,0.0,0.0,0.0,0.0,0.0,0.0,4.0,-3.8954163,-0.73272705,0.25177002,-0.20996094,0.9348755,0,0,0,0,"Esperando",1,"Bienvenida","El Laboratorio del Dr. Mente",RobotAnimModule,1
+1779959682831,NEUTRAL,0.0,0.0,0.0,0.0,0.0,0.0,0.0,4.0,-2.6841736,-1.510315,0.23486328,-0.2043457,0.9623413,0,0,0,0,"Esperando",1,"Bienvenida","El Laboratorio del Dr. Mente",RobotAnimModule,1

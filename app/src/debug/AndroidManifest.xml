@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Manifest de debug: elimina TemiSdkContentProvider para que la app
+    no se auto-mate en dispositivos que no son el robot Temi.
+    Este fichero solo se aplica en builds debug; el release conserva el provider.
+-->
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <application>
+        <provider
+            android:name="com.robotemi.sdk.TemiSdkContentProvider"
+            android:authorities="${applicationId}.TemiSdkContentProvider"
+            tools:node="remove" />
+    </application>
+
+</manifest>

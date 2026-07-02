@@ -1,0 +1,108 @@
+[{
+  "id": "lvl_demo_laboratorio",
+  "name": "El Laboratorio del Dr. Mente",
+  "modules": [
+    {
+      "type": "ANIM",
+      "title": "Bienvenida",
+      "narration": "¡Bienvenido al Laboratorio del Dr. Mente! Soy TEMI, tu guía en esta misión. Voy a ponerte a prueba en seis experimentos mentales. Sígueme.",
+      "hint": "Observa y escucha al robot",
+      "videoPath": "",
+      "robotActions": [
+        "GOTO:entrada",
+        "WAIT:1500",
+        "TILT_HEAD:20",
+        "SPEAK:Bienvenido al Laboratorio del Dr. Mente. Soy tu asistente TEMI.",
+        "WAIT:3000",
+        "TURN:90",
+        "WAIT:1000",
+        "TURN:-90",
+        "TILT_HEAD:0",
+        "GOTO:centro",
+        "SPEAK:Prepárate. Comenzamos ahora."
+      ],
+      "delayMs": 15000
+    },
+    {
+      "type": "CALM",
+      "title": "La Cámara de la Serenidad",
+      "narration": "Primera prueba. El sensor cerebral mide tu nivel de relajación. Cierra los ojos y respira despacio hasta alcanzar la calma.",
+      "hint": "Respira lentamente — mantén la calma durante 5 segundos",
+      "videoPath": "",
+      "robotActions": [
+        "GOTO:escritorio",
+        "TILT_HEAD:10",
+        "SPEAK:Cierra los ojos. Inhala despacio. Exhala despacio."
+      ],
+      "secondsRequired": 5
+    },
+    {
+      "type": "MORSE",
+      "title": "El Código Secreto",
+      "narration": "La puerta del laboratorio está cifrada con código Morse. Parpadea la letra que te diga el robot. Un parpadeo largo es punto, dos rápidos seguidos es raya.",
+      "hint": "Parpadea la letra en Morse — · punto  ·· raya",
+      "videoPath": "",
+      "robotActions": [
+        "TURN:180",
+        "WAIT:800",
+        "TURN:-180",
+        "TILT_HEAD:-10",
+        "SPEAK:Parpadea la letra que veas en pantalla usando código Morse."
+      ],
+      "letterPool": "ETISAN"
+    },
+    {
+      "type": "YESNO",
+      "title": "El Interrogatorio",
+      "narration": "El sistema de seguridad verifica tu identidad. Responde las preguntas con gestos: asiente para SÍ, niega para NO. Debes repetir el gesto para confirmar.",
+      "hint": "NOD = Sí  ·  SHAKE = No  ·  Repite el gesto para confirmar",
+      "videoPath": "",
+      "robotActions": [
+        "GOTO:entrada",
+        "TILT_HEAD:5",
+        "SPEAK:Voy a hacerte dos preguntas de seguridad. Responde con la cabeza."
+      ],
+      "questions": [
+        {
+          "text": "¿Eres el investigador autorizado para acceder al laboratorio?",
+          "expectedYes": true
+        },
+        {
+          "text": "¿Has compartido el código de acceso con alguien ajeno?",
+          "expectedYes": false
+        }
+      ]
+    },
+    {
+      "type": "BLINK_CLENCH",
+      "title": "El Interruptor Neural",
+      "narration": "El generador principal está apagado. Para activarlo debes enviar una señal neural combinada: primero parpadea para cargarlo, luego aprieta la mandíbula para disparar el pulso.",
+      "hint": "Parpadea → aprieta la mandíbula en menos de 4 segundos",
+      "videoPath": "",
+      "robotActions": [
+        "GOTO:centro",
+        "TURN:45",
+        "WAIT:800",
+        "TURN:-45",
+        "SPEAK:Parpadea primero para cargar. Luego aprieta la mandíbula para disparar."
+      ],
+      "jawWindowMs": 4000
+    },
+    {
+      "type": "VIDEO_STATE",
+      "title": "El Monitor Final",
+      "narration": "Última prueba. El sistema monitoriza tu estado mental en tiempo real. Mantén la calma durante 8 segundos. ¡Casi lo tienes!",
+      "hint": "Mantén la calma — 8 segundos",
+      "videoPath": "",
+      "robotActions": [
+        "GOTO:escritorio",
+        "TILT_HEAD:15",
+        "SPEAK:Esta es la prueba final. Confía en ti mismo y mantén la calma.",
+        "WAIT:3500",
+        "TILT_HEAD:0"
+      ],
+      "targetState": "CALM",
+      "secondsRequired": 8
+    }
+  ]
+}]

@@ -1,0 +1,609 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🧠 TemiEEG — Dashboard de Sesiones</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@3.0.1/dist/chartjs-plugin-annotation.min.js"></script>
+<style>
+  :root {
+    --bg:       #F3F0FB;
+    --card:     #FFFFFF;
+    --primary:  #7E57C2;
+    --primary2: #5E35B1;
+    --accent:   #B39DDB;
+    --text:     #2D2047;
+    --sub:      #7B6FA0;
+    --border:   #E0D7F5;
+    --calm:     #66BB6A;
+    --attention:#42A5F5;
+    --stress:   #EF5350;
+    --neutral:  #BDBDBD;
+    --good-sig: #66BB6A;
+    --bad-sig:  #EF5350;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+
+  /* ── Header ── */
+  header {
+    background: linear-gradient(135deg, var(--primary2), var(--primary));
+    color: #fff; padding: 16px 28px; display: flex; align-items: center; gap: 12px;
+    box-shadow: 0 2px 8px rgba(94,53,177,.3);
+  }
+  header h1 { font-size: 1.3rem; font-weight: 700; }
+  header span { font-size: 1.1rem; opacity: .8; }
+
+  /* ── Layout ── */
+  .layout { display: flex; height: calc(100vh - 56px); }
+
+  /* ── Sidebar ── */
+  aside {
+    width: 280px; min-width: 220px; background: var(--card);
+    border-right: 1px solid var(--border); display: flex; flex-direction: column;
+    overflow: hidden;
+  }
+  .sidebar-title {
+    padding: 14px 16px 10px; font-size: .75rem; font-weight: 700;
+    color: var(--sub); text-transform: uppercase; letter-spacing: .08em;
+    border-bottom: 1px solid var(--border);
+  }
+  .session-list { flex: 1; overflow-y: auto; padding: 8px 0; }
+  .session-item {
+    padding: 10px 16px; cursor: pointer; border-left: 3px solid transparent;
+    transition: all .15s; display: flex; flex-direction: column; gap: 3px;
+  }
+  .session-item:hover { background: var(--bg); }
+  .session-item.active { border-left-color: var(--primary); background: #EDE7F6; }
+  .session-item .name { font-size: .85rem; font-weight: 600; color: var(--text); }
+  .session-item .meta { font-size: .72rem; color: var(--sub); }
+  .session-item .badge {
+    display: inline-block; font-size: .65rem; padding: 1px 6px; border-radius: 999px;
+    font-weight: 700; margin-top: 2px;
+  }
+  .badge-game    { background: #EDE7F6; color: var(--primary); }
+  .badge-session { background: #E8F5E9; color: #388E3C; }
+
+  /* ── Drop zone ── */
+  .drop-zone {
+    margin: 12px; border: 2px dashed var(--accent); border-radius: 10px;
+    padding: 14px; text-align: center; cursor: pointer; color: var(--sub);
+    font-size: .8rem; transition: all .15s;
+  }
+  .drop-zone:hover, .drop-zone.drag-over { border-color: var(--primary); background: #EDE7F6; color: var(--primary); }
+  .drop-zone input { display: none; }
+
+  /* ── Main ── */
+  main { flex: 1; overflow-y: auto; padding: 20px 24px; }
+
+  /* ── Empty state ── */
+  .empty {
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    height: 60%; gap: 12px; color: var(--sub);
+  }
+  .empty .icon { font-size: 3rem; }
+  .empty p { font-size: .95rem; text-align: center; max-width: 320px; line-height: 1.5; }
+
+  /* ── Session header ── */
+  .session-header { margin-bottom: 18px; }
+  .session-header h2 { font-size: 1.2rem; color: var(--primary2); }
+  .session-header .sub { font-size: .82rem; color: var(--sub); margin-top: 2px; }
+
+  /* ── Stat cards ── */
+  .cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 12px; margin-bottom: 22px; }
+  .card {
+    background: var(--card); border-radius: 12px; padding: 14px 16px;
+    border: 1px solid var(--border); display: flex; flex-direction: column; gap: 4px;
+  }
+  .card .label { font-size: .7rem; font-weight: 700; color: var(--sub); text-transform: uppercase; letter-spacing: .06em; }
+  .card .value { font-size: 1.5rem; font-weight: 700; color: var(--primary2); }
+  .card .detail { font-size: .72rem; color: var(--sub); }
+
+  /* ── Charts grid ── */
+  .charts { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 22px; }
+  .chart-box {
+    background: var(--card); border-radius: 12px; padding: 16px;
+    border: 1px solid var(--border);
+  }
+  .chart-box.full { grid-column: 1 / -1; }
+  .chart-box h3 { font-size: .82rem; font-weight: 700; color: var(--sub); margin-bottom: 12px; text-transform: uppercase; letter-spacing: .06em; }
+  .chart-box canvas { max-height: 220px; }
+  .chart-box.tall canvas { max-height: 300px; }
+
+  /* ── Rooms table ── */
+  .rooms-section { background: var(--card); border-radius: 12px; padding: 16px; border: 1px solid var(--border); margin-bottom: 22px; }
+  .rooms-section h3 { font-size: .82rem; font-weight: 700; color: var(--sub); margin-bottom: 12px; text-transform: uppercase; letter-spacing: .06em; }
+  table { width: 100%; border-collapse: collapse; font-size: .82rem; }
+  th { text-align: left; padding: 7px 10px; border-bottom: 2px solid var(--border); color: var(--sub); font-weight: 700; font-size: .72rem; text-transform: uppercase; }
+  td { padding: 8px 10px; border-bottom: 1px solid var(--border); }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: var(--bg); }
+  .state-pill {
+    display: inline-block; padding: 2px 8px; border-radius: 999px; font-size: .7rem; font-weight: 700;
+  }
+  .pill-CALM      { background: #E8F5E9; color: #388E3C; }
+  .pill-ATTENTION { background: #E3F2FD; color: #1565C0; }
+  .pill-STRESS    { background: #FFEBEE; color: #C62828; }
+  .pill-NEUTRAL   { background: #F5F5F5; color: #616161; }
+
+  /* ── Signal quality bar ── */
+  .sig-bar { display: flex; height: 6px; border-radius: 3px; overflow: hidden; width: 80px; }
+  .sig-seg { height: 100%; }
+
+  /* ── Responsive ── */
+  @media (max-width: 768px) {
+    .charts { grid-template-columns: 1fr; }
+    aside { width: 220px; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <span>🧠</span>
+  <h1>TemiEEG — Dashboard de Sesiones</h1>
+</header>
+
+<div class="layout">
+  <aside>
+    <div class="sidebar-title">Sesiones cargadas</div>
+    <div class="session-list" id="sessionList">
+      <div style="padding:16px;color:var(--sub);font-size:.78rem;">Carga ficheros CSV para empezar</div>
+    </div>
+    <div class="drop-zone" id="dropZone" onclick="document.getElementById('fileInput').click()">
+      <input type="file" id="fileInput" accept=".csv" multiple>
+      📂 Arrastra CSVs aquí<br>o haz clic para seleccionar
+    </div>
+  </aside>
+
+  <main id="main">
+    <div class="empty">
+      <div class="icon">📊</div>
+      <p>Carga uno o más ficheros CSV de sesiones o partidas para ver el análisis.</p>
+    </div>
+  </main>
+</div>
+
+<script>
+// ── Datos en memoria ──────────────────────────────────────────────────────────
+const sessions = [];   // { name, type, rows, meta }
+let activeIdx = -1;
+const charts  = {};    // chart instances
+
+// ── Parseo CSV ────────────────────────────────────────────────────────────────
+function parseCSV(text) {
+  const lines = text.trim().split('\n');
+  if (lines.length < 2) return [];
+  const headers = lines[0].split(',').map(h => h.trim().replace(/"/g,''));
+  return lines.slice(1).map(line => {
+    const cols = splitCSVLine(line);
+    const obj = {};
+    headers.forEach((h, i) => {
+      const v = (cols[i] || '').replace(/"/g,'').trim();
+      obj[h] = v;
+    });
+    return obj;
+  }).filter(r => r.timestamp);
+}
+
+function splitCSVLine(line) {
+  const result = []; let cur = ''; let inQ = false;
+  for (let i = 0; i < line.length; i++) {
+    const c = line[i];
+    if (c === '"') { inQ = !inQ; continue; }
+    if (c === ',' && !inQ) { result.push(cur); cur = ''; continue; }
+    cur += c;
+  }
+  result.push(cur);
+  return result;
+}
+
+// ── Ingesta de ficheros ───────────────────────────────────────────────────────
+function loadFiles(files) {
+  Array.from(files).forEach(file => {
+    if (!file.name.endsWith('.csv')) return;
+    const reader = new FileReader();
+    reader.onload = e => {
+      const rows = parseCSV(e.target.result);
+      if (!rows.length) return;
+      const isGame = !!rows[0].escape_room_name;
+      const name = file.name.replace('.csv','');
+      sessions.push({ name, type: isGame ? 'game' : 'session', rows });
+      renderSidebar();
+      if (sessions.length === 1) selectSession(0);
+    };
+    reader.readAsText(file, 'UTF-8');
+  });
+}
+
+// ── Sidebar ───────────────────────────────────────────────────────────────────
+function renderSidebar() {
+  const list = document.getElementById('sessionList');
+  list.innerHTML = sessions.map((s, i) => {
+    const dur = duration(s.rows);
+    const label = s.type === 'game'
+      ? `<span class="badge badge-game">🎮 Partida</span>`
+      : `<span class="badge badge-session">📡 Sesión</span>`;
+    return `<div class="session-item${i===activeIdx?' active':''}" onclick="selectSession(${i})">
+      <span class="name">${shortName(s.name)}</span>
+      ${label}
+      <span class="meta">${dur} · ${s.rows.length} muestras</span>
+    </div>`;
+  }).join('');
+}
+
+function shortName(n) {
+  return n.replace(/game_|session_/,'').replace(/_\d{4}-\d{2}-\d{2}_\d{2}-\d{2}-\d{2}$/,'').replace(/_/g,' ');
+}
+
+function duration(rows) {
+  if (rows.length < 2) return '—';
+  const ms = +rows[rows.length-1].timestamp - +rows[0].timestamp;
+  if (ms < 0) return '—';
+  const s = Math.round(ms/1000);
+  return s < 60 ? `${s}s` : `${Math.floor(s/60)}m ${s%60}s`;
+}
+
+// ── Selección ─────────────────────────────────────────────────────────────────
+function selectSession(idx) {
+  activeIdx = idx;
+  renderSidebar();
+  renderMain(sessions[idx]);
+}
+
+// ── Main ──────────────────────────────────────────────────────────────────────
+function renderMain(s) {
+  const main = document.getElementById('main');
+
+  // Calcular métricas
+  const rows  = s.rows;
+  const ts0   = +rows[0].timestamp;
+  const tsEnd = +rows[rows.length-1].timestamp;
+  const durS  = Math.round((tsEnd - ts0) / 1000);
+  const durStr = durS < 60 ? `${durS}s` : `${Math.floor(durS/60)}m ${durS%60}s`;
+
+  const stateCounts = { CALM:0, ATTENTION:0, STRESS:0, NEUTRAL:0 };
+  rows.forEach(r => { if (stateCounts[r.state]!==undefined) stateCounts[r.state]++; });
+  const dominantState = Object.entries(stateCounts).sort((a,b)=>b[1]-a[1])[0][0];
+
+  const avgSig = avg(rows.map(r=>+r.signal_quality).filter(v=>v>0));
+  const sigLabel = avgSig <= 1.5 ? '✅ Buena' : avgSig <= 2.5 ? '⚠ Regular' : '❌ Mala';
+
+  const totalBlinks    = rows.filter(r=>r.blink==='1').length;
+  const totalJaw       = rows.filter(r=>r.jaw_clench==='1').length;
+  const totalNods      = rows.filter(r=>r.nod==='1').length;
+  const totalShakes    = rows.filter(r=>r.shake==='1').length;
+  const totalGestures  = totalBlinks + totalJaw + totalNods + totalShakes;
+
+  const avgConc = avg(rows.map(r=>+r.concentration));
+  const avgMell = avg(rows.map(r=>+r.mellow));
+
+  const isGame = s.type === 'game';
+  const gameName = isGame ? (rows.find(r=>r.escape_room_name)?.escape_room_name || '') : '';
+
+  // HTML
+  main.innerHTML = `
+    <div class="session-header">
+      <h2>${isGame ? '🎮' : '📡'} ${shortName(s.name)}</h2>
+      <div class="sub">${s.name} · ${rows.length} muestras · ${durStr}</div>
+    </div>
+
+    <div class="cards">
+      <div class="card">
+        <div class="label">Duración</div>
+        <div class="value">${durStr}</div>
+        <div class="detail">${rows.length} muestras</div>
+      </div>
+      <div class="card">
+        <div class="label">Estado dominante</div>
+        <div class="value"><span class="state-pill pill-${dominantState}">${dominantState}</span></div>
+        <div class="detail">${pct(stateCounts[dominantState], rows.length)}% del tiempo</div>
+      </div>
+      <div class="card">
+        <div class="label">Señal EEG</div>
+        <div class="value">${sigLabel}</div>
+        <div class="detail">Media: ${avgSig.toFixed(2)} / 4</div>
+      </div>
+      <div class="card">
+        <div class="label">Concentración media</div>
+        <div class="value">${(avgConc*100).toFixed(0)}%</div>
+        <div class="detail">Tranquilidad: ${(avgMell*100).toFixed(0)}%</div>
+      </div>
+      <div class="card">
+        <div class="label">Gestos totales</div>
+        <div class="value">${totalGestures}</div>
+        <div class="detail">👁 ${totalBlinks} · 😬 ${totalJaw} · 🙆 ${totalNods} · 🙅 ${totalShakes}</div>
+      </div>
+      ${isGame ? `<div class="card">
+        <div class="label">Nivel</div>
+        <div class="value" style="font-size:1rem">${gameName}</div>
+        <div class="detail">${uniqueRooms(rows)} salas</div>
+      </div>` : ''}
+    </div>
+
+    <div class="charts">
+      <div class="chart-box full tall">
+        <h3>Estado mental a lo largo del tiempo</h3>
+        <canvas id="chartTimeline"></canvas>
+      </div>
+      <div class="chart-box">
+        <h3>Distribución de estados</h3>
+        <canvas id="chartStates"></canvas>
+      </div>
+      <div class="chart-box">
+        <h3>Gestos detectados</h3>
+        <canvas id="chartGestures"></canvas>
+      </div>
+      <div class="chart-box full">
+        <h3>Concentración y Tranquilidad</h3>
+        <canvas id="chartMetrics"></canvas>
+      </div>
+      <div class="chart-box full">
+        <h3>Calidad de señal EEG</h3>
+        <canvas id="chartSignal"></canvas>
+      </div>
+    </div>
+
+    ${isGame ? roomsSection(rows) : ''}
+  `;
+
+  // Destruir charts previos
+  Object.values(charts).forEach(c => c.destroy());
+  for (const k in charts) delete charts[k];
+
+  // Renderizar charts
+  buildTimeline(rows, ts0);
+  buildStates(stateCounts, rows.length);
+  buildGestures(totalBlinks, totalJaw, totalNods, totalShakes);
+  buildMetrics(rows, ts0);
+  buildSignal(rows, ts0);
+}
+
+// ── Chart: Timeline de estado ─────────────────────────────────────────────────
+function buildTimeline(rows, ts0) {
+  const stateColors = { CALM:'#66BB6A', ATTENTION:'#42A5F5', STRESS:'#EF5350', NEUTRAL:'#BDBDBD' };
+  const stateValues = { CALM:3, ATTENTION:2, STRESS:1, NEUTRAL:0 };
+  const labels = rows.map(r => fmtTime(+r.timestamp - ts0));
+  const data   = rows.map(r => stateValues[r.state] ?? 0);
+  const colors = rows.map(r => stateColors[r.state] ?? '#BDBDBD');
+
+  // Downsample si hay muchos puntos
+  const step  = Math.max(1, Math.floor(rows.length / 300));
+  const sl    = labels.filter((_,i)=>i%step===0);
+  const sd    = data.filter((_,i)=>i%step===0);
+  const sc    = colors.filter((_,i)=>i%step===0);
+
+  charts.timeline = new Chart(document.getElementById('chartTimeline'), {
+    type: 'bar',
+    data: {
+      labels: sl,
+      datasets: [{
+        data: sd,
+        backgroundColor: sc,
+        borderWidth: 0,
+        barPercentage: 1.0,
+        categoryPercentage: 1.0
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: true,
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          callbacks: {
+            label: ctx => {
+              const map = ['NEUTRAL','STRESS','ATTENTION','CALM'];
+              return ` ${map[ctx.raw] ?? ''}`;
+            }
+          }
+        }
+      },
+      scales: {
+        x: { display: false },
+        y: {
+          min: 0, max: 3,
+          ticks: {
+            stepSize: 1,
+            callback: v => ['NEUTRAL','STRESS','ATTENTION','CALM'][v]
+          }
+        }
+      }
+    }
+  });
+}
+
+// ── Chart: Distribución estados ───────────────────────────────────────────────
+function buildStates(counts, total) {
+  const labels = Object.keys(counts).filter(k => counts[k] > 0);
+  const data   = labels.map(k => counts[k]);
+  const colors = labels.map(k => ({CALM:'#66BB6A',ATTENTION:'#42A5F5',STRESS:'#EF5350',NEUTRAL:'#BDBDBD'}[k]));
+
+  charts.states = new Chart(document.getElementById('chartStates'), {
+    type: 'doughnut',
+    data: { labels, datasets: [{ data, backgroundColor: colors, borderWidth: 2 }] },
+    options: {
+      responsive: true, maintainAspectRatio: true,
+      plugins: {
+        legend: { position: 'right' },
+        tooltip: {
+          callbacks: { label: ctx => ` ${ctx.label}: ${pct(ctx.raw, total)}%` }
+        }
+      }
+    }
+  });
+}
+
+// ── Chart: Gestos ─────────────────────────────────────────────────────────────
+function buildGestures(blinks, jaw, nods, shakes) {
+  charts.gestures = new Chart(document.getElementById('chartGestures'), {
+    type: 'bar',
+    data: {
+      labels: ['👁 Parpadeo', '😬 Mandíbula', '🙆 Asentir', '🙅 Negar'],
+      datasets: [{
+        data: [blinks, jaw, nods, shakes],
+        backgroundColor: ['#7E57C2','#5E35B1','#9575CD','#B39DDB'],
+        borderRadius: 6
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: true,
+      plugins: { legend: { display: false } },
+      scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } }
+    }
+  });
+}
+
+// ── Chart: Concentración y Tranquilidad ───────────────────────────────────────
+function buildMetrics(rows, ts0) {
+  const step = Math.max(1, Math.floor(rows.length / 200));
+  const filtered = rows.filter((_,i) => i%step===0);
+  const labels = filtered.map(r => fmtTime(+r.timestamp - ts0));
+  const conc   = filtered.map(r => +(+r.concentration * 100).toFixed(1));
+  const mell   = filtered.map(r => +(+r.mellow * 100).toFixed(1));
+
+  charts.metrics = new Chart(document.getElementById('chartMetrics'), {
+    type: 'line',
+    data: {
+      labels,
+      datasets: [
+        { label: 'Concentración', data: conc, borderColor: '#42A5F5', backgroundColor: 'rgba(66,165,245,.1)', borderWidth: 2, pointRadius: 0, fill: true, tension: .3 },
+        { label: 'Tranquilidad',  data: mell, borderColor: '#66BB6A', backgroundColor: 'rgba(102,187,106,.1)', borderWidth: 2, pointRadius: 0, fill: true, tension: .3 }
+      ]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: true,
+      plugins: { legend: { position: 'top' } },
+      scales: {
+        x: { display: false },
+        y: { min: 0, max: 100, ticks: { callback: v => `${v}%` } }
+      }
+    }
+  });
+}
+
+// ── Chart: Calidad de señal ───────────────────────────────────────────────────
+function buildSignal(rows, ts0) {
+  const step = Math.max(1, Math.floor(rows.length / 200));
+  const filtered = rows.filter((_,i) => i%step===0);
+  const labels = filtered.map(r => fmtTime(+r.timestamp - ts0));
+  const sig    = filtered.map(r => +r.signal_quality);
+  const colors = sig.map(v => v <= 1.5 ? '#66BB6A' : v <= 2.5 ? '#FFA726' : '#EF5350');
+
+  charts.signal = new Chart(document.getElementById('chartSignal'), {
+    type: 'line',
+    data: {
+      labels,
+      datasets: [{
+        label: 'Calidad de señal (1=buena · 4=sin contacto)',
+        data: sig,
+        borderColor: '#9575CD',
+        backgroundColor: 'rgba(149,117,205,.1)',
+        borderWidth: 1.5,
+        pointRadius: 0,
+        fill: true,
+        tension: .2
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: true,
+      plugins: {
+        legend: { display: false },
+        annotation: {
+          annotations: {
+            goodLine: { type:'line', yMin:2, yMax:2, borderColor:'rgba(102,187,106,.5)', borderWidth:1.5, borderDash:[4,4], label:{ content:'Umbral estable', display:true, position:'end', color:'#66BB6A', font:{size:10} } },
+            badLine:  { type:'line', yMin:3, yMax:3, borderColor:'rgba(239,83,80,.4)',   borderWidth:1.5, borderDash:[4,4], label:{ content:'Sin contacto',   display:true, position:'end', color:'#EF5350', font:{size:10} } }
+          }
+        }
+      },
+      scales: {
+        x: { display: false },
+        y: { min: 1, max: 4, reverse: false, ticks: { stepSize: 1, callback: v => ['','Buena','Regular','Mala','Sin contacto'][v]||v } }
+      }
+    }
+  });
+}
+
+// ── Tabla de salas (solo partidas) ────────────────────────────────────────────
+function roomsSection(rows) {
+  // Agrupar por room_index
+  const roomMap = {};
+  rows.forEach(r => {
+    const idx = r.room_index;
+    if (idx === '-1' || !idx) return;
+    if (!roomMap[idx]) roomMap[idx] = { title: r.room_title, module: r.module_type, rows: [] };
+    roomMap[idx].rows.push(r);
+  });
+
+  const roomKeys = Object.keys(roomMap).sort((a,b)=>+a-+b);
+  if (!roomKeys.length) return '';
+
+  const roomRows = roomKeys.map(k => {
+    const rm = roomMap[k];
+    const dur = roomDuration(rm.rows);
+    const sc = stateCounts(rm.rows);
+    const dom = Object.entries(sc).sort((a,b)=>b[1]-a[1])[0];
+    const blinks = rm.rows.filter(r=>r.blink==='1').length;
+    const jaw    = rm.rows.filter(r=>r.jaw_clench==='1').length;
+    const sigAvg = avg(rm.rows.map(r=>+r.signal_quality).filter(v=>v>0));
+    const modEmoji = { MorseModule:'📡', CalmModule:'🧘', YesNoModule:'🤔', BlinkClenchModule:'⚡', RobotAnimModule:'🤖', VideoStateModule:'🎯' };
+    const emoji = modEmoji[rm.module] || '🔮';
+    return `<tr>
+      <td>${k}</td>
+      <td>${emoji} ${rm.title || '—'}</td>
+      <td style="color:var(--sub);font-size:.75rem">${rm.module || '—'}</td>
+      <td>${dur}</td>
+      <td><span class="state-pill pill-${dom[0]}">${dom[0]}</span> <span style="color:var(--sub);font-size:.72rem">${pct(dom[1],rm.rows.length)}%</span></td>
+      <td>👁 ${blinks} · 😬 ${jaw}</td>
+      <td>${sigAvg.toFixed(1)}</td>
+    </tr>`;
+  }).join('');
+
+  return `<div class="rooms-section">
+    <h3>Salas de la partida</h3>
+    <table>
+      <thead><tr><th>#</th><th>Sala</th><th>Módulo</th><th>Duración</th><th>Estado dominante</th><th>Gestos</th><th>Señal</th></tr></thead>
+      <tbody>${roomRows}</tbody>
+    </table>
+  </div>`;
+}
+
+// ── Helpers ───────────────────────────────────────────────────────────────────
+function avg(arr) { return arr.length ? arr.reduce((a,b)=>a+b,0)/arr.length : 0; }
+function pct(n, total) { return total ? Math.round(n/total*100) : 0; }
+function uniqueRooms(rows) {
+  return new Set(rows.map(r=>r.room_index).filter(r=>r&&r!=='-1')).size;
+}
+function stateCounts(rows) {
+  const c = { CALM:0, ATTENTION:0, STRESS:0, NEUTRAL:0 };
+  rows.forEach(r => { if (c[r.state]!==undefined) c[r.state]++; });
+  return c;
+}
+function roomDuration(rows) {
+  if (rows.length < 2) return '—';
+  const ms = +rows[rows.length-1].timestamp - +rows[0].timestamp;
+  if (ms <= 0) return '—';
+  const s = Math.round(ms/1000);
+  return s < 60 ? `${s}s` : `${Math.floor(s/60)}m ${s%60}s`;
+}
+function fmtTime(ms) {
+  const s = Math.floor(ms/1000);
+  const m = Math.floor(s/60);
+  const ss = s % 60;
+  return `${m}:${ss.toString().padStart(2,'0')}`;
+}
+
+// ── Drag & drop ───────────────────────────────────────────────────────────────
+const dz = document.getElementById('dropZone');
+const fi = document.getElementById('fileInput');
+
+dz.addEventListener('dragover', e => { e.preventDefault(); dz.classList.add('drag-over'); });
+dz.addEventListener('dragleave', () => dz.classList.remove('drag-over'));
+dz.addEventListener('drop', e => {
+  e.preventDefault(); dz.classList.remove('drag-over');
+  loadFiles(e.dataTransfer.files);
+});
+fi.addEventListener('change', () => loadFiles(fi.files));
+</script>
+</body>
+</html>

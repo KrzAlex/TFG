@@ -1,0 +1,85 @@
+plugins {
+    id 'com.android.application'
+    id 'org.jetbrains.kotlin.android'
+}
+
+android {
+    namespace 'com.tfg.temieeg'
+    compileSdk 34
+
+    defaultConfig {
+        applicationId "com.tfg.temieeg"
+        minSdk 23
+        targetSdk 33
+        versionCode 1
+        versionName "0.1.0"
+
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+        debug {
+            // Para móviles normales: src/debug/AndroidManifest.xml elimina
+            // TemiSdkContentProvider para que la app no se mate sola.
+        }
+        temi {
+            // Para el robot Temi. Hereda firma debug (instalable directamente).
+            // NO existe src/temi/AndroidManifest.xml, así que TemiSdkContentProvider
+            // se conserva y el SDK se inicializa correctamente en el robot.
+            initWith debug
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+
+    kotlinOptions {
+        jvmTarget = '17'
+    }
+
+    buildFeatures {
+        viewBinding true
+    }
+}
+
+dependencies {
+    // ------------- LibMuse SDK (Bluetooth directo, sin Mind Monitor) -------------
+    // Coloca libmuse_android.aar en app/libs/
+    // Fuente: https://github.com/choosemuse/LibMuseAndroid  →  app/libs/
+    implementation fileTree(dir: 'libs', include: ['*.aar', '*.jar'])
+
+    // ------------- Temi SDK -------------
+    // Verificar última versión en https://github.com/robotemi/sdk
+    implementation 'com.robotemi:sdk:1.131.1'
+
+    // ------------- Kotlin & coroutines -------------
+    implementation 'androidx.core:core-ktx:1.12.0'
+    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3'
+
+    // ------------- AndroidX UI -------------
+    implementation 'androidx.appcompat:appcompat:1.6.1'
+    implementation 'com.google.android.material:material:1.11.0'
+    implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
+
+    // ------------- ViewModel + LiveData -------------
+    implementation 'androidx.lifecycle:lifecycle-viewmodel-ktx:2.7.0'
+    implementation 'androidx.lifecycle:lifecycle-livedata-ktx:2.7.0'
+    implementation 'androidx.lifecycle:lifecycle-runtime-ktx:2.7.0'
+
+    // ------------- OSC (Mind Monitor vía WiFi — modo por defecto) -------------
+    implementation 'com.illposed.osc:javaosc-core:0.4'
+
+    // ------------- Visualización EEG (opcional) -------------
+    implementation 'com.github.PhilJay:MPAndroidChart:v3.1.0'
+
+    // ------------- Test -------------
+    testImplementation 'junit:junit:4.13.2'
+    androidTestImplementation 'androidx.test.ext:junit:1.1.5'
+    androidTestImplementation 'androidx.test.espresso:espresso-core:3.5.1'
+}

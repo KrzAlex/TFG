@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:tools="http://schemas.android.com/tools">
+
+    <!-- Tema base. Light fijo: la UI está diseñada en claro y el robot Temi
+         no usa modo oscuro; DayNight invertiría los colores hardcodeados. -->
+    <style name="Theme.TemiEeg" parent="Theme.MaterialComponents.Light.NoActionBar">
+        <item name="colorPrimary">@color/primary</item>
+        <item name="colorPrimaryDark">@color/primary_dark</item>
+        <item name="colorPrimaryVariant">@color/primary_dark</item>
+        <item name="colorSecondary">@color/primary</item>
+        <item name="colorSecondaryVariant">@color/primary_dark</item>
+        <item name="colorAccent">@color/primary</item>
+        <item name="android:colorBackground">@color/background</item>
+        <item name="android:windowBackground">@color/background</item>
+        <item name="android:statusBarColor" tools:targetApi="l">@color/primary_dark</item>
+        <item name="android:textColorPrimary">@color/text_primary</item>
+        <item name="android:textColorSecondary">@color/text_secondary</item>
+    </style>
+
+    <!-- ── Tipografía ─────────────────────────────────────────────────────── -->
+
+    <!-- Cabecera de sección: MAYÚSCULAS pequeñas en color de marca -->
+    <style name="Text.Overline" parent="">
+        <item name="android:textSize">12sp</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:textColor">@color/primary</item>
+        <item name="android:letterSpacing">0.08</item>
+        <item name="android:textAllCaps">true</item>
+    </style>
+
+    <!-- Etiqueta de un ajuste / fila -->
+    <style name="Text.Label" parent="">
+        <item name="android:textSize">14sp</item>
+        <item name="android:textColor">@color/text_primary</item>
+    </style>
+
+    <!-- Texto auxiliar pequeño -->
+    <style name="Text.Caption" parent="">
+        <item name="android:textSize">11sp</item>
+        <item name="android:textColor">@color/text_muted</item>
+    </style>
+
+    <!-- Valor numérico monoespaciado (umbrales, IP, contadores…) -->
+    <style name="Text.ValueMono" parent="">
+        <item name="android:fontFamily">monospace</item>
+        <item name="android:textSize">13sp</item>
+        <item name="android:textColor">@color/text_secondary</item>
+    </style>
+
+    <!-- ── Botones ────────────────────────────────────────────────────────── -->
+
+    <!-- Acción principal: relleno de marca -->
+    <style name="Button.Primary" parent="Widget.MaterialComponents.Button">
+        <item name="backgroundTint">@color/primary</item>
+        <item name="android:textColor">@color/text_on_primary</item>
+        <item name="cornerRadius">14dp</item>
+        <item name="android:textSize">15sp</item>
+    </style>
+
+    <!-- Acción secundaria: tono suave de marca -->
+    <style name="Button.Tonal" parent="Widget.MaterialComponents.Button">
+        <item name="backgroundTint">@color/surface_tint</item>
+        <item name="android:textColor">@color/primary_dark</item>
+        <item name="cornerRadius">14dp</item>
+        <item name="android:textSize">14sp</item>
+        <item name="android:stateListAnimator">@null</item>
+    </style>
+
+    <!-- Acción terciaria: solo texto -->
+    <style name="Button.Ghost" parent="Widget.MaterialComponents.Button.TextButton">
+        <item name="android:textColor">@color/text_secondary</item>
+        <item name="android:textSize">13sp</item>
+    </style>
+
+    <!-- ── Contenedores ───────────────────────────────────────────────────── -->
+
+    <!-- Tarjeta blanca redondeada con borde sutil -->
+    <style name="Card">
+        <item name="android:background">@drawable/bg_card</item>
+        <item name="android:padding">16dp</item>
+        <item name="android:orientation">vertical</item>
+    </style>
+
+    <!-- Separador horizontal fino -->
+    <style name="Divider">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">1dp</item>
+        <item name="android:background">@color/divider</item>
+    </style>
+
+</resources>

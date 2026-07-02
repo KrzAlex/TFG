@@ -1,0 +1,161 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Temi EEG</string>
+
+    <!-- Estados mentales -->
+    <string name="state_neutral">NEUTRO</string>
+    <string name="state_stress">ESTRÉS</string>
+    <string name="state_attention">ATENCIÓN</string>
+    <string name="state_calm">CALMA</string>
+
+    <!-- Etiquetas dashboard -->
+    <string name="label_concentration">Concentración</string>
+    <string name="label_mellow">Calma</string>
+    <string name="label_alpha">Alpha</string>
+    <string name="label_beta">Beta</string>
+
+    <!-- Conexión MUSE -->
+    <string name="muse_connected">MUSE: Conectado ✓</string>
+    <string name="muse_connecting">MUSE: Conectando…</string>
+    <string name="muse_select_device">Varios MUSE detectados — selecciona uno</string>
+    <string name="bt_preferred_device">Dispositivo preferido</string>
+    <string name="bt_no_preference">—</string>
+    <string name="bt_forget">Olvidar preferencia</string>
+    <string name="bt_scan_devices">Ver dispositivos</string>
+    <string name="bt_scanning">Buscando dispositivos MUSE…</string>
+    <string name="bt_no_devices_found">No se detectó ningún MUSE. Asegúrate de que está encendido y cerca.</string>
+    <string name="muse_disconnected">MUSE: Desconectado</string>
+    <string name="muse_no_elements">MUSE: Conectado · Activa Alpha/Beta en Mind Monitor → OSC</string>
+
+    <!-- Botones -->
+    <string name="btn_start_session">Empezar registro</string>
+    <string name="btn_stop_session">Parar registro</string>
+    <string name="share_session">Compartir registro CSV</string>
+
+    <!-- Info umbrales -->
+    <string name="thresholds_info">Umbrales: Estrés mellow&lt;0.30 · Atención conc&gt;0.55 · Calma mellow&gt;0.78</string>
+    <string name="label_raw_bands">Bandas brutas (log):</string>
+
+    <!-- Orientación cabeza -->
+    <string name="section_head_orientation">Acelerómetro — posición estática</string>
+    <string name="acc_note">Muestra hacia dónde apunta la cabeza cuando está quieta (vector gravedad). Se mantiene estable mientras no hay movimiento. Activa «Accelerometer» en Mind Monitor → OSC.</string>
+
+    <!-- Giroscopio -->
+    <string name="section_gyro">Giroscopio — velocidad de giro (°/s)</string>
+    <string name="gyro_note">Sube durante el movimiento y vuelve a 0 al parar. Y = pitch (asentir ✅) · Z = yaw (negar ❌) · X = roll (inclinar). El gráfico muestra Y (verde) y Z (azul). Umbrales por defecto: NOD 30 °/s · SHAKE 50 °/s.</string>
+
+    <!-- Calidad de señal -->
+    <string name="signal_unknown">Señal: —</string>
+    <string name="signal_good">Señal: ● ● ● ●  Buena</string>
+    <string name="signal_ok">Señal: ◑ ◑ ◑ ◑  Regular</string>
+    <string name="signal_bad">Señal: ○ ○ ○ ○  Sin contacto</string>
+
+    <!-- Mandíbula / Cabeza -->
+    <string name="jaw_indicator">😬 Mandíbula</string>
+    <string name="nod_indicator">✅ Asentir</string>
+    <string name="shake_indicator">❌ Negar</string>
+
+    <!-- Configuración -->
+    <string name="btn_settings_mode">⚙ Configuración</string>
+    <string name="btn_settings_back">← Volver</string>
+    <string name="settings_title">Configuración</string>
+    <string name="settings_section_general">🔊 General</string>
+    <string name="settings_label_volume">Volumen del sistema</string>
+    <string name="settings_section_connection">📡 Conexión</string>
+    <string name="settings_mode_osc">📶  Mind Monitor (OSC / WiFi)</string>
+    <string name="settings_mode_bt">🔵  MUSE Directo (Bluetooth)</string>
+    <string name="settings_mode_bt_note">Requiere libmuse_android.aar en app/libs/. El MUSE 2 se conecta directamente sin Mind Monitor.</string>
+    <string name="settings_label_device_ip">IP de este dispositivo</string>
+    <string name="settings_label_osc_port">Puerto OSC</string>
+    <string name="settings_section_eeg">🧠 Sensibilidad EEG</string>
+    <string name="settings_label_stress">Umbral ESTRÉS  (mellow &lt;)</string>
+    <string name="settings_label_attention">Umbral ATENCIÓN  (concentración &gt;)</string>
+    <string name="settings_label_calm">Umbral CALMA  (mellow &gt;)</string>
+    <string name="settings_section_bci">👁 Detección BCI</string>
+    <string name="settings_label_blink_debounce">Debounce parpadeo</string>
+    <string name="settings_label_nod">✅ Umbral asentir — NOD  (gyroY, °/s)</string>
+    <string name="settings_label_shake">❌ Umbral negar — SHAKE  (gyroZ, °/s)</string>
+    <string name="settings_label_noise_mic">Micrófono — silencio en sala Morse</string>
+    <string name="settings_reset">Restablecer por defecto</string>
+    <string name="settings_export_locations">📍 Exportar ubicaciones del mapa</string>
+
+    <!-- Dev mode -->
+    <string name="btn_dev_mode">⚙ Desarrollador</string>
+    <string name="btn_dev_back">← Volver</string>
+
+    <!-- Escape Room -->
+    <string name="btn_play_escape_room">🚪 Jugar Escape Room</string>
+    <string name="escape_room_exit">✕ Salir</string>
+    <string name="escape_room_skip">⏭ Saltar sala</string>
+    <string name="escape_room_room1">La Puerta de la Calma</string>
+    <string name="escape_room_room2">El Código Secreto</string>
+    <string name="escape_room_room3">El Oráculo</string>
+    <string name="escape_room_room4">La Cerradura Final</string>
+    <string name="escape_room_completed">¡Escape completado! 🎉</string>
+    <string name="escape_room_morse_symbols">En curso:</string>
+
+    <!-- Morse -->
+    <string name="section_morse">Código Morse (parpadeos)</string>
+    <string name="morse_hint">1 parpadeo = punto ·     2 rápidos = raya —</string>
+    <string name="morse_switch_label">Modo Morse</string>
+    <string name="morse_current_label">En curso:</string>
+    <string name="morse_decoded_label">Texto decodificado:</string>
+    <string name="morse_clear">Borrar</string>
+    <string name="morse_help_btn">?</string>
+    <string name="morse_empty_hint">Parpadea para escribir…</string>
+
+    <!-- Reproductor de vídeo -->
+    <string name="video_skip">Saltar ⏭</string>
+
+    <!-- Editor de niveles -->
+    <string name="btn_create_level">✏ Crear Nivel</string>
+    <string name="level_editor_title">Editor de Niveles</string>
+    <string name="level_editor_back">← Volver</string>
+    <string name="level_list_empty">No hay niveles creados.</string>
+    <string name="btn_new_level">+ Nuevo nivel</string>
+    <string name="btn_save_level">💾 Guardar nivel</string>
+    <string name="btn_add_room">+ Añadir sala</string>
+    <string name="level_name_hint">Nombre del nivel</string>
+    <string name="room_type_calm">Calma</string>
+    <string name="room_type_morse">Morse</string>
+    <string name="room_type_yesno">Sí/No</string>
+    <string name="room_type_blink">Parpadeo + Mandíbula</string>
+    <string name="room_title_hint">Título de la sala</string>
+    <string name="room_narration_hint">Narración (el robot la leerá)</string>
+    <string name="room_hint_hint">Pista de acción</string>
+    <string name="btn_attach_video">🎬 Adjuntar vídeo</string>
+    <string name="video_attached">Vídeo adjunto ✓</string>
+    <string name="no_video">Sin vídeo</string>
+    <string name="dialog_pick_room_type">Tipo de sala</string>
+    <string name="dialog_configure_room">Configurar sala</string>
+    <string name="label_seconds_required">Segundos requeridos</string>
+    <string name="label_letter_pool">Letras Morse (ej: ETISAN)</string>
+    <string name="label_jaw_window">Ventana mandíbula (ms)</string>
+    <string name="label_questions">Preguntas (una por línea: texto|S o texto|N)</string>
+    <string name="level_saved_ok">Nivel guardado ✓</string>
+    <string name="level_name_required">Escribe un nombre para el nivel</string>
+    <string name="level_no_rooms">Añade al menos una sala</string>
+    <string name="btn_delete_level">🗑 Eliminar</string>
+    <string name="btn_play_custom">▶ Jugar</string>
+    <string name="btn_export_levels">⬆ Exportar niveles</string>
+    <string name="btn_import_levels">⬇ Importar niveles</string>
+    <string name="label_robot_actions">Acciones (una por línea): SPEAK:texto · GOTO:lugar · TILT_HEAD:grados · TURN:grados · WAIT:ms</string>
+    <string name="room_type_video_state">Estado EEG con vídeo</string>
+    <string name="label_target_state">Estado objetivo (CALM / ATTENTION)</string>
+    <string name="btn_edit_room">✎ Editar</string>
+    <string name="btn_move_up">↑</string>
+    <string name="btn_move_down">↓</string>
+    <string name="room_type_anim">Animación robot</string>
+    <string name="label_anim_delay">Duración (ms) antes de continuar</string>
+    <string name="label_action_templates">Plantillas de acciones:</string>
+    <string name="template_celebrate">🎉 Celebrar</string>
+    <string name="template_welcome">👋 Bienvenida</string>
+    <string name="template_cheer">💪 Ánimo</string>
+    <string name="template_final">🏆 Final</string>
+
+    <!-- Validación y vista previa de nivel -->
+    <string name="btn_preview_level">👁 Vista previa</string>
+    <string name="validation_title">Problemas en el nivel</string>
+    <string name="validation_save_anyway">Guardar de todas formas</string>
+    <string name="validation_fix">Corregir</string>
+</resources>

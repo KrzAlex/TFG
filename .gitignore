@@ -1,0 +1,48 @@
+# Gradle
+.gradle/
+build/
+**/build/
+*.iml
+.idea/
+local.properties
+
+# Android
+*.apk
+*.ap_
+*.aab
+*.dex
+captures/
+
+# Generated files
+gen/
+out/
+
+# Files for the dex VM
+*.class
+
+# Keystore files
+*.jks
+*.keystore
+
+# Mac
+.DS_Store
+
+# Windows
+Thumbs.db
+
+# VS Code
+.vscode/
+
+# Logs
+*.log
+
+# Generacion del documento TFG y ficheros de contexto de IA
+gen_tfg.js
+package.json
+package-lock.json
+node_modules/
+CLAUDE.md
+TFG_CONTEXT_CLAUDE_CODE.md
+TFG_Deac_Alexandru_Florin.docx
+TFG_Deac_Alexandru_Florin.pdf
+.claude/

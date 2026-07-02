@@ -1,0 +1,1741 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/background">
+
+    <!-- ══════════════════════════════════════════════════════════════════════
+         PANTALLA PRINCIPAL — Escape Room launcher (visible por defecto)
+         ══════════════════════════════════════════════════════════════════════ -->
+    <LinearLayout
+        android:id="@+id/homeScreen"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:visibility="visible">
+
+        <!-- Cabecera: branding + barra de estado -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/bg_header"
+            android:orientation="vertical"
+            android:paddingStart="24dp"
+            android:paddingEnd="24dp"
+            android:paddingTop="18dp"
+            android:paddingBottom="22dp">
+
+            <!-- Barra de estado: conexión + calidad + batería -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:layout_marginBottom="18dp">
+
+                <TextView
+                    android:id="@+id/tvHomeConnectionStatus"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="@string/muse_disconnected"
+                    android:textSize="12sp"
+                    android:textColor="#E8DFFB" />
+
+                <TextView
+                    android:id="@+id/tvHomeSignalQuality"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/bg_chip"
+                    android:paddingStart="12dp"
+                    android:paddingEnd="12dp"
+                    android:paddingTop="4dp"
+                    android:paddingBottom="4dp"
+                    android:text=""
+                    android:textSize="12sp"
+                    android:textStyle="bold"
+                    android:layout_marginEnd="8dp" />
+
+                <TextView
+                    android:id="@+id/tvHomeBattery"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/bg_chip"
+                    android:paddingStart="12dp"
+                    android:paddingEnd="12dp"
+                    android:paddingTop="4dp"
+                    android:paddingBottom="4dp"
+                    android:text=""
+                    android:textSize="12sp"
+                    android:textStyle="bold"
+                    android:textColor="@color/primary_dark" />
+
+            </LinearLayout>
+
+            <!-- Logo + título -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="🧠"
+                    android:textSize="42sp"
+                    android:layout_marginEnd="14dp" />
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/app_name"
+                        android:textSize="26sp"
+                        android:textStyle="bold"
+                        android:textColor="@color/text_on_primary" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="BCI · Escape Room"
+                        android:textSize="13sp"
+                        android:letterSpacing="0.04"
+                        android:textColor="#D5C8F5" />
+
+                </LinearLayout>
+
+            </LinearLayout>
+
+        </LinearLayout>
+
+        <!-- Estado mental (tarjeta centrada) -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:orientation="vertical"
+            android:gravity="center"
+            android:paddingStart="24dp"
+            android:paddingEnd="24dp">
+
+            <LinearLayout
+                style="@style/Card"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:elevation="2dp"
+                android:paddingTop="30dp"
+                android:paddingBottom="30dp">
+
+                <TextView
+                    style="@style/Text.Overline"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Estado mental"
+                    android:layout_marginBottom="10dp" />
+
+                <TextView
+                    android:id="@+id/tvHomeMentalState"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center"
+                    android:text="@string/state_neutral"
+                    android:textSize="56sp"
+                    android:textStyle="bold" />
+
+            </LinearLayout>
+
+        </LinearLayout>
+
+        <!-- Botones inferiores -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:paddingStart="24dp"
+            android:paddingEnd="24dp"
+            android:paddingBottom="20dp">
+
+            <Button
+                android:id="@+id/btnPlayEscapeRoom"
+                style="@style/Button.Primary"
+                android:layout_width="match_parent"
+                android:layout_height="64dp"
+                android:text="@string/btn_play_escape_room"
+                android:textSize="18sp"
+                android:layout_marginBottom="10dp" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginBottom="6dp">
+
+                <Button
+                    android:id="@+id/btnCreateLevel"
+                    style="@style/Button.Tonal"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:layout_marginEnd="5dp"
+                    android:text="@string/btn_create_level" />
+
+                <Button
+                    android:id="@+id/btnHomeStartSession"
+                    style="@style/Button.Tonal"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:layout_marginStart="5dp"
+                    android:text="@string/btn_start_session" />
+
+            </LinearLayout>
+
+            <Button
+                android:id="@+id/btnSettingsMode"
+                style="@style/Button.Ghost"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/btn_settings_mode"
+                android:textSize="12sp"
+                android:textColor="@color/text_muted" />
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+    <!-- ══════════════════════════════════════════════════════════════════════
+         PANTALLA CONFIGURACIÓN (gone por defecto)
+         ══════════════════════════════════════════════════════════════════════ -->
+    <androidx.core.widget.NestedScrollView
+        android:id="@+id/settingsScreen"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/background"
+        android:fillViewport="true"
+        android:visibility="gone">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="16dp">
+
+            <!-- Cabecera: título + botón volver -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:layout_marginBottom="12dp">
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="@string/settings_title"
+                    android:textSize="22sp"
+                    android:textStyle="bold"
+                    android:textColor="@color/text_primary" />
+
+                <Button
+                    android:id="@+id/btnSettingsBack"
+                    style="@style/Button.Ghost"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/btn_settings_back"
+                    android:textColor="@color/primary" />
+
+            </LinearLayout>
+
+            <!-- ══ SECCIÓN GENERAL ═══════════════════════════════════════════ -->
+            <LinearLayout
+                style="@style/Card"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="12dp">
+
+                <TextView
+                    style="@style/Text.Overline"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/settings_section_general" />
+
+                <!-- Volumen -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="14dp"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical">
+
+                    <TextView
+                        style="@style/Text.Label"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="@string/settings_label_volume" />
+
+                    <TextView
+                        android:id="@+id/tvVolumeValue"
+                        style="@style/Text.ValueMono"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="—" />
+
+                </LinearLayout>
+
+                <SeekBar
+                    android:id="@+id/sbVolume"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:max="15" />
+
+            </LinearLayout>
+
+            <!-- ══ SECCIÓN CONEXIÓN ══════════════════════════════════════════ -->
+            <LinearLayout
+                style="@style/Card"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="12dp">
+
+                <TextView
+                    style="@style/Text.Overline"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/settings_section_connection" />
+
+                <!-- Selector de modo de conexión -->
+                <RadioGroup
+                    android:id="@+id/rgConnectionMode"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:orientation="vertical">
+
+                    <RadioButton
+                        android:id="@+id/rbModeOsc"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="@string/settings_mode_osc"
+                        android:textSize="14sp"
+                        android:textColor="@color/text_primary"
+                        android:checked="true" />
+
+                    <RadioButton
+                        android:id="@+id/rbModeBluetooth"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="@string/settings_mode_bt"
+                        android:textSize="14sp"
+                        android:textColor="@color/text_primary"
+                        android:layout_marginTop="2dp" />
+
+                </RadioGroup>
+
+                <!-- Detalles OSC (visibles solo en modo Mind Monitor) -->
+                <LinearLayout
+                    android:id="@+id/layoutOscDetails"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp"
+                    android:orientation="vertical">
+
+                    <!-- IP del dispositivo -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical">
+
+                        <TextView
+                            style="@style/Text.Label"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="@string/settings_label_device_ip" />
+
+                        <TextView
+                            android:id="@+id/tvDeviceIp"
+                            style="@style/Text.ValueMono"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:textSize="15sp"
+                            android:textStyle="bold"
+                            android:textColor="@color/info"
+                            android:text="—" />
+
+                    </LinearLayout>
+
+                    <!-- Puerto OSC -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp"
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical">
+
+                        <TextView
+                            style="@style/Text.Label"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="@string/settings_label_osc_port" />
+
+                        <TextView
+                            android:id="@+id/tvOscPort"
+                            style="@style/Text.ValueMono"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:textSize="15sp"
+                            android:textStyle="bold"
+                            android:text="5000" />
+
+                    </LinearLayout>
+
+                </LinearLayout>
+
+                <!-- Nota BT (visible solo en modo Bluetooth) -->
+                <TextView
+                    android:id="@+id/tvBtNote"
+                    style="@style/Text.Caption"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:textSize="12sp"
+                    android:text="@string/settings_mode_bt_note"
+                    android:visibility="gone" />
+
+                <!-- Dispositivo BT preferido (visible solo en modo Bluetooth) -->
+                <LinearLayout
+                    android:id="@+id/layoutBtPreferred"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:visibility="gone">
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+
+                        <TextView
+                            style="@style/Text.Caption"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:textSize="12sp"
+                            android:text="@string/bt_preferred_device" />
+
+                        <TextView
+                            android:id="@+id/tvBtPreferredDevice"
+                            style="@style/Text.ValueMono"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:textSize="14sp"
+                            android:textStyle="bold"
+                            android:textColor="@color/info"
+                            android:text="—" />
+
+                    </LinearLayout>
+
+                    <Button
+                        android:id="@+id/btnBtScanDevices"
+                        style="@style/Button.Ghost"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/bt_scan_devices"
+                        android:textColor="@color/info" />
+
+                </LinearLayout>
+
+            </LinearLayout>
+
+            <!-- ══ SECCIÓN EEG ═══════════════════════════════════════════════ -->
+            <LinearLayout
+                style="@style/Card"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="12dp">
+
+                <TextView
+                    style="@style/Text.Overline"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/settings_section_eeg" />
+
+                <!-- Umbral ESTRÉS -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="14dp"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical">
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="@string/settings_label_stress"
+                        android:textSize="13sp"
+                        android:textColor="@color/state_stress" />
+
+                    <TextView
+                        android:id="@+id/tvStressThresholdValue"
+                        style="@style/Text.ValueMono"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="0.22" />
+
+                </LinearLayout>
+
+                <SeekBar
+                    android:id="@+id/sbStressThreshold"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:max="100" />
+
+                <!-- Umbral ATENCIÓN -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="12dp"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical">
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="@string/settings_label_attention"
+                        android:textSize="13sp"
+                        android:textColor="@color/state_attention" />
+
+                    <TextView
+                        android:id="@+id/tvAttentionThresholdValue"
+                        style="@style/Text.ValueMono"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="0.38" />
+
+                </LinearLayout>
+
+                <SeekBar
+                    android:id="@+id/sbAttentionThreshold"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:max="100" />
+
+                <!-- Umbral CALMA -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="12dp"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical">
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="@string/settings_label_calm"
+                        android:textSize="13sp"
+                        android:textColor="@color/state_calm" />
+
+                    <TextView
+                        android:id="@+id/tvCalmThresholdValue"
+                        style="@style/Text.ValueMono"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="0.52" />
+
+                </LinearLayout>
+
+                <SeekBar
+                    android:id="@+id/sbCalmThreshold"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:max="100" />
+
+            </LinearLayout>
+
+            <!-- ══ SECCIÓN BCI ═══════════════════════════════════════════════ -->
+            <LinearLayout
+                style="@style/Card"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="12dp">
+
+                <TextView
+                    style="@style/Text.Overline"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/settings_section_bci" />
+
+                <!-- Debounce parpadeo -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="14dp"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical">
+
+                    <TextView
+                        style="@style/Text.Label"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:textSize="13sp"
+                        android:text="@string/settings_label_blink_debounce" />
+
+                    <TextView
+                        android:id="@+id/tvBlinkDebounceValue"
+                        style="@style/Text.ValueMono"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="500 ms" />
+
+                </LinearLayout>
+
+                <SeekBar
+                    android:id="@+id/sbBlinkDebounce"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:max="18" />
+
+                <!-- Umbral NOD (asentir) -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="12dp"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical">
+
+                    <TextView
+                        style="@style/Text.Label"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:textSize="13sp"
+                        android:text="@string/settings_label_nod" />
+
+                    <TextView
+                        android:id="@+id/tvNodThresholdValue"
+                        style="@style/Text.ValueMono"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="30 °/s" />
+
+                </LinearLayout>
+
+                <SeekBar
+                    android:id="@+id/sbNodThreshold"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:max="199" />
+
+                <!-- Umbral SHAKE (negar) -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="12dp"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical">
+
+                    <TextView
+                        style="@style/Text.Label"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:textSize="13sp"
+                        android:text="@string/settings_label_shake" />
+
+                    <TextView
+                        android:id="@+id/tvShakeThresholdValue"
+                        style="@style/Text.ValueMono"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="50 °/s" />
+
+                </LinearLayout>
+
+                <SeekBar
+                    android:id="@+id/sbShakeThreshold"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:max="199" />
+
+                <!-- Micrófono silencio Morse -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="16dp"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical">
+
+                    <TextView
+                        style="@style/Text.Label"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:textSize="13sp"
+                        android:text="@string/settings_label_noise_mic" />
+
+                    <androidx.appcompat.widget.SwitchCompat
+                        android:id="@+id/switchNoiseMic"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:checked="true" />
+
+                </LinearLayout>
+
+            </LinearLayout>
+
+            <!-- ── Acciones de pie ───────────────────────────────────────────── -->
+            <Button
+                android:id="@+id/btnSettingsReset"
+                style="@style/Button.Ghost"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/settings_reset"
+                android:textSize="12sp"
+                android:textColor="@color/text_muted" />
+
+            <Button
+                android:id="@+id/btnExportLocations"
+                style="@style/Button.Ghost"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/settings_export_locations"
+                android:textSize="12sp"
+                android:textColor="@color/info" />
+
+            <Button
+                android:id="@+id/btnDevMode"
+                style="@style/Button.Ghost"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/btn_dev_mode"
+                android:textSize="12sp"
+                android:textColor="@color/text_muted" />
+
+            <Space android:layout_width="match_parent" android:layout_height="16dp" />
+
+        </LinearLayout>
+    </androidx.core.widget.NestedScrollView>
+
+    <!-- ══════════════════════════════════════════════════════════════════════
+         PANTALLA DESARROLLADOR — Todas las variables (gone por defecto)
+         ══════════════════════════════════════════════════════════════════════ -->
+    <androidx.core.widget.NestedScrollView
+        android:id="@+id/devScreen"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/background"
+        android:fillViewport="true"
+        android:visibility="gone">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="16dp">
+
+            <!-- Cabecera dev: título + botón volver -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:layout_marginBottom="12dp">
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="@string/app_name"
+                    android:textSize="20sp"
+                    android:textStyle="bold"
+                    android:textColor="@color/text_primary" />
+
+                <Button
+                    android:id="@+id/btnDevBack"
+                    style="@style/Button.Ghost"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/btn_dev_back"
+                    android:textColor="@color/primary" />
+
+            </LinearLayout>
+
+            <!-- ── Estado mental + métricas EEG ──────────────────────────── -->
+            <LinearLayout
+                style="@style/Card"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="12dp">
+
+                <TextView
+                    android:id="@+id/tvMentalState"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center"
+                    android:text="@string/state_neutral"
+                    android:textSize="40sp"
+                    android:textStyle="bold" />
+
+                <!-- Concentración -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="18dp"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        style="@style/Text.Label"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:textStyle="bold"
+                        android:text="@string/label_concentration" />
+
+                    <TextView
+                        android:id="@+id/tvConcentrationValue"
+                        style="@style/Text.ValueMono"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="0.00" />
+                </LinearLayout>
+
+                <ProgressBar
+                    android:id="@+id/pbConcentration"
+                    style="?android:attr/progressBarStyleHorizontal"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:progressTint="@color/state_attention"
+                    android:progressBackgroundTint="@color/divider"
+                    android:max="100" />
+
+                <!-- Calma -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="12dp"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        style="@style/Text.Label"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:textStyle="bold"
+                        android:text="@string/label_mellow" />
+
+                    <TextView
+                        android:id="@+id/tvMellowValue"
+                        style="@style/Text.ValueMono"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="0.00" />
+                </LinearLayout>
+
+                <ProgressBar
+                    android:id="@+id/pbMellow"
+                    style="?android:attr/progressBarStyleHorizontal"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:progressTint="@color/state_calm"
+                    android:progressBackgroundTint="@color/divider"
+                    android:max="100" />
+
+                <!-- ── Indicadores BCI ──────────────────────────────────────── -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="14dp"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical">
+
+                    <TextView
+                        android:id="@+id/tvBlinkIndicator"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="👁 Parpadeo"
+                        android:textSize="13sp"
+                        android:textStyle="bold"
+                        android:textColor="@color/info"
+                        android:visibility="invisible" />
+
+                    <TextView
+                        android:id="@+id/tvBlinkCount"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:gravity="end"
+                        android:text=""
+                        android:textSize="12sp"
+                        android:textColor="@color/text_muted" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="2dp"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical">
+
+                    <TextView
+                        android:id="@+id/tvJawIndicator"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/jaw_indicator"
+                        android:textSize="13sp"
+                        android:textStyle="bold"
+                        android:textColor="@color/primary"
+                        android:visibility="invisible" />
+
+                    <TextView
+                        android:id="@+id/tvJawCount"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:gravity="end"
+                        android:text=""
+                        android:textSize="12sp"
+                        android:textColor="@color/text_muted" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="2dp"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical">
+
+                    <TextView
+                        android:id="@+id/tvNodIndicator"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/nod_indicator"
+                        android:textSize="13sp"
+                        android:textStyle="bold"
+                        android:textColor="@color/state_calm"
+                        android:visibility="invisible" />
+
+                    <TextView
+                        android:id="@+id/tvNodCount"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:gravity="end"
+                        android:text=""
+                        android:textSize="12sp"
+                        android:textColor="@color/text_muted" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="2dp"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical">
+
+                    <TextView
+                        android:id="@+id/tvShakeIndicator"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/shake_indicator"
+                        android:textSize="13sp"
+                        android:textStyle="bold"
+                        android:textColor="@color/state_stress"
+                        android:visibility="invisible" />
+
+                    <TextView
+                        android:id="@+id/tvShakeCount"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:gravity="end"
+                        android:text=""
+                        android:textSize="12sp"
+                        android:textColor="@color/text_muted" />
+                </LinearLayout>
+
+                <!-- ── Bandas brutas + umbrales ─────────────────────────────── -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="6dp"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        style="@style/Text.Caption"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:textSize="12sp"
+                        android:text="@string/label_raw_bands" />
+
+                    <TextView
+                        android:id="@+id/tvRawBands"
+                        style="@style/Text.ValueMono"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textSize="12sp"
+                        android:textColor="@color/text_muted"
+                        android:text="α — β —" />
+                </LinearLayout>
+
+                <TextView
+                    android:id="@+id/tvThresholds"
+                    style="@style/Text.Caption"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:textSize="12sp"
+                    android:text="@string/thresholds_info" />
+
+            </LinearLayout>
+
+            <!-- ── Orientación cabeza + giroscopio ───────────────────────── -->
+            <LinearLayout
+                style="@style/Card"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="12dp">
+
+                <TextView
+                    style="@style/Text.Overline"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/section_head_orientation" />
+
+                <TextView
+                    style="@style/Text.Caption"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="2dp"
+                    android:text="@string/acc_note" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="210dp"
+                    android:layout_marginTop="8dp"
+                    android:orientation="horizontal">
+
+                    <com.tfg.temieeg.ui.HeadDirectionView
+                        android:id="@+id/headDirectionView"
+                        android:layout_width="190dp"
+                        android:layout_height="match_parent" />
+
+                    <com.github.mikephil.charting.charts.LineChart
+                        android:id="@+id/accChart"
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:layout_weight="1"
+                        android:layout_marginStart="8dp" />
+                </LinearLayout>
+
+                <TextView
+                    style="@style/Text.Overline"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="18dp"
+                    android:text="@string/section_gyro" />
+
+                <TextView
+                    android:id="@+id/tvRawGyro"
+                    style="@style/Text.ValueMono"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="2dp"
+                    android:textSize="12sp"
+                    android:textColor="@color/text_muted"
+                    android:text="X: —   Y: —   Z: —  °/s" />
+
+                <TextView
+                    style="@style/Text.Caption"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="2dp"
+                    android:text="@string/gyro_note" />
+
+                <com.github.mikephil.charting.charts.LineChart
+                    android:id="@+id/gyroChart"
+                    android:layout_width="match_parent"
+                    android:layout_height="140dp"
+                    android:layout_marginTop="6dp" />
+
+            </LinearLayout>
+
+            <!-- ── Código Morse ──────────────────────────────────────────── -->
+            <LinearLayout
+                style="@style/Card"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="12dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical">
+
+                    <TextView
+                        style="@style/Text.Overline"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="@string/section_morse" />
+
+                    <androidx.appcompat.widget.SwitchCompat
+                        android:id="@+id/switchMorse"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/morse_switch_label"
+                        android:textSize="13sp"
+                        android:checked="false" />
+
+                    <Button
+                        android:id="@+id/btnMorseHelp"
+                        style="@style/Button.Ghost"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="4dp"
+                        android:text="@string/morse_help_btn"
+                        android:textSize="16sp"
+                        android:minWidth="0dp"
+                        android:paddingStart="6dp"
+                        android:paddingEnd="6dp" />
+                </LinearLayout>
+
+                <TextView
+                    style="@style/Text.Caption"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="2dp"
+                    android:text="@string/morse_hint" />
+
+                <TextView
+                    android:id="@+id/tvMorseReference"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="6dp"
+                    android:background="@color/surface_tint"
+                    android:padding="10dp"
+                    android:fontFamily="monospace"
+                    android:textSize="12sp"
+                    android:textColor="@color/primary_dark"
+                    android:lineSpacingMultiplier="1.4"
+                    android:visibility="gone" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical">
+
+                    <TextView
+                        style="@style/Text.Label"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textSize="13sp"
+                        android:textColor="@color/text_secondary"
+                        android:text="@string/morse_current_label"
+                        android:layout_marginEnd="8dp" />
+
+                    <TextView
+                        android:id="@+id/tvMorseCurrent"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:fontFamily="monospace"
+                        android:textSize="20sp"
+                        android:textColor="@color/info"
+                        android:text="" />
+                </LinearLayout>
+
+                <TextView
+                    style="@style/Text.Label"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="2dp"
+                    android:textSize="13sp"
+                    android:textColor="@color/text_secondary"
+                    android:text="@string/morse_decoded_label" />
+
+                <TextView
+                    android:id="@+id/tvMorseDecoded"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="2dp"
+                    android:fontFamily="monospace"
+                    android:textSize="18sp"
+                    android:textColor="@color/text_primary"
+                    android:minLines="2"
+                    android:hint="@string/morse_empty_hint"
+                    android:textColorHint="@color/text_muted" />
+
+                <Button
+                    android:id="@+id/btnMorseClear"
+                    style="@style/Button.Ghost"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="end"
+                    android:layout_marginTop="2dp"
+                    android:text="@string/morse_clear"
+                    android:textColor="@color/state_stress" />
+
+            </LinearLayout>
+
+            <!-- ── Pie dev: señal + batería + conexión + sesión ──────────── -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical">
+
+                <TextView
+                    android:id="@+id/tvSignalQuality"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="@string/signal_unknown"
+                    android:textSize="13sp" />
+
+                <TextView
+                    android:id="@+id/tvBattery"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text=""
+                    android:textSize="13sp"
+                    android:textColor="@color/text_secondary" />
+            </LinearLayout>
+
+            <TextView
+                android:id="@+id/tvConnectionStatus"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:textColor="@color/text_secondary"
+                android:text="@string/muse_disconnected" />
+
+            <Button
+                android:id="@+id/btnStartSession"
+                style="@style/Button.Tonal"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:text="@string/btn_start_session" />
+
+        </LinearLayout>
+    </androidx.core.widget.NestedScrollView>
+
+    <!-- ══════════════════════════════════════════════════════════════════════
+         ESCAPE ROOM OVERLAY  (gone por defecto, cubre pantalla entera)
+         ══════════════════════════════════════════════════════════════════════ -->
+    <LinearLayout
+        android:id="@+id/escapeRoomOverlay"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:background="@color/background"
+        android:visibility="gone">
+
+        <!-- ── Cabecera: progreso + botones ── -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:background="@color/surface_tint">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:paddingStart="16dp"
+                android:paddingEnd="8dp"
+                android:paddingTop="10dp"
+                android:paddingBottom="4dp"
+                android:gravity="center_vertical">
+
+                <TextView
+                    android:id="@+id/tvEscapeProgress"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Sala 1 / 4"
+                    android:textColor="@color/primary"
+                    android:textSize="13sp"
+                    android:fontFamily="monospace" />
+
+                <!-- Botón de rescate: oculto hasta que el jugador lleva
+                     30 s atascado en la sala (SKIP_OFFER_DELAY_MS) -->
+                <Button
+                    android:id="@+id/btnEscapeSkip"
+                    style="@style/Button.Ghost"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/escape_room_skip"
+                    android:textColor="@color/state_attention"
+                    android:textSize="12sp"
+                    android:minWidth="0dp"
+                    android:minHeight="0dp"
+                    android:paddingStart="8dp"
+                    android:paddingEnd="4dp"
+                    android:visibility="gone" />
+
+                <Button
+                    android:id="@+id/btnEscapeExit"
+                    style="@style/Button.Ghost"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/escape_room_exit"
+                    android:textColor="@color/primary"
+                    android:textSize="13sp"
+                    android:minWidth="0dp"
+                    android:minHeight="0dp"
+                    android:paddingStart="4dp"
+                    android:paddingEnd="12dp" />
+            </LinearLayout>
+
+            <!-- Barra de progreso de salas -->
+            <ProgressBar
+                android:id="@+id/progressEscapeRooms"
+                style="@style/Widget.AppCompat.ProgressBar.Horizontal"
+                android:layout_width="match_parent"
+                android:layout_height="6dp"
+                android:max="100"
+                android:progress="0"
+                android:progressTint="@color/primary"
+                android:progressBackgroundTint="@color/primary_light"
+                android:indeterminate="false" />
+        </LinearLayout>
+
+        <!-- ── Contenido principal ── -->
+        <ScrollView
+            android:id="@+id/gameScrollView"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:fillViewport="true"
+            android:overScrollMode="never">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:paddingStart="24dp"
+                android:paddingEnd="24dp"
+                android:paddingTop="28dp"
+                android:paddingBottom="28dp">
+
+                <!-- Icono del tipo de módulo -->
+                <TextView
+                    android:id="@+id/tvEscapeModuleType"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text=""
+                    android:textSize="52sp"
+                    android:gravity="center"
+                    android:paddingBottom="12dp" />
+
+                <!-- Título de la sala -->
+                <TextView
+                    android:id="@+id/tvEscapeRoomName"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text=""
+                    android:textColor="@color/primary_dark"
+                    android:textSize="24sp"
+                    android:textStyle="bold"
+                    android:gravity="center"
+                    android:paddingBottom="20dp" />
+
+                <!-- Tarjeta de narración -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:background="@drawable/bg_game_card"
+                    android:elevation="2dp"
+                    android:padding="20dp"
+                    android:layout_marginBottom="20dp">
+
+                    <TextView
+                        android:id="@+id/tvEscapeNarration"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text=""
+                        android:textColor="@color/text_secondary"
+                        android:textSize="16sp"
+                        android:lineSpacingMultiplier="1.7"
+                        android:gravity="center" />
+                </LinearLayout>
+
+                <!-- Tarjeta de pista de acción -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:background="@drawable/bg_game_hint"
+                    android:padding="16dp"
+                    android:layout_marginBottom="16dp">
+
+                    <TextView
+                        android:id="@+id/tvEscapeHint"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text=""
+                        android:textColor="@color/info"
+                        android:textSize="18sp"
+                        android:textStyle="bold"
+                        android:gravity="center" />
+                </LinearLayout>
+
+                <!-- Símbolos Morse en curso -->
+                <TextView
+                    android:id="@+id/tvEscapeMorseSymbols"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="12dp"
+                    android:text=""
+                    android:fontFamily="monospace"
+                    android:textColor="@color/info"
+                    android:textSize="30sp"
+                    android:gravity="center" />
+
+                <!-- Botón de referencia (Morse / imagen personalizada) -->
+                <Button
+                    android:id="@+id/btnHintImage"
+                    style="@style/Button.Ghost"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_horizontal"
+                    android:layout_marginBottom="12dp"
+                    android:text="📋 Ver referencia"
+                    android:textColor="@color/primary"
+                    android:textSize="14sp"
+                    android:visibility="gone" />
+
+                <!-- Feedback de éxito / fallo -->
+                <TextView
+                    android:id="@+id/tvEscapeFeedback"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:text=""
+                    android:textSize="17sp"
+                    android:textStyle="bold"
+                    android:gravity="center"
+                    android:lineSpacingMultiplier="1.4"
+                    android:padding="14dp" />
+
+            </LinearLayout>
+        </ScrollView>
+
+    </LinearLayout>
+
+    <!-- Overlay de imagen de referencia (Morse, etc.) -->
+    <FrameLayout
+        android:id="@+id/hintImageContainer"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="#E6000000"
+        android:visibility="gone"
+        android:clickable="true"
+        android:focusable="true">
+
+        <ImageView
+            android:id="@+id/imgHint"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:scaleType="fitCenter"
+            android:padding="32dp"
+            android:layout_gravity="center" />
+
+        <Button
+            android:id="@+id/btnCloseHintImage"
+            style="@style/Button.Ghost"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="top|end"
+            android:layout_margin="12dp"
+            android:text="✕ Cerrar"
+            android:textColor="@color/text_on_primary"
+            android:textSize="15sp" />
+
+    </FrameLayout>
+
+    <!-- ══ Reproductor de vídeo introductorio ══════════════════════════════════
+         Se muestra encima del overlay de escape room durante el vídeo de sala.
+         Oculto por defecto; EscapeRoomEngine lo activa vía onPlayVideo callback.
+         ══════════════════════════════════════════════════════════════════════ -->
+    <FrameLayout
+        android:id="@+id/videoPlayerContainer"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="#000000"
+        android:visibility="gone">
+
+        <VideoView
+            android:id="@+id/videoView"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_gravity="center" />
+
+        <Button
+            android:id="@+id/btnSkipVideo"
+            style="@style/Button.Ghost"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom|end"
+            android:layout_margin="16dp"
+            android:text="@string/video_skip"
+            android:textColor="#DDDDDD"
+            android:textSize="14sp"
+            android:background="#66000000"
+            android:padding="12dp" />
+
+    </FrameLayout>
+
+    <!-- ══════════════════════════════════════════════════════════════════════
+         PANTALLA EDITOR DE NIVELES (gone por defecto)
+         ══════════════════════════════════════════════════════════════════════ -->
+    <LinearLayout
+        android:id="@+id/levelEditorScreen"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:background="@color/background"
+        android:visibility="gone">
+
+        <!-- Cabecera -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:paddingStart="20dp"
+            android:paddingEnd="8dp"
+            android:paddingTop="10dp"
+            android:paddingBottom="10dp"
+            android:background="@drawable/bg_header">
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/level_editor_title"
+                android:textSize="18sp"
+                android:textStyle="bold"
+                android:textColor="@color/text_on_primary" />
+
+            <Button
+                android:id="@+id/btnLevelEditorBack"
+                style="@style/Button.Ghost"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/level_editor_back"
+                android:textColor="#E8DFFB" />
+
+        </LinearLayout>
+
+        <!-- Dos paneles: lista de niveles | builder -->
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1">
+
+            <!-- ── Panel: lista de niveles guardados ── -->
+            <LinearLayout
+                android:id="@+id/levelListPanel"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="vertical"
+                android:padding="16dp"
+                android:visibility="visible">
+
+                <TextView
+                    android:id="@+id/tvLevelListEmpty"
+                    style="@style/Text.Caption"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center"
+                    android:textSize="14sp"
+                    android:text="@string/level_list_empty"
+                    android:layout_marginBottom="12dp" />
+
+                <androidx.core.widget.NestedScrollView
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    android:layout_weight="1">
+
+                    <LinearLayout
+                        android:id="@+id/levelListContainer"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical" />
+
+                </androidx.core.widget.NestedScrollView>
+
+                <Button
+                    android:id="@+id/btnNewLevel"
+                    style="@style/Button.Primary"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/btn_new_level"
+                    android:layout_marginTop="12dp" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:layout_marginTop="6dp">
+
+                    <Button
+                        android:id="@+id/btnExportLevels"
+                        style="@style/Button.Ghost"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="@string/btn_export_levels"
+                        android:textColor="@color/state_calm"
+                        android:textSize="12sp" />
+
+                    <Button
+                        android:id="@+id/btnImportLevels"
+                        style="@style/Button.Ghost"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="@string/btn_import_levels"
+                        android:textColor="@color/state_attention"
+                        android:textSize="12sp" />
+
+                </LinearLayout>
+
+            </LinearLayout>
+
+            <!-- ── Panel: builder (editor de salas del nivel) ── -->
+            <LinearLayout
+                android:id="@+id/levelBuilderPanel"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="vertical"
+                android:padding="16dp"
+                android:visibility="gone">
+
+                <!-- Nombre del nivel -->
+                <EditText
+                    android:id="@+id/etLevelName"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="@string/level_name_hint"
+                    android:inputType="text"
+                    android:textSize="16sp"
+                    android:textColor="@color/text_primary"
+                    android:textColorHint="@color/text_muted"
+                    android:layout_marginBottom="6dp" />
+
+                <!-- Vídeos de nivel (intro y transición) -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:layout_marginBottom="10dp">
+
+                    <Button
+                        android:id="@+id/btnIntroVideo"
+                        style="@style/Button.Ghost"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="🎬 Entrada"
+                        android:textColor="@color/primary"
+                        android:textSize="12sp" />
+
+                    <Button
+                        android:id="@+id/btnTransitionVideo"
+                        style="@style/Button.Ghost"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="🎬 Transición"
+                        android:textColor="@color/primary"
+                        android:textSize="12sp" />
+
+                </LinearLayout>
+
+                <!-- Lista de salas configuradas -->
+                <androidx.core.widget.NestedScrollView
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    android:layout_weight="1">
+
+                    <LinearLayout
+                        android:id="@+id/roomListContainer"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical" />
+
+                </androidx.core.widget.NestedScrollView>
+
+                <!-- Botones del builder -->
+                <Button
+                    android:id="@+id/btnAddRoom"
+                    style="@style/Button.Tonal"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/btn_add_room"
+                    android:layout_marginTop="8dp" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:layout_marginTop="4dp">
+
+                    <Button
+                        android:id="@+id/btnPreviewLevel"
+                        style="@style/Button.Tonal"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="@string/btn_preview_level"
+                        android:layout_marginEnd="4dp" />
+
+                    <Button
+                        android:id="@+id/btnSaveLevel"
+                        style="@style/Button.Primary"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="@string/btn_save_level" />
+
+                </LinearLayout>
+
+            </LinearLayout>
+
+        </FrameLayout>
+
+    </LinearLayout>
+
+
+</FrameLayout>

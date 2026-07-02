@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- ── Marca ──────────────────────────────────────────────────────────── -->
+    <color name="primary">#5E35B1</color>
+    <color name="primary_dark">#4527A0</color>
+    <color name="primary_light">#B39DDB</color>
+    <color name="accent">#7E57C2</color>
+
+    <!-- ── Superficies ────────────────────────────────────────────────────── -->
+    <color name="background">#F6F4FB</color>
+    <color name="surface">#FFFFFF</color>
+    <color name="surface_tint">#EDE7F6</color>
+    <color name="divider">#E6E1F2</color>
+
+    <!-- ── Texto ──────────────────────────────────────────────────────────── -->
+    <color name="text_primary">#26223A</color>
+    <color name="text_secondary">#5F5970</color>
+    <color name="text_muted">#9A93AC</color>
+    <color name="text_on_primary">#FFFFFF</color>
+
+    <!-- ── Informativo / enlaces ──────────────────────────────────────────── -->
+    <color name="info">#1565C0</color>
+
+    <!-- ── Colores semánticos por estado mental ───────────────────────────── -->
+    <color name="state_stress">#E53935</color>
+    <color name="state_attention">#FB8C00</color>
+    <color name="state_calm">#43A047</color>
+    <color name="state_neutral">#757575</color>
+</resources>

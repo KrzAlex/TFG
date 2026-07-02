@@ -1,0 +1,860 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Temi EEG — Editor de Niveles</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<style>
+:root {
+  --bg:      #0f1923;  --surface:  #1a2733;  --surface2: #243040;  --surface3: #2e3d50;
+  --accent:  #00bcd4;  --green:    #4caf50;  --red:      #f44336;
+  --text:    #eceff1;  --text2:    #78909c;  --border:   #2e3d50;  --r: 8px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+
+header{background:var(--surface);border-bottom:2px solid var(--accent);
+  padding:14px 28px;display:flex;align-items:center;gap:12px;position:sticky;top:0;z-index:10}
+header h1{flex:1;font-size:18px;color:var(--accent);letter-spacing:.5px}
+.hdr-actions{display:flex;gap:8px;flex-wrap:wrap}
+
+.btn{padding:8px 16px;border:none;border-radius:var(--r);font-size:13px;font-weight:600;
+  cursor:pointer;transition:opacity .15s,transform .1s}
+.btn:hover{opacity:.85}.btn:active{transform:scale(.97)}
+.btn-accent{background:var(--accent);color:#000}
+.btn-green{background:var(--green);color:#fff}
+.btn-red{background:var(--red);color:#fff}
+.btn-ghost{background:var(--surface3);color:var(--text)}
+.btn-outline{background:transparent;border:1px solid var(--border);color:var(--text2)}
+.btn-outline:hover{border-color:var(--accent);color:var(--accent)}
+.btn-sm{padding:5px 10px;font-size:12px}
+
+main{max-width:920px;margin:0 auto;padding:28px 24px}
+
+.level-name-wrap{display:flex;gap:10px;align-items:center;margin-bottom:28px}
+.level-name-wrap input{flex:1;background:var(--surface);border:1px solid var(--border);
+  border-radius:var(--r);color:var(--text);font-size:20px;font-weight:600;padding:12px 18px}
+.level-name-wrap input:focus{outline:none;border-color:var(--accent)}
+.level-name-wrap input::placeholder{color:var(--text2);font-weight:400}
+
+#roomsList{display:flex;flex-direction:column;gap:10px;margin-bottom:16px}
+.empty-state{text-align:center;padding:60px 24px;color:var(--text2);
+  border:2px dashed var(--border);border-radius:var(--r)}
+.empty-state .big{font-size:48px;margin-bottom:14px}
+
+.room-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);
+  display:flex;align-items:stretch;overflow:hidden;transition:border-color .15s}
+.room-card:hover{border-color:var(--accent)}
+.room-handle{display:flex;flex-direction:column;gap:2px;padding:10px 6px;
+  background:var(--surface2);border-right:1px solid var(--border);justify-content:center}
+.room-handle button{background:none;border:none;color:var(--text2);width:28px;height:28px;
+  border-radius:4px;cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center}
+.room-handle button:hover:not(:disabled){background:var(--accent);color:#000}
+.room-handle button:disabled{opacity:.2;cursor:default}
+.room-body{flex:1;padding:14px 16px;min-width:0}
+.room-header-row{display:flex;align-items:center;gap:10px;margin-bottom:6px}
+.type-badge{font-size:11px;font-weight:700;padding:3px 9px;border-radius:12px;white-space:nowrap}
+.badge-CALM        {background:#0d2f3a;color:#4dd0e1;border:1px solid #4dd0e1}
+.badge-MORSE       {background:#2a250a;color:#ffd54f;border:1px solid #ffd54f}
+.badge-YESNO       {background:#0d2a0d;color:#81c784;border:1px solid #81c784}
+.badge-BLINK_CLENCH{background:#2a0d1f;color:#f48fb1;border:1px solid #f48fb1}
+.badge-VIDEO_STATE {background:#0d0d2a;color:#9fa8da;border:1px solid #9fa8da}
+.badge-ANIM        {background:#2a1d0d;color:#ffcc80;border:1px solid #ffcc80}
+.room-title{font-size:15px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.room-narration{font-size:13px;color:var(--text2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:6px}
+.room-meta{display:flex;gap:14px;flex-wrap:wrap;font-size:12px;color:var(--text2)}
+.room-btns{display:flex;flex-direction:column;gap:4px;padding:12px 12px 12px 8px;justify-content:center}
+
+.add-room-btn{width:100%;padding:16px;font-size:15px;border:2px dashed var(--border);
+  border-radius:var(--r);background:transparent;color:var(--text2);cursor:pointer;
+  transition:all .15s;margin-bottom:28px}
+.add-room-btn:hover{border-color:var(--accent);color:var(--accent);background:rgba(0,188,212,.05)}
+
+.overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.75);
+  z-index:100;align-items:center;justify-content:center;padding:16px}
+.overlay.open{display:flex}
+.modal{background:var(--surface);border:1px solid var(--border);border-radius:12px;
+  width:700px;max-width:100%;max-height:92vh;display:flex;flex-direction:column;overflow:hidden}
+.modal-hdr{padding:20px 24px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px}
+.modal-hdr h2{flex:1;font-size:17px}
+.modal-body{padding:20px 24px;overflow-y:auto;flex:1}
+.modal-ftr{padding:14px 24px;border-top:1px solid var(--border);display:flex;justify-content:flex-end;gap:8px}
+
+.field{margin-bottom:16px}
+label{display:block;font-size:11px;font-weight:700;color:var(--text2);
+  text-transform:uppercase;letter-spacing:.6px;margin-bottom:6px}
+input[type=text],input[type=number],textarea,select{width:100%;background:var(--surface2);
+  border:1px solid var(--border);border-radius:var(--r);color:var(--text);font-size:14px;
+  padding:9px 13px;font-family:inherit}
+input:focus,textarea:focus,select:focus{outline:none;border-color:var(--accent)}
+textarea{resize:vertical;min-height:72px}
+select option{background:var(--surface2)}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.section-sep{font-size:11px;font-weight:700;color:var(--text2);text-transform:uppercase;
+  letter-spacing:1px;padding:10px 0 8px;border-bottom:1px solid var(--border);margin-bottom:14px}
+.info-box{background:var(--surface3);border-radius:var(--r);padding:10px 14px;
+  font-size:12px;color:var(--text2);line-height:1.6}
+
+/* video picker */
+.video-pick-area{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.video-name{font-size:13px;color:var(--text2);flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.video-name.has-video{color:var(--accent)}
+.video-preview{width:100%;max-height:140px;border-radius:var(--r);object-fit:cover;
+  margin-top:10px;display:none;background:#000}
+.video-preview.visible{display:block}
+
+.templates{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px}
+.tpl-btn{background:var(--surface3);border:1px solid var(--border);color:var(--text);
+  padding:5px 12px;border-radius:16px;font-size:12px;cursor:pointer;transition:all .15s}
+.tpl-btn:hover{border-color:var(--accent);color:var(--accent)}
+
+#questionsList{display:flex;flex-direction:column;gap:8px;margin-bottom:8px}
+.q-card{background:var(--surface2);border:1px solid var(--border);border-radius:var(--r);padding:10px 12px}
+.q-top{display:flex;gap:6px;align-items:center;margin-bottom:8px}
+.q-top input{flex:1}
+.q-top .del-q{background:var(--red);border:none;color:#fff;width:30px;height:34px;
+  border-radius:4px;cursor:pointer;font-size:15px;flex-shrink:0}
+.q-bottom{display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end}
+.q-field{display:flex;flex-direction:column;gap:4px}
+.q-field label{font-size:10px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.5px;margin:0}
+.q-field select{width:130px}
+.q-field input[type=number]{width:72px}
+
+.type-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.type-card{background:var(--surface2);border:2px solid var(--border);border-radius:var(--r);
+  padding:18px 14px;cursor:pointer;transition:all .15s;text-align:center}
+.type-card:hover{border-color:var(--accent);background:var(--surface3)}
+.type-card .tc-icon{font-size:30px;margin-bottom:8px}
+.type-card .tc-name{font-size:14px;font-weight:700}
+.type-card .tc-desc{font-size:12px;color:var(--text2);margin-top:4px}
+
+#toast{position:fixed;bottom:24px;right:24px;background:var(--surface2);border:1px solid var(--accent);
+  border-radius:var(--r);padding:12px 20px;font-size:14px;z-index:200;display:none;animation:fadeUp .2s ease}
+@keyframes fadeUp{from{transform:translateY(12px);opacity:0}to{transform:translateY(0);opacity:1}}
+::-webkit-scrollbar{width:6px}::-webkit-scrollbar-track{background:var(--surface)}
+::-webkit-scrollbar-thumb{background:var(--surface3);border-radius:3px}
+
+/* progress overlay */
+#progress{display:none;position:fixed;inset:0;background:rgba(0,0,0,.8);z-index:300;
+  align-items:center;justify-content:center;flex-direction:column;gap:16px}
+#progress.open{display:flex}
+.spinner{width:48px;height:48px;border:4px solid var(--surface3);border-top-color:var(--accent);
+  border-radius:50%;animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+</style>
+</head>
+<body>
+
+<header>
+  <h1>🧠 Temi EEG — Editor de Niveles</h1>
+  <div class="hdr-actions">
+    <label class="btn btn-ghost" style="cursor:pointer">
+      📂 Importar
+      <input type="file" id="importFile" accept=".json,.zip" style="display:none">
+    </label>
+    <button class="btn btn-accent" onclick="exportLevel()">⬆ Exportar</button>
+  </div>
+</header>
+
+<main>
+  <div class="level-name-wrap">
+    <input id="levelName" type="text" placeholder="Nombre del nivel" maxlength="60">
+  </div>
+  <div id="roomsList"></div>
+  <button class="add-room-btn" onclick="openTypePicker()">+ Añadir sala</button>
+</main>
+
+<!-- Type picker -->
+<div class="overlay" id="typeModal">
+  <div class="modal" style="width:520px">
+    <div class="modal-hdr">
+      <h2>Tipo de sala</h2>
+      <button class="btn btn-ghost btn-sm" onclick="closeModal('typeModal')">✕</button>
+    </div>
+    <div class="modal-body"><div class="type-grid" id="typeGrid"></div></div>
+  </div>
+</div>
+
+<!-- Room config -->
+<div class="overlay" id="cfgModal">
+  <div class="modal">
+    <div class="modal-hdr">
+      <span id="cfgIcon" style="font-size:22px"></span>
+      <h2 id="cfgTitle">Configurar sala</h2>
+      <button class="btn btn-ghost btn-sm" onclick="closeModal('cfgModal')">✕</button>
+    </div>
+    <div class="modal-body" id="cfgBody"></div>
+    <div class="modal-ftr">
+      <button class="btn btn-ghost" onclick="closeModal('cfgModal')">Cancelar</button>
+      <button class="btn btn-green" id="cfgSaveBtn">Guardar sala</button>
+    </div>
+  </div>
+</div>
+
+<!-- Progress -->
+<div id="progress">
+  <div class="spinner"></div>
+  <div id="progressMsg" style="color:var(--text2);font-size:14px">Generando ZIP…</div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+// ── State ─────────────────────────────────────────────────────────────────────
+let rooms    = [];
+let editIdx  = -1;
+let questions = [];
+let cfgVideo  = null;   // { file: File|Blob, name: string } for the open modal
+let cfgImage  = null;   // { file: File|Blob, name: string } for MORSE hint image
+
+const TYPES = [
+  { key:'CALM',         icon:'🧘', name:'Calma',               desc:'Mantener estado CALM N segundos' },
+  { key:'MORSE',        icon:'📡', name:'Morse',               desc:'Escribir letra con parpadeos' },
+  { key:'YESNO',        icon:'🗣️', name:'Sí / No',             desc:'Preguntas con NOD / SHAKE' },
+  { key:'BLINK_CLENCH', icon:'👁️', name:'Parpadeo + Mandíbula', desc:'Blink → jaw clench en ventana' },
+  { key:'VIDEO_STATE',  icon:'🎬', name:'Estado + Vídeo',      desc:'EEG objetivo con vídeo en bucle' },
+  { key:'ANIM',         icon:'🤖', name:'Animación robot',     desc:'Robot actúa, sin reto BCI' },
+];
+
+const TEMPLATES = {
+  celebrate: 'SPEAK:¡Felicidades! Lo has conseguido.\nTILT_HEAD:25\nWAIT:1500\nTILT_HEAD:0',
+  welcome:   'SPEAK:Bienvenido. Estoy aquí para guiarte.\nTILT_HEAD:10\nWAIT:1000\nTILT_HEAD:0',
+  cheer:     'SPEAK:¡Ánimo! Puedes hacerlo.\nTILT_HEAD:15\nWAIT:1000\nTILT_HEAD:0',
+  final:     'SPEAK:Has completado el desafío. Eres increíble.\nWAIT:1500\nTURN:360',
+};
+
+// ── Render ────────────────────────────────────────────────────────────────────
+function render() {
+  const list = document.getElementById('roomsList');
+  if (!rooms.length) {
+    list.innerHTML = `<div class="empty-state"><div class="big">🚪</div>
+      <div>Sin salas aún. Pulsa <strong>+ Añadir sala</strong> para empezar.</div></div>`;
+    return;
+  }
+  list.innerHTML = rooms.map((r, i) => {
+    const t = TYPES.find(x => x.key === r.type) || { icon:'?', name:r.type };
+    const hasVideo = !!(r._videoName);
+    const hasImage = !!(r._imageName);
+    return `<div class="room-card">
+      <div class="room-handle">
+        <button onclick="moveRoom(${i},-1)" ${i===0?'disabled':''}>↑</button>
+        <button onclick="moveRoom(${i}, 1)" ${i===rooms.length-1?'disabled':''}>↓</button>
+      </div>
+      <div class="room-body">
+        <div class="room-header-row">
+          <span class="type-badge badge-${r.type}">${t.icon} ${t.name}</span>
+          <span class="room-title">${i+1}. ${h(r.title||'(sin título)')}</span>
+        </div>
+        <div class="room-narration">${h(r.narration||'—')}</div>
+        <div class="room-meta">
+          ${metaHtml(r)}
+          ${r.robotActions?.length ? `<span>🤖 ${r.robotActions.length} acción${r.robotActions.length>1?'es':''}</span>` : ''}
+          ${hasVideo ? `<span style="color:var(--accent)">🎬 ${h(r._videoName)}</span>` : ''}
+          ${hasImage ? `<span style="color:var(--accent)">🖼 ${h(r._imageName)}</span>` : ''}
+        </div>
+      </div>
+      <div class="room-btns">
+        <button class="btn btn-ghost btn-sm" onclick="editRoom(${i})">✎ Editar</button>
+        <button class="btn btn-red   btn-sm" onclick="deleteRoom(${i})">✕ Borrar</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function metaHtml(r) {
+  switch(r.type) {
+    case 'CALM':         return `<span>⏱ ${r.secondsRequired??5}s</span>`;
+    case 'MORSE':        return `<span>🔤 ${r.letterPool||'ETISAN'}</span>`;
+    case 'YESNO':        return `<span>❓ ${(r.questions||[]).length} pregunta${(r.questions||[]).length!==1?'s':''}</span>`;
+    case 'BLINK_CLENCH': return `<span>⏳ ${r.jawWindowMs??4000}ms</span>`;
+    case 'VIDEO_STATE':  return `<span>${r.targetState ? `🎯 ${r.targetState}` : '⏯ Libre'} · ${r.secondsRequired??5}s</span>`;
+    case 'ANIM':         return `<span>⏳ ${r.delayMs??3000}ms</span>`;
+    default:             return '';
+  }
+}
+
+// ── Room ops ──────────────────────────────────────────────────────────────────
+function moveRoom(i, dir) {
+  const j = i + dir;
+  if (j < 0 || j >= rooms.length) return;
+  [rooms[i], rooms[j]] = [rooms[j], rooms[i]];
+  render();
+}
+function deleteRoom(i) {
+  if (!confirm(`¿Eliminar la sala "${rooms[i].title||i+1}"?`)) return;
+  rooms.splice(i, 1); render();
+}
+function editRoom(i) { editIdx = i; openRoomConfig(rooms[i].type, rooms[i]); }
+
+// ── Type picker ───────────────────────────────────────────────────────────────
+function openTypePicker() {
+  editIdx = -1;
+  document.getElementById('typeGrid').innerHTML = TYPES.map(t => `
+    <div class="type-card" onclick="pickType('${t.key}')">
+      <div class="tc-icon">${t.icon}</div>
+      <div class="tc-name">${t.name}</div>
+      <div class="tc-desc">${t.desc}</div>
+    </div>`).join('');
+  openModal('typeModal');
+}
+function pickType(key) { closeModal('typeModal'); openRoomConfig(key, null); }
+
+// ── Room config modal ─────────────────────────────────────────────────────────
+function openRoomConfig(typeKey, existing) {
+  const t = TYPES.find(x => x.key === typeKey);
+  document.getElementById('cfgIcon').textContent  = t?.icon || '';
+  document.getElementById('cfgTitle').textContent = existing
+    ? `Editar sala — ${t?.name}` : `Nueva sala — ${t?.name}`;
+
+  questions = (existing?.questions || []).map(q => ({...q}));
+  cfgVideo  = existing?._videoFile
+    ? { file: existing._videoFile, name: existing._videoName }
+    : null;
+  cfgImage  = existing?._imageFile
+    ? { file: existing._imageFile, name: existing._imageName }
+    : null;
+
+  document.getElementById('cfgBody').innerHTML = buildForm(typeKey, existing);
+  updateVideoUI();
+  if (typeKey === 'MORSE')      updateImageUI();
+  if (typeKey === 'YESNO') renderQuestions();
+  if (typeKey === 'VIDEO_STATE') updateVideoStateHint();
+  document.getElementById('cfgSaveBtn').onclick = () => saveRoom(typeKey);
+  openModal('cfgModal');
+}
+
+function buildForm(type, d) {
+  const v = d || {};
+  const common = `
+    <div class="field">
+      <label>Título de la sala *</label>
+      <input id="fTitle" type="text" value="${a(v.title||'')}" placeholder="Ej: La Puerta de la Calma" maxlength="60">
+    </div>
+    <div class="field">
+      <label>Narración (el robot la leerá en voz alta)</label>
+      <textarea id="fNarr" rows="3" placeholder="Ej: Para abrir esta puerta necesitas encontrar la calma…">${h(v.narration||'')}</textarea>
+    </div>
+    <div class="field">
+      <label>Pista de acción</label>
+      <input id="fHint" type="text" value="${a(v.hint||'')}" placeholder="Ej: Respira despacio y cierra los ojos">
+    </div>`;
+
+  // Vídeo introductorio — presente en todos los tipos
+  const videoSection = `
+    <div class="section-sep">Vídeo introductorio <small style="text-transform:none;font-weight:400">(opcional — se reproduce antes del reto)</small></div>
+    <div class="field">
+      <div class="video-pick-area">
+        <span class="video-name" id="videoLabel">Sin vídeo</span>
+        <label class="btn btn-ghost btn-sm" style="cursor:pointer">
+          🎬 Seleccionar vídeo
+          <input type="file" id="fVideo" accept="video/*" style="display:none" onchange="onVideoChange(this)">
+        </label>
+        <button class="btn btn-red btn-sm" id="clearVideoBtn" onclick="clearVideo()" style="display:none">✕</button>
+      </div>
+      <video id="videoPreview" class="video-preview" controls muted playsinline></video>
+    </div>`;
+
+  let specific = '';
+  switch(type) {
+    case 'CALM':
+      specific = `<div class="section-sep">Parámetros del reto</div>
+        <div class="field">
+          <label>Segundos de calma requeridos</label>
+          <input id="fSec" type="number" min="1" max="120" value="${v.secondsRequired??5}">
+        </div>`;
+      break;
+    case 'MORSE':
+      specific = `<div class="section-sep">Parámetros del reto</div>
+        <div class="field">
+          <label>Pool de letras (el robot elige una al azar)</label>
+          <input id="fPool" type="text" value="${a(v.letterPool||'ETISAN')}" maxlength="26"
+            placeholder="ETISAN" style="font-family:monospace;letter-spacing:6px;font-size:18px">
+          <div style="font-size:11px;color:var(--text2);margin-top:6px">
+            Fáciles: E T I S A N &nbsp;·&nbsp; Medias: R L D U O &nbsp;·&nbsp; Difíciles: G K P W
+          </div>
+        </div>
+        <div class="section-sep">Imagen de referencia <small style="text-transform:none;font-weight:400">(opcional — el jugador puede consultarla)</small></div>
+        <div class="field">
+          <div class="video-pick-area">
+            <span class="video-name" id="imageLabel">Sin imagen</span>
+            <label class="btn btn-ghost btn-sm" style="cursor:pointer">
+              🖼 Seleccionar imagen
+              <input type="file" id="fImage" accept="image/*" style="display:none" onchange="onImageChange(this)">
+            </label>
+            <button class="btn btn-red btn-sm" id="clearImageBtn" onclick="clearImage()" style="display:none">✕</button>
+          </div>
+          <img id="imagePreview" style="display:none;max-width:100%;max-height:180px;margin-top:8px;border-radius:6px;border:1px solid var(--border)">
+        </div>`;
+      break;
+    case 'YESNO':
+      specific = `<div class="section-sep">Preguntas &nbsp;<small style="text-transform:none;font-weight:400">NOD = Sí &nbsp;·&nbsp; SHAKE = No</small></div>
+        <div id="questionsList"></div>
+        <button class="btn btn-outline btn-sm" style="margin-bottom:10px" onclick="addQuestion()">+ Añadir pregunta</button>
+        <div class="info-box">Cada gesto requiere confirmación doble: repite el mismo gesto en 4 s para confirmar, o haz el gesto contrario para cancelar. Un fallo repite la pregunta sin penalizar.</div>`;
+      break;
+    case 'BLINK_CLENCH':
+      specific = `<div class="section-sep">Parámetros del reto</div>
+        <div class="field">
+          <label>Ventana de tiempo tras parpadeo (ms)</label>
+          <input id="fJaw" type="number" min="1000" max="15000" step="500" value="${v.jawWindowMs??4000}">
+          <div style="font-size:11px;color:var(--text2);margin-top:6px">
+            El usuario tiene este tiempo para apretar la mandíbula tras parpadear.
+          </div>
+        </div>`;
+      break;
+    case 'VIDEO_STATE': {
+      const ts = v.targetState || '';
+      specific = `<div class="section-sep">Parámetros del reto</div>
+        <div class="row2">
+          <div class="field">
+            <label>Estado EEG objetivo</label>
+            <select id="fTarget" onchange="updateVideoStateHint()">
+              <option value=""         ${ ts===''        ?'selected':''}>⏯ Ninguno — solo reproducir vídeo</option>
+              <option value="CALM"     ${ ts==='CALM'    ?'selected':''}>🧘 CALM — Calma</option>
+              <option value="ATTENTION"${ ts==='ATTENTION'?'selected':''}>🎯 ATTENTION — Atención</option>
+            </select>
+          </div>
+          <div class="field">
+            <label id="fSecLabel">Segundos requeridos</label>
+            <input id="fSec" type="number" min="1" max="300" value="${v.secondsRequired??5}">
+          </div>
+        </div>
+        <div class="info-box" id="videoStateHint"></div>`;
+      break;
+    }
+    case 'ANIM':
+      specific = `<div class="section-sep">Parámetros</div>
+        <div class="field">
+          <label>Duración antes de avanzar automáticamente (ms)</label>
+          <input id="fDelay" type="number" min="500" max="60000" step="500" value="${v.delayMs??3000}">
+          <div style="font-size:11px;color:var(--text2);margin-top:6px">Sin reto BCI. El nivel avanza solo pasado este tiempo.</div>
+        </div>`;
+      break;
+  }
+
+  const actText = (v.robotActions||[]).join('\n');
+  const robotSection = `
+    <div class="section-sep" style="margin-top:6px">Acciones del robot</div>
+    <div class="templates">
+      <button class="tpl-btn" onclick="applyTpl('celebrate')">🎉 Celebrar</button>
+      <button class="tpl-btn" onclick="applyTpl('welcome')">👋 Bienvenida</button>
+      <button class="tpl-btn" onclick="applyTpl('cheer')">💪 Ánimo</button>
+      <button class="tpl-btn" onclick="applyTpl('final')">🏆 Final</button>
+    </div>
+    <div class="field">
+      <label>Una por línea: SPEAK:texto · GOTO:lugar · TILT_HEAD:grados · TURN:grados · WAIT:ms</label>
+      <textarea id="fActions" rows="5" style="font-family:monospace;font-size:13px"
+        placeholder="SPEAK:Bienvenido al desafío\nTILT_HEAD:15\nWAIT:1000\nTILT_HEAD:0">${h(actText)}</textarea>
+    </div>`;
+
+  return common + videoSection + specific + robotSection;
+}
+
+// ── Video ─────────────────────────────────────────────────────────────────────
+function onVideoChange(input) {
+  const file = input.files[0];
+  if (!file) return;
+  cfgVideo = { file, name: file.name };
+  updateVideoUI();
+}
+function clearVideo() {
+  cfgVideo = null;
+  const fi = document.getElementById('fVideo');
+  if (fi) fi.value = '';
+  updateVideoUI();
+}
+function updateVideoUI() {
+  const label   = document.getElementById('videoLabel');
+  const clearBtn = document.getElementById('clearVideoBtn');
+  const preview = document.getElementById('videoPreview');
+  if (!label) return;
+  if (cfgVideo) {
+    label.textContent = '🎬 ' + cfgVideo.name;
+    label.classList.add('has-video');
+    if (clearBtn) clearBtn.style.display = '';
+    if (preview) {
+      const url = cfgVideo.file instanceof File
+        ? URL.createObjectURL(cfgVideo.file)
+        : URL.createObjectURL(new Blob([cfgVideo.file]));
+      preview.src = url;
+      preview.classList.add('visible');
+    }
+  } else {
+    label.textContent = 'Sin vídeo';
+    label.classList.remove('has-video');
+    if (clearBtn) clearBtn.style.display = 'none';
+    if (preview) { preview.src = ''; preview.classList.remove('visible'); }
+  }
+}
+
+// ── Image (MORSE hint) ────────────────────────────────────────────────────────
+function onImageChange(input) {
+  const file = input.files[0];
+  if (!file) return;
+  cfgImage = { file, name: file.name };
+  updateImageUI();
+}
+function clearImage() {
+  cfgImage = null;
+  const fi = document.getElementById('fImage');
+  if (fi) fi.value = '';
+  updateImageUI();
+}
+function updateImageUI() {
+  const label    = document.getElementById('imageLabel');
+  const clearBtn = document.getElementById('clearImageBtn');
+  const preview  = document.getElementById('imagePreview');
+  if (!label) return;
+  if (cfgImage) {
+    label.textContent = '🖼 ' + cfgImage.name;
+    label.classList.add('has-video');
+    if (clearBtn) clearBtn.style.display = '';
+    if (preview) {
+      const url = cfgImage.file instanceof File
+        ? URL.createObjectURL(cfgImage.file)
+        : URL.createObjectURL(new Blob([cfgImage.file]));
+      preview.src = url;
+      preview.style.display = 'block';
+    }
+  } else {
+    label.textContent = 'Sin imagen';
+    label.classList.remove('has-video');
+    if (clearBtn) clearBtn.style.display = 'none';
+    if (preview)  { preview.src = ''; preview.style.display = 'none'; }
+  }
+}
+
+// ── Questions ─────────────────────────────────────────────────────────────────
+function renderQuestions() {
+  const el = document.getElementById('questionsList');
+  if (!el) return;
+  el.innerHTML = questions.map((q, i) => {
+    const gY = q.gotoOnYes != null ? q.gotoOnYes + 1 : '';
+    const gN = q.gotoOnNo  != null ? q.gotoOnNo  + 1 : '';
+    return `<div class="q-card">
+      <div class="q-top">
+        <input type="text" value="${a(q.text)}" placeholder="¿Pregunta al usuario?"
+          oninput="questions[${i}].text=this.value">
+        <button class="del-q" onclick="removeQ(${i})">✕</button>
+      </div>
+      <div class="q-bottom">
+        <div class="q-field">
+          <label>Resp. correcta</label>
+          <select onchange="questions[${i}].answer=this.value">
+            <option value="S" ${q.answer==='S'?'selected':''}>✅ Sí (NOD)</option>
+            <option value="N" ${q.answer==='N'?'selected':''}>❌ No (SHAKE)</option>
+          </select>
+        </div>
+        <div class="q-field">
+          <label>Ir a sala si SÍ</label>
+          <input type="number" min="1" placeholder="—" value="${gY}"
+            oninput="questions[${i}].gotoOnYes=this.value===''?null:+this.value-1">
+        </div>
+        <div class="q-field">
+          <label>Ir a sala si NO</label>
+          <input type="number" min="1" placeholder="—" value="${gN}"
+            oninput="questions[${i}].gotoOnNo=this.value===''?null:+this.value-1">
+        </div>
+        <div style="font-size:11px;color:var(--text2);align-self:flex-end;padding-bottom:4px">
+          nº de sala (1-${rooms.length||'N'})
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+function addQuestion()  { questions.push({text:'', answer:'S', gotoOnYes:null, gotoOnNo:null}); renderQuestions(); }
+function removeQ(i)     { questions.splice(i,1); renderQuestions(); }
+function applyTpl(key)  { const ta = document.getElementById('fActions'); if(ta) ta.value=TEMPLATES[key]||''; }
+
+// ── Save room ─────────────────────────────────────────────────────────────────
+function saveRoom(type) {
+  const title = document.getElementById('fTitle')?.value.trim();
+  if (!title) { alert('El título es obligatorio.'); return; }
+
+  const actions = (document.getElementById('fActions')?.value||'')
+    .split('\n').map(l=>l.trim()).filter(l=>l&&l.includes(':'));
+
+  const room = {
+    type, title,
+    narration:    document.getElementById('fNarr')?.value.trim()||'',
+    hint:         document.getElementById('fHint')?.value.trim()||'',
+    robotActions: actions,
+    _videoFile:   cfgVideo?.file  || null,
+    _videoName:   cfgVideo?.name  || '',
+    _imageFile:   null,
+    _imageName:   '',
+  };
+
+  switch(type) {
+    case 'CALM':         room.secondsRequired = +document.getElementById('fSec')?.value||5; break;
+    case 'MORSE':
+      room.letterPool = (document.getElementById('fPool')?.value||'ETISAN').toUpperCase().replace(/[^A-Z]/g,'')||'ETISAN';
+      room._imageFile = cfgImage?.file || null;
+      room._imageName = cfgImage?.name || '';
+      break;
+    case 'YESNO':
+      room.questions = questions.filter(q=>q.text.trim()).map(q=>({
+        text: q.text.trim(), answer: q.answer,
+        gotoOnYes: q.gotoOnYes ?? null,
+        gotoOnNo:  q.gotoOnNo  ?? null,
+      })); break;
+    case 'BLINK_CLENCH': room.jawWindowMs = +document.getElementById('fJaw')?.value||4000; break;
+    case 'VIDEO_STATE':
+      room.targetState     = document.getElementById('fTarget')?.value ?? '';
+      room.secondsRequired = +document.getElementById('fSec')?.value||5; break;
+    case 'ANIM':         room.delayMs = +document.getElementById('fDelay')?.value||3000; break;
+  }
+
+  if (editIdx >= 0) rooms[editIdx] = room; else rooms.push(room);
+  closeModal('cfgModal');
+  render();
+  toast(editIdx >= 0 ? '✓ Sala actualizada' : '✓ Sala añadida');
+}
+
+// ── Export ────────────────────────────────────────────────────────────────────
+async function exportLevel() {
+  const name = document.getElementById('levelName').value.trim();
+  if (!name)        { alert('Escribe un nombre para el nivel.'); return; }
+  if (!rooms.length){ alert('Añade al menos una sala.'); return; }
+
+  const hasVideos = rooms.some(r => r._videoFile);
+  const hasImages = rooms.some(r => r._imageFile);
+
+  if (hasVideos || hasImages) {
+    await exportZip(name);
+  } else {
+    exportJson(name);
+  }
+}
+
+function exportJson(name) {
+  const level = buildLevelJson(name, rooms.map(r => ({ ...r, videoPath:'' })));
+  const blob  = new Blob([JSON.stringify([level], null, 2)], { type:'application/json' });
+  download(blob, name.replace(/[^\w\-]/g,'_') + '.json');
+  toast('⬆ JSON exportado');
+}
+
+async function exportZip(name) {
+  showProgress('Generando ZIP…');
+  try {
+    const zip = new JSZip();
+    const videoFolder = zip.folder('videos');
+    const imageFolder = zip.folder('images');
+    const roomsForJson = [];
+
+    for (let i = 0; i < rooms.length; i++) {
+      const r = rooms[i];
+      let videoPath = '';
+      if (r._videoFile) {
+        const ext = r._videoName.split('.').pop() || 'mp4';
+        const fname = `video_${i}.${ext}`;
+        const buf = await r._videoFile.arrayBuffer();
+        videoFolder.file(fname, buf);
+        videoPath = fname;
+      }
+      let hintImagePath = '';
+      if (r._imageFile) {
+        const ext = r._imageName.split('.').pop() || 'jpg';
+        const fname = `image_${i}.${ext}`;
+        const buf = await r._imageFile.arrayBuffer();
+        imageFolder.file(fname, buf);
+        hintImagePath = fname;
+      }
+      roomsForJson.push({ ...r, videoPath, hintImagePath, _videoFile: undefined, _videoName: undefined, _imageFile: undefined, _imageName: undefined });
+    }
+
+    const level = buildLevelJson(name, roomsForJson);
+    zip.file('levels.json', JSON.stringify([level], null, 2));
+
+    const hasVideos = rooms.some(r => r._videoFile);
+    const hasImages = rooms.some(r => r._imageFile);
+    const blob = await zip.generateAsync({ type:'blob', compression:'DEFLATE', compressionOptions:{level:6} },
+      meta => { document.getElementById('progressMsg').textContent = `Comprimiendo… ${meta.percent.toFixed(0)}%`; });
+
+    download(blob, name.replace(/[^\w\-]/g,'_') + '.zip');
+    const parts = [hasVideos && 'vídeos', hasImages && 'imágenes'].filter(Boolean).join(' + ');
+    toast(`⬆ ZIP exportado (JSON + ${parts})`);
+  } finally {
+    hideProgress();
+  }
+}
+
+function buildLevelJson(name, roomList) {
+  return {
+    id: 'lvl_' + Date.now(),
+    name,
+    modules: roomList.map(r => {
+      const m = {
+        type:         r.type,
+        title:        r.title,
+        narration:    r.narration || '',
+        hint:         r.hint || '',
+        videoPath:    r.videoPath || '',
+        robotActions: r.robotActions || [],
+      };
+      switch(r.type) {
+        case 'CALM':         m.secondsRequired = r.secondsRequired ?? 5; break;
+        case 'MORSE':
+          m.letterPool = r.letterPool || 'ETISAN';
+          if (r.hintImagePath) m.hintImagePath = r.hintImagePath;
+          break;
+        case 'YESNO':
+          m.questions = (r.questions || []).map(q => {
+            const out = { text: q.text, expectedYes: q.answer === 'S' };
+            if (q.gotoOnYes != null) out.gotoOnYes = q.gotoOnYes;
+            if (q.gotoOnNo  != null) out.gotoOnNo  = q.gotoOnNo;
+            return out;
+          }); break;
+        case 'BLINK_CLENCH': m.jawWindowMs = r.jawWindowMs ?? 4000; break;
+        case 'VIDEO_STATE':
+          m.targetState     = r.targetState ?? '';
+          m.secondsRequired = r.secondsRequired ?? 5; break;
+        case 'ANIM':         m.delayMs = r.delayMs ?? 3000; break;
+      }
+      return m;
+    })
+  };
+}
+
+function download(blob, filename) {
+  const url = URL.createObjectURL(blob);
+  const a   = document.createElement('a');
+  a.href    = url; a.download = filename; a.click();
+  setTimeout(() => URL.revokeObjectURL(url), 5000);
+}
+
+// ── Import ────────────────────────────────────────────────────────────────────
+document.getElementById('importFile').addEventListener('change', async e => {
+  const file = e.target.files[0];
+  if (!file) return;
+  e.target.value = '';
+
+  const isZip = file.name.endsWith('.zip') || file.type === 'application/zip';
+  try {
+    if (isZip) await importZip(file);
+    else        await importJson(file);
+  } catch(err) {
+    alert('Error al importar:\n' + err.message);
+  }
+});
+
+function normalizeModule(m) {
+  const mod = { ...m, robotActions: m.robotActions || [], _videoFile: null, _videoName: '', _imageFile: null, _imageName: '' };
+  if (mod.questions) {
+    mod.questions = mod.questions.map(q => ({
+      ...q,
+      answer: q.answer ?? (q.expectedYes === false ? 'N' : 'S'),
+      gotoOnYes: q.gotoOnYes ?? null,
+      gotoOnNo:  q.gotoOnNo  ?? null,
+    }));
+  }
+  return mod;
+}
+
+async function importJson(file) {
+  const text  = await file.text();
+  const data  = JSON.parse(text);
+  const level = Array.isArray(data) ? data[0] : data;
+  if (!level?.name || !Array.isArray(level?.modules)) throw new Error('Formato JSON no reconocido');
+  document.getElementById('levelName').value = level.name;
+  rooms = level.modules.map(normalizeModule);
+  render();
+  toast(`📂 "${level.name}" importado`);
+}
+
+async function importZip(file) {
+  showProgress('Leyendo ZIP…');
+  try {
+    const zip   = await JSZip.loadAsync(file);
+    const jsonF = zip.file('levels.json');
+    if (!jsonF) throw new Error('El ZIP no contiene levels.json');
+
+    const text  = await jsonF.async('text');
+    const data  = JSON.parse(text);
+    const level = Array.isArray(data) ? data[0] : data;
+    if (!level?.name || !Array.isArray(level?.modules)) throw new Error('levels.json no reconocido');
+
+    document.getElementById('levelName').value = level.name;
+
+    const videoMap = {};
+    const videoFiles = Object.entries(zip.files).filter(([p]) => p.startsWith('videos/') && !p.endsWith('/'));
+    for (const [path, entry] of videoFiles) {
+      const name = path.replace('videos/', '');
+      const buf  = await entry.async('arraybuffer');
+      videoMap[name] = { blob: new Blob([buf]), name };
+    }
+
+    const imageMap = {};
+    const imageFiles = Object.entries(zip.files).filter(([p]) => p.startsWith('images/') && !p.endsWith('/'));
+    for (const [path, entry] of imageFiles) {
+      const name = path.replace('images/', '');
+      const buf  = await entry.async('arraybuffer');
+      const ext  = name.split('.').pop() || 'jpg';
+      imageMap[name] = { blob: new Blob([buf], { type: `image/${ext}` }), name };
+    }
+
+    rooms = level.modules.map(m => {
+      const vname    = m.videoPath     ? m.videoPath.split('/').pop()     : '';
+      const iname    = m.hintImagePath ? m.hintImagePath.split('/').pop() : '';
+      const videoEnt = vname && videoMap[vname] ? videoMap[vname] : null;
+      const imageEnt = iname && imageMap[iname] ? imageMap[iname] : null;
+      const mod      = normalizeModule(m);
+      mod._videoFile = videoEnt?.blob || null;
+      mod._videoName = videoEnt?.name || '';
+      mod._imageFile = imageEnt?.blob || null;
+      mod._imageName = imageEnt?.name || '';
+      return mod;
+    });
+
+    render();
+    const parts = [videoFiles.length && `${videoFiles.length} vídeo${videoFiles.length!==1?'s':''}`,
+                   imageFiles.length && `${imageFiles.length} imagen${imageFiles.length!==1?'es':''}`].filter(Boolean).join(', ');
+    toast(`📂 "${level.name}" importado${parts ? ` (${parts})` : ''}`);
+  } finally {
+    hideProgress();
+  }
+}
+
+// ── Video state hint ─────────────────────────────────────────────────────────
+function updateVideoStateHint() {
+  const sel  = document.getElementById('fTarget');
+  const hint = document.getElementById('videoStateHint');
+  const lbl  = document.getElementById('fSecLabel');
+  if (!sel || !hint) return;
+  const v = sel.value;
+  if (!v) {
+    if (lbl) lbl.textContent = 'Duración del vídeo (s)';
+    hint.textContent = '⏯ Sin requisito EEG — el módulo reproduce el vídeo durante los segundos indicados y avanza automáticamente.';
+  } else {
+    if (lbl) lbl.textContent = 'Segundos requeridos';
+    const name = { CALM: 'Calma (CALM)', ATTENTION: 'Atención (ATTENTION)' }[v] || v;
+    const secs = document.getElementById('fSec')?.value || 5;
+    hint.textContent = `🧠 El usuario debe mantener ${name} acumulando ${secs}s mientras el vídeo se reproduce en bucle.`;
+  }
+}
+
+// ── Modal / Progress ──────────────────────────────────────────────────────────
+function openModal(id)   { document.getElementById(id).classList.add('open') }
+function closeModal(id)  { document.getElementById(id).classList.remove('open') }
+function showProgress(m) { document.getElementById('progressMsg').textContent=m; document.getElementById('progress').classList.add('open') }
+function hideProgress()  { document.getElementById('progress').classList.remove('open') }
+
+document.querySelectorAll('.overlay').forEach(el =>
+  el.addEventListener('click', e => { if (e.target===el) el.classList.remove('open') })
+);
+
+// ── Toast / Utils ─────────────────────────────────────────────────────────────
+let _tt;
+function toast(msg) {
+  const el=document.getElementById('toast');
+  el.textContent=msg; el.style.display='block';
+  clearTimeout(_tt); _tt=setTimeout(()=>el.style.display='none',2800);
+}
+function h(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;') }
+function a(s){ return String(s).replace(/"/g,'&quot;').replace(/'/g,'&#39;') }
+
+render();
+</script>
+</body>
+</html>
