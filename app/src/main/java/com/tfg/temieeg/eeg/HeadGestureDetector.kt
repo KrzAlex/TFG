@@ -36,7 +36,9 @@ class HeadGestureDetector(
     /** Tiempo máximo entre las dos oscilaciones de un gesto (ms). */
     var gestureWindowMs: Long = 800L,
     /** Tiempo mínimo entre dos detecciones del mismo gesto (ms). */
-    var gestureDebounceMs: Long = 1500L
+    var gestureDebounceMs: Long = 1500L,
+    /** Fuente de tiempo (ms). Inyectable para tests deterministas; por defecto el reloj real. */
+    private val clock: () -> Long = { System.currentTimeMillis() }
 ) {
     var onNod:   (() -> Unit)? = null
     var onShake: (() -> Unit)? = null
@@ -54,7 +56,7 @@ class HeadGestureDetector(
     // ── API ──────────────────────────────────────────────────────────────────
 
     fun addSample(@Suppress("UNUSED_PARAMETER") gyroX: Float, gyroY: Float, gyroZ: Float) {
-        val now = System.currentTimeMillis()
+        val now = clock()
 
         // ── Supresión cruzada ─────────────────────────────────────────────────
         // Si el eje de SHAKE (Z) está activo, resetear el estado del NOD (Y)

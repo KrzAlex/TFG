@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:paddingStart="24dp"
+    android:paddingEnd="24dp"
+    android:paddingTop="24dp"
+    android:paddingBottom="8dp">
+
+    <TextView
+        style="@style/Text.Display"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="¿Cómo se juega?"
+        android:textSize="21sp" />
+
+    <TextView
+        style="@style/Text.Caption"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
+        android:layout_marginBottom="14dp"
+        android:textSize="13sp"
+        android:text="Controlas el juego con tu mente y tus gestos. Estas son las acciones:" />
+
+    <!-- Calma -->
+    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:orientation="horizontal" android:gravity="center_vertical" android:paddingTop="8dp" android:paddingBottom="8dp">
+        <ImageView android:layout_width="42dp" android:layout_height="42dp" android:padding="10dp"
+            android:background="@drawable/bg_module_icon" android:src="@drawable/ic_mod_calm"
+            app:tint="@color/primary" android:layout_marginEnd="14dp" android:contentDescription="@null" />
+        <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:orientation="vertical">
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:text="Mantén la calma" android:textStyle="bold" android:textSize="15sp" android:textColor="@color/heading" />
+            <TextView style="@style/Text.Caption" android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:textSize="12sp" android:text="Relájate y respira: tu EEG detecta la calma." />
+        </LinearLayout>
+    </LinearLayout>
+
+    <!-- Parpadeo -->
+    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:orientation="horizontal" android:gravity="center_vertical" android:paddingTop="8dp" android:paddingBottom="8dp">
+        <ImageView android:layout_width="42dp" android:layout_height="42dp" android:padding="10dp"
+            android:background="@drawable/bg_module_icon" android:src="@drawable/ic_mod_blink"
+            app:tint="@color/primary" android:layout_marginEnd="14dp" android:contentDescription="@null" />
+        <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:orientation="vertical">
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:text="Parpadea (Morse)" android:textStyle="bold" android:textSize="15sp" android:textColor="@color/heading" />
+            <TextView style="@style/Text.Caption" android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:textSize="12sp" android:text="1 parpadeo = punto · 2 rápidos = raya. Aprieta la mandíbula para abrir." />
+        </LinearLayout>
+    </LinearLayout>
+
+    <!-- Asentir / Negar -->
+    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:orientation="horizontal" android:gravity="center_vertical" android:paddingTop="8dp" android:paddingBottom="8dp">
+        <ImageView android:layout_width="42dp" android:layout_height="42dp" android:padding="10dp"
+            android:background="@drawable/bg_module_icon" android:src="@drawable/ic_mod_yesno"
+            app:tint="@color/primary" android:layout_marginEnd="14dp" android:contentDescription="@null" />
+        <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:orientation="vertical">
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:text="Asiente o niega" android:textStyle="bold" android:textSize="15sp" android:textColor="@color/heading" />
+            <TextView style="@style/Text.Caption" android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:textSize="12sp" android:text="Mueve la cabeza: asentir = SÍ, negar = NO. Repite para confirmar." />
+        </LinearLayout>
+    </LinearLayout>
+
+    <!-- Señal -->
+    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:orientation="horizontal" android:gravity="center_vertical" android:paddingTop="8dp" android:paddingBottom="8dp">
+        <ImageView android:layout_width="42dp" android:layout_height="42dp" android:padding="10dp"
+            android:background="@drawable/bg_module_icon" android:src="@drawable/ic_brain"
+            app:tint="@color/primary" android:layout_marginEnd="14dp" android:contentDescription="@null" />
+        <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:orientation="vertical">
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:text="Buena señal" android:textStyle="bold" android:textSize="15sp" android:textColor="@color/heading" />
+            <TextView style="@style/Text.Caption" android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:textSize="12sp" android:text="Ajusta bien la diadema: si la señal es mala, los gestos se ignoran." />
+        </LinearLayout>
+    </LinearLayout>
+
+</LinearLayout>

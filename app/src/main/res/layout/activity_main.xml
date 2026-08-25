@@ -1,12 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <FrameLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/background">
 
     <!-- ══════════════════════════════════════════════════════════════════════
-         PANTALLA PRINCIPAL — Escape Room launcher (visible por defecto)
+         PANTALLA PRINCIPAL — Escape Room launcher (landscape, visible por defecto)
          ══════════════════════════════════════════════════════════════════════ -->
     <LinearLayout
         android:id="@+id/homeScreen"
@@ -15,204 +16,233 @@
         android:orientation="vertical"
         android:visibility="visible">
 
-        <!-- Cabecera: branding + barra de estado -->
+        <!-- Cabecera: branding a la izquierda + estado a la derecha -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:background="@drawable/bg_header"
-            android:orientation="vertical"
-            android:paddingStart="24dp"
-            android:paddingEnd="24dp"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:paddingStart="40dp"
+            android:paddingEnd="40dp"
             android:paddingTop="18dp"
-            android:paddingBottom="22dp">
+            android:paddingBottom="20dp">
 
-            <!-- Barra de estado: conexión + calidad + batería -->
+            <ImageView
+                android:layout_width="56dp"
+                android:layout_height="56dp"
+                android:src="@drawable/ic_brain"
+                android:scaleType="centerInside"
+                android:background="@drawable/bg_chip"
+                android:padding="12dp"
+                app:tint="@color/text_on_primary"
+                android:contentDescription="@string/app_name"
+                android:layout_marginEnd="16dp" />
+
             <LinearLayout
-                android:layout_width="match_parent"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:gravity="center_vertical"
-                android:layout_marginBottom="18dp">
+                android:layout_weight="1"
+                android:orientation="vertical">
 
                 <TextView
-                    android:id="@+id/tvHomeConnectionStatus"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="@string/muse_disconnected"
-                    android:textSize="12sp"
-                    android:textColor="#E8DFFB" />
-
-                <TextView
-                    android:id="@+id/tvHomeSignalQuality"
+                    style="@style/Text.Display"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:background="@drawable/bg_chip"
-                    android:paddingStart="12dp"
-                    android:paddingEnd="12dp"
-                    android:paddingTop="4dp"
-                    android:paddingBottom="4dp"
-                    android:text=""
-                    android:textSize="12sp"
-                    android:textStyle="bold"
-                    android:layout_marginEnd="8dp" />
+                    android:text="@string/app_name"
+                    android:textSize="28sp"
+                    android:textColor="@color/text_on_primary" />
 
                 <TextView
-                    android:id="@+id/tvHomeBattery"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:background="@drawable/bg_chip"
-                    android:paddingStart="12dp"
-                    android:paddingEnd="12dp"
-                    android:paddingTop="4dp"
-                    android:paddingBottom="4dp"
-                    android:text=""
+                    android:text="BCI · ESCAPE ROOM"
                     android:textSize="12sp"
+                    android:letterSpacing="0.14"
                     android:textStyle="bold"
-                    android:textColor="@color/primary_dark" />
+                    android:textColor="@color/text_on_primary_soft" />
 
             </LinearLayout>
 
-            <!-- Logo + título -->
-            <LinearLayout
-                android:layout_width="match_parent"
+            <TextView
+                android:id="@+id/tvHomeConnectionStatus"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:gravity="center_vertical">
+                android:text="@string/muse_disconnected"
+                android:textSize="13sp"
+                android:textColor="@color/text_on_primary_soft"
+                android:layout_marginEnd="12dp" />
 
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="🧠"
-                    android:textSize="42sp"
-                    android:layout_marginEnd="14dp" />
+            <TextView
+                android:id="@+id/tvHomeSignalQuality"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@drawable/bg_chip"
+                android:paddingStart="14dp"
+                android:paddingEnd="14dp"
+                android:paddingTop="7dp"
+                android:paddingBottom="7dp"
+                android:text=""
+                android:textSize="12sp"
+                android:textStyle="bold"
+                android:textColor="@color/text_on_primary"
+                android:layout_marginEnd="8dp" />
 
-                <LinearLayout
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:orientation="vertical">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/app_name"
-                        android:textSize="26sp"
-                        android:textStyle="bold"
-                        android:textColor="@color/text_on_primary" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="BCI · Escape Room"
-                        android:textSize="13sp"
-                        android:letterSpacing="0.04"
-                        android:textColor="#D5C8F5" />
-
-                </LinearLayout>
-
-            </LinearLayout>
+            <TextView
+                android:id="@+id/tvHomeBattery"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@drawable/bg_chip"
+                android:paddingStart="14dp"
+                android:paddingEnd="14dp"
+                android:paddingTop="7dp"
+                android:paddingBottom="7dp"
+                android:text=""
+                android:textSize="12sp"
+                android:textStyle="bold"
+                android:textColor="@color/text_on_primary" />
 
         </LinearLayout>
 
-        <!-- Estado mental (tarjeta centrada) -->
+        <!-- Cuerpo en dos columnas -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_weight="1"
-            android:orientation="vertical"
-            android:gravity="center"
-            android:paddingStart="24dp"
-            android:paddingEnd="24dp">
+            android:orientation="horizontal"
+            android:paddingStart="44dp"
+            android:paddingEnd="44dp"
+            android:paddingTop="24dp"
+            android:paddingBottom="24dp"
+            android:gravity="center_vertical">
 
+            <!-- Columna izquierda: orbe de estado mental -->
             <LinearLayout
-                style="@style/Card"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:gravity="center"
-                android:elevation="2dp"
-                android:paddingTop="30dp"
-                android:paddingBottom="30dp">
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1.15"
+                android:orientation="vertical"
+                android:gravity="center">
 
                 <TextView
                     style="@style/Text.Overline"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Estado mental"
-                    android:layout_marginBottom="10dp" />
+                    android:textColor="@color/text_muted"
+                    android:layout_marginBottom="20dp" />
+
+                <FrameLayout
+                    android:layout_width="264dp"
+                    android:layout_height="264dp">
+
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:background="@drawable/bg_orb_outer" />
+
+                    <View
+                        android:layout_width="206dp"
+                        android:layout_height="206dp"
+                        android:layout_gravity="center"
+                        android:background="@drawable/bg_orb_inner" />
+
+                    <TextView
+                        android:id="@+id/tvHomeMentalState"
+                        android:layout_width="206dp"
+                        android:layout_height="206dp"
+                        android:layout_gravity="center"
+                        android:gravity="center"
+                        android:text="@string/state_neutral"
+                        android:textSize="44sp"
+                        android:textStyle="bold" />
+
+                </FrameLayout>
+
+            </LinearLayout>
+
+            <!-- Columna derecha: acciones -->
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="vertical"
+                android:layout_marginStart="20dp">
 
                 <TextView
-                    android:id="@+id/tvHomeMentalState"
+                    style="@style/Text.Display"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Empieza tu aventura mental"
+                    android:textSize="21sp"
+                    android:layout_marginBottom="16dp" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnPlayEscapeRoom"
+                    style="@style/Button.Primary"
+                    android:layout_width="match_parent"
+                    android:layout_height="74dp"
+                    android:text="@string/btn_play_escape_room"
+                    android:textSize="19sp"
+                    app:icon="@drawable/ic_play"
+                    app:iconGravity="textStart"
+                    app:iconSize="24dp"
+                    app:iconTint="@color/text_on_primary"
+                    android:layout_marginBottom="12dp" />
+
+                <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:gravity="center"
-                    android:text="@string/state_neutral"
-                    android:textSize="56sp"
-                    android:textStyle="bold" />
+                    android:orientation="horizontal"
+                    android:layout_marginBottom="8dp">
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btnCreateLevel"
+                        style="@style/Button.Tonal"
+                        android:layout_width="0dp"
+                        android:layout_height="60dp"
+                        android:layout_weight="1"
+                        android:layout_marginEnd="6dp"
+                        android:text="@string/btn_create_level"
+                        app:icon="@drawable/ic_plus"
+                        app:iconGravity="textStart"
+                        app:iconTint="@color/primary_dark" />
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btnHomeStartSession"
+                        style="@style/Button.Tonal"
+                        android:layout_width="0dp"
+                        android:layout_height="60dp"
+                        android:layout_weight="1"
+                        android:layout_marginStart="6dp"
+                        android:text="@string/btn_start_session"
+                        app:icon="@drawable/ic_history"
+                        app:iconGravity="textStart"
+                        app:iconTint="@color/primary_dark" />
+
+                </LinearLayout>
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnSettingsMode"
+                    style="@style/Button.Ghost"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/btn_settings_mode"
+                    android:textSize="13sp"
+                    android:textColor="@color/text_muted"
+                    app:icon="@drawable/ic_gear"
+                    app:iconGravity="textStart"
+                    app:iconSize="18dp"
+                    app:iconTint="@color/text_muted" />
 
             </LinearLayout>
-
-        </LinearLayout>
-
-        <!-- Botones inferiores -->
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:paddingStart="24dp"
-            android:paddingEnd="24dp"
-            android:paddingBottom="20dp">
-
-            <Button
-                android:id="@+id/btnPlayEscapeRoom"
-                style="@style/Button.Primary"
-                android:layout_width="match_parent"
-                android:layout_height="64dp"
-                android:text="@string/btn_play_escape_room"
-                android:textSize="18sp"
-                android:layout_marginBottom="10dp" />
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:layout_marginBottom="6dp">
-
-                <Button
-                    android:id="@+id/btnCreateLevel"
-                    style="@style/Button.Tonal"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:layout_marginEnd="5dp"
-                    android:text="@string/btn_create_level" />
-
-                <Button
-                    android:id="@+id/btnHomeStartSession"
-                    style="@style/Button.Tonal"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:layout_marginStart="5dp"
-                    android:text="@string/btn_start_session" />
-
-            </LinearLayout>
-
-            <Button
-                android:id="@+id/btnSettingsMode"
-                style="@style/Button.Ghost"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="@string/btn_settings_mode"
-                android:textSize="12sp"
-                android:textColor="@color/text_muted" />
 
         </LinearLayout>
 
     </LinearLayout>
 
     <!-- ══════════════════════════════════════════════════════════════════════
-         PANTALLA CONFIGURACIÓN (gone por defecto)
+         PANTALLA CONFIGURACIÓN (landscape, gone por defecto)
          ══════════════════════════════════════════════════════════════════════ -->
     <androidx.core.widget.NestedScrollView
         android:id="@+id/settingsScreen"
@@ -226,7 +256,10 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:padding="16dp">
+            android:paddingStart="32dp"
+            android:paddingEnd="32dp"
+            android:paddingTop="20dp"
+            android:paddingBottom="20dp">
 
             <!-- Cabecera: título + botón volver -->
             <LinearLayout
@@ -234,509 +267,595 @@
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
                 android:gravity="center_vertical"
-                android:layout_marginBottom="12dp">
+                android:layout_marginBottom="16dp">
 
                 <TextView
+                    style="@style/Text.Display"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:text="@string/settings_title"
-                    android:textSize="22sp"
-                    android:textStyle="bold"
-                    android:textColor="@color/text_primary" />
+                    android:textSize="24sp" />
 
-                <Button
+                <com.google.android.material.button.MaterialButton
                     android:id="@+id/btnSettingsBack"
                     style="@style/Button.Ghost"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/btn_settings_back"
-                    android:textColor="@color/primary" />
+                    android:textColor="@color/primary"
+                    app:icon="@drawable/ic_back"
+                    app:iconGravity="textStart"
+                    app:iconSize="18dp"
+                    app:iconTint="@color/primary" />
 
             </LinearLayout>
 
-            <!-- ══ SECCIÓN GENERAL ═══════════════════════════════════════════ -->
+            <!-- Dos columnas de tarjetas -->
             <LinearLayout
-                style="@style/Card"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="12dp">
+                android:orientation="horizontal"
+                android:baselineAligned="false">
 
-                <TextView
-                    style="@style/Text.Overline"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="@string/settings_section_general" />
-
-                <!-- Volumen -->
+                <!-- ══ COLUMNA IZQUIERDA ═══════════════════════════════════════ -->
                 <LinearLayout
-                    android:layout_width="match_parent"
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="14dp"
-                    android:orientation="horizontal"
-                    android:gravity="center_vertical">
+                    android:layout_weight="1"
+                    android:orientation="vertical"
+                    android:layout_marginEnd="10dp">
 
-                    <TextView
-                        style="@style/Text.Label"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:text="@string/settings_label_volume" />
-
-                    <TextView
-                        android:id="@+id/tvVolumeValue"
-                        style="@style/Text.ValueMono"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="—" />
-
-                </LinearLayout>
-
-                <SeekBar
-                    android:id="@+id/sbVolume"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="4dp"
-                    android:max="15" />
-
-            </LinearLayout>
-
-            <!-- ══ SECCIÓN CONEXIÓN ══════════════════════════════════════════ -->
-            <LinearLayout
-                style="@style/Card"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="12dp">
-
-                <TextView
-                    style="@style/Text.Overline"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="@string/settings_section_connection" />
-
-                <!-- Selector de modo de conexión -->
-                <RadioGroup
-                    android:id="@+id/rgConnectionMode"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="8dp"
-                    android:orientation="vertical">
-
-                    <RadioButton
-                        android:id="@+id/rbModeOsc"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:text="@string/settings_mode_osc"
-                        android:textSize="14sp"
-                        android:textColor="@color/text_primary"
-                        android:checked="true" />
-
-                    <RadioButton
-                        android:id="@+id/rbModeBluetooth"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:text="@string/settings_mode_bt"
-                        android:textSize="14sp"
-                        android:textColor="@color/text_primary"
-                        android:layout_marginTop="2dp" />
-
-                </RadioGroup>
-
-                <!-- Detalles OSC (visibles solo en modo Mind Monitor) -->
-                <LinearLayout
-                    android:id="@+id/layoutOscDetails"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="10dp"
-                    android:orientation="vertical">
-
-                    <!-- IP del dispositivo -->
+                    <!-- ── Conexión ── -->
                     <LinearLayout
+                        style="@style/Card"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:orientation="horizontal"
-                        android:gravity="center_vertical">
+                        android:layout_marginBottom="14dp">
 
                         <TextView
-                            style="@style/Text.Label"
-                            android:layout_width="0dp"
+                            style="@style/Text.Overline"
+                            android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:text="@string/settings_label_device_ip" />
+                            android:gravity="center_vertical"
+                            android:drawablePadding="8dp"
+                            android:drawableStart="@drawable/ic_wifi"
+                            android:drawableTint="@color/primary"
+                            android:text="@string/settings_section_connection" />
 
-                        <TextView
-                            android:id="@+id/tvDeviceIp"
-                            style="@style/Text.ValueMono"
-                            android:layout_width="wrap_content"
+                        <RadioGroup
+                            android:id="@+id/rgConnectionMode"
+                            android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:textSize="15sp"
-                            android:textStyle="bold"
-                            android:textColor="@color/info"
-                            android:text="—" />
+                            android:layout_marginTop="10dp"
+                            android:orientation="vertical">
+
+                            <RadioButton
+                                android:id="@+id/rbModeOsc"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:text="@string/settings_mode_osc"
+                                android:textSize="14sp"
+                                android:textColor="@color/text_primary"
+                                android:checked="true" />
+
+                            <RadioButton
+                                android:id="@+id/rbModeBluetooth"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:text="@string/settings_mode_bt"
+                                android:textSize="14sp"
+                                android:textColor="@color/text_primary"
+                                android:layout_marginTop="2dp" />
+
+                        </RadioGroup>
+
+                        <!-- Detalles OSC -->
+                        <LinearLayout
+                            android:id="@+id/layoutOscDetails"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="10dp"
+                            android:orientation="vertical">
+
+                            <LinearLayout
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:orientation="horizontal"
+                                android:gravity="center_vertical">
+
+                                <TextView
+                                    style="@style/Text.Label"
+                                    android:layout_width="0dp"
+                                    android:layout_height="wrap_content"
+                                    android:layout_weight="1"
+                                    android:text="@string/settings_label_device_ip" />
+
+                                <TextView
+                                    android:id="@+id/tvDeviceIp"
+                                    style="@style/Text.ValueMono"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:textSize="15sp"
+                                    android:textStyle="bold"
+                                    android:textColor="@color/info"
+                                    android:text="—" />
+
+                            </LinearLayout>
+
+                            <LinearLayout
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="8dp"
+                                android:orientation="horizontal"
+                                android:gravity="center_vertical">
+
+                                <TextView
+                                    style="@style/Text.Label"
+                                    android:layout_width="0dp"
+                                    android:layout_height="wrap_content"
+                                    android:layout_weight="1"
+                                    android:text="@string/settings_label_osc_port" />
+
+                                <TextView
+                                    android:id="@+id/tvOscPort"
+                                    style="@style/Text.ValueMono"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:textSize="15sp"
+                                    android:textStyle="bold"
+                                    android:text="5000" />
+
+                            </LinearLayout>
+
+                        </LinearLayout>
+
+                        <!-- Nota BT -->
+                        <TextView
+                            android:id="@+id/tvBtNote"
+                            style="@style/Text.Caption"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="8dp"
+                            android:textSize="12sp"
+                            android:text="@string/settings_mode_bt_note"
+                            android:visibility="gone" />
+
+                        <!-- Dispositivo BT preferido -->
+                        <LinearLayout
+                            android:id="@+id/layoutBtPreferred"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="10dp"
+                            android:orientation="horizontal"
+                            android:gravity="center_vertical"
+                            android:visibility="gone">
+
+                            <LinearLayout
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:orientation="vertical">
+
+                                <TextView
+                                    style="@style/Text.Caption"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:textSize="12sp"
+                                    android:text="@string/bt_preferred_device" />
+
+                                <TextView
+                                    android:id="@+id/tvBtPreferredDevice"
+                                    style="@style/Text.ValueMono"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:textSize="14sp"
+                                    android:textStyle="bold"
+                                    android:textColor="@color/info"
+                                    android:text="—" />
+
+                            </LinearLayout>
+
+                            <Button
+                                android:id="@+id/btnBtScanDevices"
+                                style="@style/Button.Ghost"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="@string/bt_scan_devices"
+                                android:textColor="@color/info" />
+
+                        </LinearLayout>
 
                     </LinearLayout>
 
-                    <!-- Puerto OSC -->
+                    <!-- ── General (volumen) ── -->
                     <LinearLayout
+                        style="@style/Card"
                         android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="8dp"
-                        android:orientation="horizontal"
-                        android:gravity="center_vertical">
+                        android:layout_height="wrap_content">
 
                         <TextView
-                            style="@style/Text.Label"
-                            android:layout_width="0dp"
+                            style="@style/Text.Overline"
+                            android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:text="@string/settings_label_osc_port" />
+                            android:gravity="center_vertical"
+                            android:drawablePadding="8dp"
+                            android:drawableStart="@drawable/ic_sliders"
+                            android:drawableTint="@color/primary"
+                            android:text="@string/settings_section_general" />
 
-                        <TextView
-                            android:id="@+id/tvOscPort"
-                            style="@style/Text.ValueMono"
-                            android:layout_width="wrap_content"
+                        <LinearLayout
+                            android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:textSize="15sp"
-                            android:textStyle="bold"
-                            android:text="5000" />
+                            android:layout_marginTop="14dp"
+                            android:orientation="horizontal"
+                            android:gravity="center_vertical">
+
+                            <TextView
+                                style="@style/Text.Label"
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:text="@string/settings_label_volume" />
+
+                            <TextView
+                                android:id="@+id/tvVolumeValue"
+                                style="@style/Text.ValueMono"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="—" />
+
+                        </LinearLayout>
+
+                        <SeekBar
+                            android:id="@+id/sbVolume"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="4dp"
+                            android:max="15" />
 
                     </LinearLayout>
 
                 </LinearLayout>
 
-                <!-- Nota BT (visible solo en modo Bluetooth) -->
-                <TextView
-                    android:id="@+id/tvBtNote"
-                    style="@style/Text.Caption"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="8dp"
-                    android:textSize="12sp"
-                    android:text="@string/settings_mode_bt_note"
-                    android:visibility="gone" />
-
-                <!-- Dispositivo BT preferido (visible solo en modo Bluetooth) -->
+                <!-- ══ COLUMNA DERECHA ═════════════════════════════════════════ -->
                 <LinearLayout
-                    android:id="@+id/layoutBtPreferred"
-                    android:layout_width="match_parent"
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="10dp"
-                    android:orientation="horizontal"
-                    android:gravity="center_vertical"
-                    android:visibility="gone">
+                    android:layout_weight="1"
+                    android:orientation="vertical"
+                    android:layout_marginStart="10dp">
 
+                    <!-- ── Umbrales EEG ── -->
                     <LinearLayout
-                        android:layout_width="0dp"
+                        style="@style/Card"
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:orientation="vertical">
+                        android:layout_marginBottom="14dp">
+
+                        <TextView
+                            style="@style/Text.Overline"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:gravity="center_vertical"
+                            android:drawablePadding="8dp"
+                            android:drawableStart="@drawable/ic_brain"
+                            android:drawableTint="@color/primary"
+                            android:text="@string/settings_section_eeg" />
+
+                        <!-- Calibración por usuario -->
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/btnCalibrate"
+                            style="@style/Button.Tonal"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="12dp"
+                            android:text="@string/settings_calibrate"
+                            android:textSize="13sp"
+                            app:icon="@drawable/ic_mod_target"
+                            app:iconGravity="textStart"
+                            app:iconSize="18dp"
+                            app:iconTint="@color/primary_dark" />
 
                         <TextView
                             style="@style/Text.Caption"
-                            android:layout_width="wrap_content"
+                            android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:textSize="12sp"
-                            android:text="@string/bt_preferred_device" />
+                            android:layout_marginTop="4dp"
+                            android:text="@string/settings_calibrate_hint" />
 
-                        <TextView
-                            android:id="@+id/tvBtPreferredDevice"
-                            style="@style/Text.ValueMono"
-                            android:layout_width="wrap_content"
+                        <!-- ESTRÉS -->
+                        <LinearLayout
+                            android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:textSize="14sp"
-                            android:textStyle="bold"
-                            android:textColor="@color/info"
-                            android:text="—" />
+                            android:layout_marginTop="14dp"
+                            android:orientation="horizontal"
+                            android:gravity="center_vertical">
+
+                            <TextView
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:text="@string/settings_label_stress"
+                                android:textSize="13sp"
+                                android:textStyle="bold"
+                                android:textColor="@color/state_stress" />
+
+                            <TextView
+                                android:id="@+id/tvStressThresholdValue"
+                                style="@style/Text.ValueMono"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="0.22" />
+
+                        </LinearLayout>
+
+                        <SeekBar
+                            android:id="@+id/sbStressThreshold"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="4dp"
+                            android:max="100" />
+
+                        <!-- ATENCIÓN -->
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="12dp"
+                            android:orientation="horizontal"
+                            android:gravity="center_vertical">
+
+                            <TextView
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:text="@string/settings_label_attention"
+                                android:textSize="13sp"
+                                android:textStyle="bold"
+                                android:textColor="@color/state_attention" />
+
+                            <TextView
+                                android:id="@+id/tvAttentionThresholdValue"
+                                style="@style/Text.ValueMono"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="0.38" />
+
+                        </LinearLayout>
+
+                        <SeekBar
+                            android:id="@+id/sbAttentionThreshold"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="4dp"
+                            android:max="100" />
+
+                        <!-- CALMA -->
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="12dp"
+                            android:orientation="horizontal"
+                            android:gravity="center_vertical">
+
+                            <TextView
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:text="@string/settings_label_calm"
+                                android:textSize="13sp"
+                                android:textStyle="bold"
+                                android:textColor="@color/state_calm" />
+
+                            <TextView
+                                android:id="@+id/tvCalmThresholdValue"
+                                style="@style/Text.ValueMono"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="0.52" />
+
+                        </LinearLayout>
+
+                        <SeekBar
+                            android:id="@+id/sbCalmThreshold"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="4dp"
+                            android:max="100" />
 
                     </LinearLayout>
 
-                    <Button
-                        android:id="@+id/btnBtScanDevices"
-                        style="@style/Button.Ghost"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/bt_scan_devices"
-                        android:textColor="@color/info" />
+                    <!-- ── Detección BCI ── -->
+                    <LinearLayout
+                        style="@style/Card"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content">
+
+                        <TextView
+                            style="@style/Text.Overline"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:gravity="center_vertical"
+                            android:drawablePadding="8dp"
+                            android:drawableStart="@drawable/ic_eye"
+                            android:drawableTint="@color/primary"
+                            android:text="@string/settings_section_bci" />
+
+                        <!-- Debounce parpadeo -->
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="14dp"
+                            android:orientation="horizontal"
+                            android:gravity="center_vertical">
+
+                            <TextView
+                                style="@style/Text.Label"
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:textSize="13sp"
+                                android:text="@string/settings_label_blink_debounce" />
+
+                            <TextView
+                                android:id="@+id/tvBlinkDebounceValue"
+                                style="@style/Text.ValueMono"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="500 ms" />
+
+                        </LinearLayout>
+
+                        <SeekBar
+                            android:id="@+id/sbBlinkDebounce"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="4dp"
+                            android:max="18" />
+
+                        <!-- NOD -->
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="12dp"
+                            android:orientation="horizontal"
+                            android:gravity="center_vertical">
+
+                            <TextView
+                                style="@style/Text.Label"
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:textSize="13sp"
+                                android:text="@string/settings_label_nod" />
+
+                            <TextView
+                                android:id="@+id/tvNodThresholdValue"
+                                style="@style/Text.ValueMono"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="30 °/s" />
+
+                        </LinearLayout>
+
+                        <SeekBar
+                            android:id="@+id/sbNodThreshold"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="4dp"
+                            android:max="199" />
+
+                        <!-- SHAKE -->
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="12dp"
+                            android:orientation="horizontal"
+                            android:gravity="center_vertical">
+
+                            <TextView
+                                style="@style/Text.Label"
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:textSize="13sp"
+                                android:text="@string/settings_label_shake" />
+
+                            <TextView
+                                android:id="@+id/tvShakeThresholdValue"
+                                style="@style/Text.ValueMono"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="50 °/s" />
+
+                        </LinearLayout>
+
+                        <SeekBar
+                            android:id="@+id/sbShakeThreshold"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="4dp"
+                            android:max="199" />
+
+                        <!-- Micrófono anti-ruido -->
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="16dp"
+                            android:orientation="horizontal"
+                            android:gravity="center_vertical">
+
+                            <TextView
+                                style="@style/Text.Label"
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:textSize="13sp"
+                                android:text="@string/settings_label_noise_mic" />
+
+                            <androidx.appcompat.widget.SwitchCompat
+                                android:id="@+id/switchNoiseMic"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:checked="true" />
+
+                        </LinearLayout>
+
+                    </LinearLayout>
 
                 </LinearLayout>
 
             </LinearLayout>
 
-            <!-- ══ SECCIÓN EEG ═══════════════════════════════════════════════ -->
+            <!-- ── Acciones de pie ── -->
             <LinearLayout
-                style="@style/Card"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="12dp">
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:layout_marginTop="12dp">
 
-                <TextView
-                    style="@style/Text.Overline"
-                    android:layout_width="match_parent"
+                <Button
+                    android:id="@+id/btnSettingsReset"
+                    style="@style/Button.Ghost"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="@string/settings_section_eeg" />
+                    android:text="@string/settings_reset"
+                    android:textSize="12sp"
+                    android:textColor="@color/text_muted" />
 
-                <!-- Umbral ESTRÉS -->
-                <LinearLayout
-                    android:layout_width="match_parent"
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnExportLocations"
+                    style="@style/Button.Ghost"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="14dp"
-                    android:orientation="horizontal"
-                    android:gravity="center_vertical">
+                    android:text="@string/settings_export_locations"
+                    android:textSize="12sp"
+                    android:textColor="@color/info"
+                    app:icon="@drawable/ic_pin"
+                    app:iconGravity="textStart"
+                    app:iconSize="16dp"
+                    app:iconTint="@color/info" />
 
-                    <TextView
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:text="@string/settings_label_stress"
-                        android:textSize="13sp"
-                        android:textColor="@color/state_stress" />
+                <Space
+                    android:layout_width="0dp"
+                    android:layout_height="1dp"
+                    android:layout_weight="1" />
 
-                    <TextView
-                        android:id="@+id/tvStressThresholdValue"
-                        style="@style/Text.ValueMono"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="0.22" />
-
-                </LinearLayout>
-
-                <SeekBar
-                    android:id="@+id/sbStressThreshold"
-                    android:layout_width="match_parent"
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnDevMode"
+                    style="@style/Button.Ghost"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="4dp"
-                    android:max="100" />
-
-                <!-- Umbral ATENCIÓN -->
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="12dp"
-                    android:orientation="horizontal"
-                    android:gravity="center_vertical">
-
-                    <TextView
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:text="@string/settings_label_attention"
-                        android:textSize="13sp"
-                        android:textColor="@color/state_attention" />
-
-                    <TextView
-                        android:id="@+id/tvAttentionThresholdValue"
-                        style="@style/Text.ValueMono"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="0.38" />
-
-                </LinearLayout>
-
-                <SeekBar
-                    android:id="@+id/sbAttentionThreshold"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="4dp"
-                    android:max="100" />
-
-                <!-- Umbral CALMA -->
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="12dp"
-                    android:orientation="horizontal"
-                    android:gravity="center_vertical">
-
-                    <TextView
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:text="@string/settings_label_calm"
-                        android:textSize="13sp"
-                        android:textColor="@color/state_calm" />
-
-                    <TextView
-                        android:id="@+id/tvCalmThresholdValue"
-                        style="@style/Text.ValueMono"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="0.52" />
-
-                </LinearLayout>
-
-                <SeekBar
-                    android:id="@+id/sbCalmThreshold"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="4dp"
-                    android:max="100" />
+                    android:text="@string/btn_dev_mode"
+                    android:textSize="12sp"
+                    android:textColor="@color/text_muted"
+                    app:icon="@drawable/ic_gear"
+                    app:iconGravity="textStart"
+                    app:iconSize="16dp"
+                    app:iconTint="@color/text_muted" />
 
             </LinearLayout>
-
-            <!-- ══ SECCIÓN BCI ═══════════════════════════════════════════════ -->
-            <LinearLayout
-                style="@style/Card"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="12dp">
-
-                <TextView
-                    style="@style/Text.Overline"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="@string/settings_section_bci" />
-
-                <!-- Debounce parpadeo -->
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="14dp"
-                    android:orientation="horizontal"
-                    android:gravity="center_vertical">
-
-                    <TextView
-                        style="@style/Text.Label"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:textSize="13sp"
-                        android:text="@string/settings_label_blink_debounce" />
-
-                    <TextView
-                        android:id="@+id/tvBlinkDebounceValue"
-                        style="@style/Text.ValueMono"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="500 ms" />
-
-                </LinearLayout>
-
-                <SeekBar
-                    android:id="@+id/sbBlinkDebounce"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="4dp"
-                    android:max="18" />
-
-                <!-- Umbral NOD (asentir) -->
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="12dp"
-                    android:orientation="horizontal"
-                    android:gravity="center_vertical">
-
-                    <TextView
-                        style="@style/Text.Label"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:textSize="13sp"
-                        android:text="@string/settings_label_nod" />
-
-                    <TextView
-                        android:id="@+id/tvNodThresholdValue"
-                        style="@style/Text.ValueMono"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="30 °/s" />
-
-                </LinearLayout>
-
-                <SeekBar
-                    android:id="@+id/sbNodThreshold"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="4dp"
-                    android:max="199" />
-
-                <!-- Umbral SHAKE (negar) -->
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="12dp"
-                    android:orientation="horizontal"
-                    android:gravity="center_vertical">
-
-                    <TextView
-                        style="@style/Text.Label"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:textSize="13sp"
-                        android:text="@string/settings_label_shake" />
-
-                    <TextView
-                        android:id="@+id/tvShakeThresholdValue"
-                        style="@style/Text.ValueMono"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="50 °/s" />
-
-                </LinearLayout>
-
-                <SeekBar
-                    android:id="@+id/sbShakeThreshold"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="4dp"
-                    android:max="199" />
-
-                <!-- Micrófono silencio Morse -->
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="16dp"
-                    android:orientation="horizontal"
-                    android:gravity="center_vertical">
-
-                    <TextView
-                        style="@style/Text.Label"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:textSize="13sp"
-                        android:text="@string/settings_label_noise_mic" />
-
-                    <androidx.appcompat.widget.SwitchCompat
-                        android:id="@+id/switchNoiseMic"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:checked="true" />
-
-                </LinearLayout>
-
-            </LinearLayout>
-
-            <!-- ── Acciones de pie ───────────────────────────────────────────── -->
-            <Button
-                android:id="@+id/btnSettingsReset"
-                style="@style/Button.Ghost"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/settings_reset"
-                android:textSize="12sp"
-                android:textColor="@color/text_muted" />
-
-            <Button
-                android:id="@+id/btnExportLocations"
-                style="@style/Button.Ghost"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/settings_export_locations"
-                android:textSize="12sp"
-                android:textColor="@color/info" />
-
-            <Button
-                android:id="@+id/btnDevMode"
-                style="@style/Button.Ghost"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="@string/btn_dev_mode"
-                android:textSize="12sp"
-                android:textColor="@color/text_muted" />
-
-            <Space android:layout_width="match_parent" android:layout_height="16dp" />
 
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>
@@ -775,13 +894,17 @@
                     android:textStyle="bold"
                     android:textColor="@color/text_primary" />
 
-                <Button
+                <com.google.android.material.button.MaterialButton
                     android:id="@+id/btnDevBack"
                     style="@style/Button.Ghost"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/btn_dev_back"
-                    android:textColor="@color/primary" />
+                    android:textColor="@color/primary"
+                    app:icon="@drawable/ic_back"
+                    app:iconGravity="textStart"
+                    app:iconSize="18dp"
+                    app:iconTint="@color/primary" />
 
             </LinearLayout>
 
@@ -1248,7 +1371,7 @@
     </androidx.core.widget.NestedScrollView>
 
     <!-- ══════════════════════════════════════════════════════════════════════
-         ESCAPE ROOM OVERLAY  (gone por defecto, cubre pantalla entera)
+         ESCAPE ROOM OVERLAY (landscape, gone por defecto, cubre pantalla entera)
          ══════════════════════════════════════════════════════════════════════ -->
     <LinearLayout
         android:id="@+id/escapeRoomOverlay"
@@ -1263,56 +1386,74 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:background="@color/surface_tint">
+            android:background="@color/surface">
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
-                android:paddingStart="16dp"
-                android:paddingEnd="8dp"
-                android:paddingTop="10dp"
-                android:paddingBottom="4dp"
+                android:paddingStart="32dp"
+                android:paddingEnd="20dp"
+                android:paddingTop="14dp"
+                android:paddingBottom="10dp"
                 android:gravity="center_vertical">
 
                 <TextView
                     android:id="@+id/tvEscapeProgress"
-                    android:layout_width="0dp"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_weight="1"
                     android:text="Sala 1 / 4"
                     android:textColor="@color/primary"
                     android:textSize="13sp"
-                    android:fontFamily="monospace" />
+                    android:textStyle="bold"
+                    android:fontFamily="monospace"
+                    android:background="@drawable/bg_pill_soft"
+                    android:paddingStart="13dp"
+                    android:paddingEnd="13dp"
+                    android:paddingTop="6dp"
+                    android:paddingBottom="6dp"
+                    android:layout_marginEnd="12dp" />
 
-                <!-- Botón de rescate: oculto hasta que el jugador lleva
-                     30 s atascado en la sala (SKIP_OFFER_DELAY_MS) -->
-                <Button
+                <Space
+                    android:layout_width="0dp"
+                    android:layout_height="1dp"
+                    android:layout_weight="1" />
+
+                <!-- Botón de rescate: oculto hasta 30 s atascado (SKIP_OFFER_DELAY_MS) -->
+                <com.google.android.material.button.MaterialButton
                     android:id="@+id/btnEscapeSkip"
                     style="@style/Button.Ghost"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/escape_room_skip"
                     android:textColor="@color/state_attention"
-                    android:textSize="12sp"
+                    android:textSize="13sp"
                     android:minWidth="0dp"
                     android:minHeight="0dp"
                     android:paddingStart="8dp"
-                    android:paddingEnd="4dp"
+                    android:paddingEnd="8dp"
+                    app:icon="@drawable/ic_skip"
+                    app:iconGravity="textStart"
+                    app:iconSize="18dp"
+                    app:iconTint="@color/state_attention"
                     android:visibility="gone" />
 
-                <Button
+                <com.google.android.material.button.MaterialButton
                     android:id="@+id/btnEscapeExit"
                     style="@style/Button.Ghost"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/escape_room_exit"
                     android:textColor="@color/primary"
-                    android:textSize="13sp"
+                    android:textSize="14sp"
                     android:minWidth="0dp"
                     android:minHeight="0dp"
-                    android:paddingStart="4dp"
-                    android:paddingEnd="12dp" />
+                    android:paddingStart="8dp"
+                    android:paddingEnd="8dp"
+                    app:icon="@drawable/ic_close"
+                    app:iconGravity="textStart"
+                    app:iconSize="18dp"
+                    app:iconTint="@color/primary" />
             </LinearLayout>
 
             <!-- Barra de progreso de salas -->
@@ -1320,15 +1461,15 @@
                 android:id="@+id/progressEscapeRooms"
                 style="@style/Widget.AppCompat.ProgressBar.Horizontal"
                 android:layout_width="match_parent"
-                android:layout_height="6dp"
+                android:layout_height="7dp"
                 android:max="100"
                 android:progress="0"
                 android:progressTint="@color/primary"
-                android:progressBackgroundTint="@color/primary_light"
+                android:progressBackgroundTint="@color/surface_tint"
                 android:indeterminate="false" />
         </LinearLayout>
 
-        <!-- ── Contenido principal ── -->
+        <!-- ── Contenido principal en dos columnas ── -->
         <ScrollView
             android:id="@+id/gameScrollView"
             android:layout_width="match_parent"
@@ -1340,112 +1481,143 @@
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:paddingStart="24dp"
-                android:paddingEnd="24dp"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:paddingStart="44dp"
+                android:paddingEnd="44dp"
                 android:paddingTop="28dp"
-                android:paddingBottom="28dp">
+                android:paddingBottom="28dp"
+                android:baselineAligned="false">
 
-                <!-- Icono del tipo de módulo -->
-                <TextView
-                    android:id="@+id/tvEscapeModuleType"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text=""
-                    android:textSize="52sp"
-                    android:gravity="center"
-                    android:paddingBottom="12dp" />
-
-                <!-- Título de la sala -->
-                <TextView
-                    android:id="@+id/tvEscapeRoomName"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text=""
-                    android:textColor="@color/primary_dark"
-                    android:textSize="24sp"
-                    android:textStyle="bold"
-                    android:gravity="center"
-                    android:paddingBottom="20dp" />
-
-                <!-- Tarjeta de narración -->
+                <!-- Columna izquierda: contexto de la sala -->
                 <LinearLayout
-                    android:layout_width="match_parent"
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
+                    android:layout_weight="1"
                     android:orientation="vertical"
-                    android:background="@drawable/bg_game_card"
-                    android:elevation="2dp"
-                    android:padding="20dp"
-                    android:layout_marginBottom="20dp">
+                    android:layout_marginEnd="20dp">
 
-                    <TextView
-                        android:id="@+id/tvEscapeNarration"
+                    <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text=""
-                        android:textColor="@color/text_secondary"
-                        android:textSize="16sp"
-                        android:lineSpacingMultiplier="1.7"
-                        android:gravity="center" />
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical"
+                        android:layout_marginBottom="18dp">
+
+                        <ImageView
+                            android:id="@+id/tvEscapeModuleType"
+                            android:layout_width="80dp"
+                            android:layout_height="80dp"
+                            android:padding="18dp"
+                            android:scaleType="fitCenter"
+                            android:background="@drawable/bg_module_icon"
+                            app:tint="@color/primary"
+                            android:contentDescription="@null"
+                            android:layout_marginEnd="16dp" />
+
+                        <TextView
+                            android:id="@+id/tvEscapeRoomName"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text=""
+                            android:textColor="@color/heading"
+                            android:textSize="26sp"
+                            android:textStyle="bold" />
+
+                    </LinearLayout>
+
+                    <!-- Tarjeta de narración -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:background="@drawable/bg_game_card"
+                        android:elevation="2dp"
+                        android:padding="26dp">
+
+                        <TextView
+                            android:id="@+id/tvEscapeNarration"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text=""
+                            android:textColor="@color/text_secondary"
+                            android:textSize="17sp"
+                            android:lineSpacingMultiplier="1.7" />
+                    </LinearLayout>
+
                 </LinearLayout>
 
-                <!-- Tarjeta de pista de acción -->
+                <!-- Columna derecha: acción del jugador -->
                 <LinearLayout
-                    android:layout_width="match_parent"
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:background="@drawable/bg_game_hint"
-                    android:padding="16dp"
-                    android:layout_marginBottom="16dp">
+                    android:layout_weight="1"
+                    android:orientation="vertical">
 
-                    <TextView
-                        android:id="@+id/tvEscapeHint"
+                    <!-- Tarjeta de pista de acción -->
+                    <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:background="@drawable/bg_game_hint"
+                        android:padding="20dp"
+                        android:layout_marginBottom="16dp">
+
+                        <TextView
+                            android:id="@+id/tvEscapeHint"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text=""
+                            android:textColor="@color/info_dark"
+                            android:textSize="19sp"
+                            android:textStyle="bold"
+                            android:gravity="center" />
+                    </LinearLayout>
+
+                    <!-- Símbolos Morse en curso -->
+                    <TextView
+                        android:id="@+id/tvEscapeMorseSymbols"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="12dp"
                         android:text=""
-                        android:textColor="@color/info"
-                        android:textSize="18sp"
+                        android:fontFamily="monospace"
+                        android:textColor="@color/primary"
+                        android:textSize="34sp"
+                        android:gravity="center" />
+
+                    <!-- Botón de referencia (Morse / imagen personalizada) -->
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btnHintImage"
+                        style="@style/Button.Tonal"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center_horizontal"
+                        android:layout_marginBottom="12dp"
+                        android:text="Ver referencia"
+                        android:textColor="@color/primary_dark"
+                        android:textSize="14sp"
+                        app:icon="@drawable/ic_doc"
+                        app:iconGravity="textStart"
+                        app:iconSize="18dp"
+                        app:iconTint="@color/primary_dark"
+                        android:visibility="gone" />
+
+                    <!-- Feedback de éxito / fallo -->
+                    <TextView
+                        android:id="@+id/tvEscapeFeedback"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="4dp"
+                        android:text=""
+                        android:textSize="17sp"
                         android:textStyle="bold"
-                        android:gravity="center" />
+                        android:gravity="center"
+                        android:lineSpacingMultiplier="1.4"
+                        android:padding="16dp" />
+
                 </LinearLayout>
-
-                <!-- Símbolos Morse en curso -->
-                <TextView
-                    android:id="@+id/tvEscapeMorseSymbols"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginBottom="12dp"
-                    android:text=""
-                    android:fontFamily="monospace"
-                    android:textColor="@color/info"
-                    android:textSize="30sp"
-                    android:gravity="center" />
-
-                <!-- Botón de referencia (Morse / imagen personalizada) -->
-                <Button
-                    android:id="@+id/btnHintImage"
-                    style="@style/Button.Ghost"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center_horizontal"
-                    android:layout_marginBottom="12dp"
-                    android:text="📋 Ver referencia"
-                    android:textColor="@color/primary"
-                    android:textSize="14sp"
-                    android:visibility="gone" />
-
-                <!-- Feedback de éxito / fallo -->
-                <TextView
-                    android:id="@+id/tvEscapeFeedback"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="8dp"
-                    android:text=""
-                    android:textSize="17sp"
-                    android:textStyle="bold"
-                    android:gravity="center"
-                    android:lineSpacingMultiplier="1.4"
-                    android:padding="14dp" />
 
             </LinearLayout>
         </ScrollView>
@@ -1483,10 +1655,7 @@
 
     </FrameLayout>
 
-    <!-- ══ Reproductor de vídeo introductorio ══════════════════════════════════
-         Se muestra encima del overlay de escape room durante el vídeo de sala.
-         Oculto por defecto; EscapeRoomEngine lo activa vía onPlayVideo callback.
-         ══════════════════════════════════════════════════════════════════════ -->
+    <!-- ══ Reproductor de vídeo introductorio ══════════════════════════════════ -->
     <FrameLayout
         android:id="@+id/videoPlayerContainer"
         android:layout_width="match_parent"
@@ -1532,10 +1701,10 @@
             android:layout_height="wrap_content"
             android:orientation="horizontal"
             android:gravity="center_vertical"
-            android:paddingStart="20dp"
-            android:paddingEnd="8dp"
-            android:paddingTop="10dp"
-            android:paddingBottom="10dp"
+            android:paddingStart="24dp"
+            android:paddingEnd="12dp"
+            android:paddingTop="12dp"
+            android:paddingBottom="12dp"
             android:background="@drawable/bg_header">
 
             <TextView
@@ -1543,17 +1712,21 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:text="@string/level_editor_title"
-                android:textSize="18sp"
+                android:textSize="19sp"
                 android:textStyle="bold"
                 android:textColor="@color/text_on_primary" />
 
-            <Button
+            <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnLevelEditorBack"
                 style="@style/Button.Ghost"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/level_editor_back"
-                android:textColor="#E8DFFB" />
+                android:textColor="@color/text_on_primary_soft"
+                app:icon="@drawable/ic_back"
+                app:iconGravity="textStart"
+                app:iconSize="18dp"
+                app:iconTint="@color/text_on_primary_soft" />
 
         </LinearLayout>
 
@@ -1569,7 +1742,10 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:orientation="vertical"
-                android:padding="16dp"
+                android:paddingStart="40dp"
+                android:paddingEnd="40dp"
+                android:paddingTop="16dp"
+                android:paddingBottom="16dp"
                 android:visibility="visible">
 
                 <TextView
@@ -1639,7 +1815,10 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:orientation="vertical"
-                android:padding="16dp"
+                android:paddingStart="40dp"
+                android:paddingEnd="40dp"
+                android:paddingTop="16dp"
+                android:paddingBottom="16dp"
                 android:visibility="gone">
 
                 <!-- Nombre del nivel -->
@@ -1661,25 +1840,33 @@
                     android:orientation="horizontal"
                     android:layout_marginBottom="10dp">
 
-                    <Button
+                    <com.google.android.material.button.MaterialButton
                         android:id="@+id/btnIntroVideo"
                         style="@style/Button.Ghost"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:text="🎬 Entrada"
+                        android:text="Entrada"
                         android:textColor="@color/primary"
-                        android:textSize="12sp" />
+                        android:textSize="12sp"
+                        app:icon="@drawable/ic_film"
+                        app:iconGravity="textStart"
+                        app:iconSize="16dp"
+                        app:iconTint="@color/primary" />
 
-                    <Button
+                    <com.google.android.material.button.MaterialButton
                         android:id="@+id/btnTransitionVideo"
                         style="@style/Button.Ghost"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:text="🎬 Transición"
+                        android:text="Transición"
                         android:textColor="@color/primary"
-                        android:textSize="12sp" />
+                        android:textSize="12sp"
+                        app:icon="@drawable/ic_film"
+                        app:iconGravity="textStart"
+                        app:iconSize="16dp"
+                        app:iconTint="@color/primary" />
 
                 </LinearLayout>
 
@@ -1736,6 +1923,5 @@
         </FrameLayout>
 
     </LinearLayout>
-
 
 </FrameLayout>

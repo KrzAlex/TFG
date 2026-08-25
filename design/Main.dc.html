@@ -1,0 +1,98 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&family=Inter:wght@400;500;600&display=swap">
+  <style>
+    body { margin:0; font-family:'Inter', system-ui, sans-serif; }
+    a { color:#6C4BF0; } a:hover { color:#4A2CC7; }
+    .display { font-family:'Sora', system-ui, sans-serif; }
+    .glass { background:rgba(255,255,255,0.14); border:1px solid rgba(255,255,255,0.22); backdrop-filter:blur(6px); }
+    .btn { border:none; font-family:'Sora',sans-serif; font-weight:600; cursor:pointer; }
+  </style>
+</helmet>
+<div style="width:1280px;height:800px;background:#F5F3FC;display:flex;flex-direction:column;overflow:hidden;color:#1B1730;">
+
+  <!-- ── Header full-width ── -->
+  <div style="position:relative;padding:20px 40px;border-radius:0 0 34px 34px;overflow:hidden;
+              background:linear-gradient(120deg,#4A2CC7 0%,#6C4BF0 55%,#8B5CF6 100%);
+              display:flex;align-items:center;gap:18px;">
+    <div style="position:absolute;top:-120px;right:120px;width:320px;height:320px;border-radius:50%;
+                background:radial-gradient(circle,rgba(167,139,250,0.5),transparent 70%);"></div>
+    <div class="glass" style="width:60px;height:60px;border-radius:19px;display:flex;align-items:center;justify-content:center;position:relative;">
+      <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M9.5 3.5A3 3 0 0 0 6.7 8 3 3 0 0 0 5 13a3 3 0 0 0 2 4 2.6 2.6 0 0 0 5 .3V4.5a2.5 2.5 0 0 0-2.5-1z"/>
+        <path d="M14.5 3.5A3 3 0 0 1 17.3 8 3 3 0 0 1 19 13a3 3 0 0 1-2 4 2.6 2.6 0 0 1-5 .3"/>
+        <path d="M9 8.5h1.5M9 12h1M14 8.5h1M13.5 12H15"/>
+      </svg>
+    </div>
+    <div style="position:relative;flex:1;">
+      <div class="display" style="font-size:29px;font-weight:800;color:#fff;line-height:1.05;letter-spacing:-0.5px;">Temi EEG</div>
+      <div style="font-size:12px;letter-spacing:0.16em;text-transform:uppercase;color:#CDBEFA;font-weight:600;margin-top:2px;">BCI · Escape Room</div>
+    </div>
+    <!-- status chips -->
+    <div style="position:relative;display:flex;align-items:center;gap:10px;">
+      <span style="display:flex;align-items:center;gap:7px;font-size:13px;color:#E7DEFF;font-weight:500;margin-right:4px;">
+        <span style="width:8px;height:8px;border-radius:50%;background:#F79009;box-shadow:0 0 8px #F79009;"></span>MUSE desconectado
+      </span>
+      <span class="glass" style="border-radius:999px;padding:7px 14px;font-size:12.5px;font-weight:600;color:#fff;display:flex;align-items:center;gap:6px;">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#6EE7B7" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12h4l3 8 6-16 3 8h4"/></svg>Señal
+      </span>
+      <span class="glass" style="border-radius:999px;padding:7px 14px;font-size:12.5px;font-weight:600;color:#fff;display:flex;align-items:center;gap:6px;">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="17" height="10" rx="2.5"/><path d="M22 10v4"/></svg>82%
+      </span>
+    </div>
+  </div>
+
+  <!-- ── Cuerpo en dos columnas ── -->
+  <div style="flex:1;display:flex;padding:36px 44px;gap:44px;align-items:center;">
+
+    <!-- Columna izq: orbe de estado -->
+    <div style="flex:1.15;display:flex;flex-direction:column;align-items:center;justify-content:center;">
+      <div style="font-size:12px;font-weight:700;letter-spacing:0.18em;text-transform:uppercase;color:#8B7FB0;margin-bottom:26px;">Estado mental</div>
+      <div style="position:relative;width:300px;height:300px;display:flex;align-items:center;justify-content:center;">
+        <div style="position:absolute;inset:0;border-radius:50%;background:radial-gradient(circle,rgba(18,183,106,0.22),transparent 68%);"></div>
+        <div style="position:absolute;inset:30px;border-radius:50%;border:2px solid rgba(18,183,106,0.28);"></div>
+        <div style="position:absolute;inset:54px;border-radius:50%;
+                    background:linear-gradient(160deg,#12B76A,#0E9E5C);
+                    box-shadow:0 26px 55px -16px rgba(18,183,106,0.6), inset 0 2px 14px rgba(255,255,255,0.35);
+                    display:flex;flex-direction:column;align-items:center;justify-content:center;">
+          <span class="display" style="font-size:46px;font-weight:800;color:#fff;letter-spacing:-0.5px;">CALMA</span>
+          <span style="font-size:14px;color:rgba(255,255,255,0.88);font-weight:500;margin-top:4px;">mente estable</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Columna der: acciones -->
+    <div style="flex:1;display:flex;flex-direction:column;gap:16px;max-width:520px;">
+      <div class="display" style="font-size:22px;font-weight:700;color:#2A1F52;margin-bottom:2px;">Empieza tu aventura mental</div>
+      <button class="btn" style="height:78px;border-radius:22px;color:#fff;font-size:21px;
+              background:linear-gradient(135deg,#6C4BF0,#8B5CF6);
+              box-shadow:0 18px 34px -12px rgba(108,75,240,0.6);display:flex;align-items:center;justify-content:center;gap:12px;">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="#fff"><path d="M8 5v14l11-7z"/></svg>Jugar Escape Room
+      </button>
+      <div style="display:flex;gap:14px;">
+        <button class="btn" style="flex:1;height:64px;border-radius:18px;background:#EEE8FE;color:#4A2CC7;font-size:16px;display:flex;align-items:center;justify-content:center;gap:9px;">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#6C4BF0" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>Crear nivel
+        </button>
+        <button class="btn" style="flex:1;height:64px;border-radius:18px;background:#EEE8FE;color:#4A2CC7;font-size:16px;display:flex;align-items:center;justify-content:center;gap:9px;">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#6C4BF0" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 8v4l3 2"/></svg>Iniciar sesión
+        </button>
+      </div>
+      <button class="btn" style="height:50px;border-radius:14px;background:transparent;color:#948CA9;font-size:14px;display:flex;align-items:center;justify-content:center;gap:8px;">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#948CA9" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.6 1.6 0 0 0 .3 1.8 2 2 0 1 1-2.8 2.8 1.6 1.6 0 0 0-2.7 1.1 2 2 0 1 1-4 0 1.6 1.6 0 0 0-2.7-1.1 1.6 1.6 0 0 0-1.8.3 2 2 0 1 1-2.8-2.8 1.6 1.6 0 0 0 .3-1.8 1.6 1.6 0 0 0-1.5-1 2 2 0 1 1 0-4 1.6 1.6 0 0 0 1.5-1 1.6 1.6 0 0 0-.3-1.8 2 2 0 1 1 2.8-2.8 1.6 1.6 0 0 0 1.8.3 1.6 1.6 0 0 0 1-1.5 2 2 0 1 1 4 0 1.6 1.6 0 0 0 1 1.5 1.6 1.6 0 0 0 1.8-.3 2 2 0 1 1 2.8 2.8 1.6 1.6 0 0 0-.3 1.8 1.6 1.6 0 0 0 1.5 1 2 2 0 1 1 0 4 1.6 1.6 0 0 0-1.5 1z"/></svg>Modo configuración
+      </button>
+    </div>
+  </div>
+</div>
+</x-dc>
+<script data-dc-script data-props='{}'>
+class Component extends DCLogic { renderVals() { return {}; } }
+</script>
+</body>
+</html>

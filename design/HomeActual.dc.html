@@ -1,0 +1,56 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <style>
+    body { margin: 0; font-family: 'Roboto', system-ui, sans-serif; }
+    a { color: #1565C0; } a:hover { color: #0D47A1; }
+    .chip { background:#fff; border-radius:999px; padding:4px 12px; font-size:12px; font-weight:700; }
+    .card { background:#fff; border:1px solid #E6E1F2; border-radius:18px; }
+    .btn { border:none; border-radius:14px; font-family:inherit; font-weight:600; }
+  </style>
+</helmet>
+<div style="width:390px;height:844px;background:#F6F4FB;display:flex;flex-direction:column;overflow:hidden;color:#26223A;">
+  <!-- Header -->
+  <div style="background:linear-gradient(45deg,#4527A0,#7E57C2);border-radius:0 0 24px 24px;padding:18px 24px 22px;">
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:18px;">
+      <span style="flex:1;font-size:12px;color:#E8DFFB;">● MUSE desconectado</span>
+      <span class="chip" style="color:#43A047;">Señal OK</span>
+      <span class="chip" style="color:#4527A0;">🔋 82%</span>
+    </div>
+    <div style="display:flex;align-items:center;gap:14px;">
+      <span style="font-size:42px;">🧠</span>
+      <div>
+        <div style="font-size:26px;font-weight:700;color:#fff;line-height:1.1;">Temi EEG</div>
+        <div style="font-size:13px;letter-spacing:0.04em;color:#D5C8F5;">BCI · Escape Room</div>
+      </div>
+    </div>
+  </div>
+  <!-- Estado mental -->
+  <div style="flex:1;display:flex;align-items:center;justify-content:center;padding:0 24px;">
+    <div class="card" style="width:100%;padding:30px;text-align:center;">
+      <div style="font-size:12px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:#5E35B1;margin-bottom:10px;">Estado mental</div>
+      <div style="font-size:56px;font-weight:700;color:#43A047;">CALMA</div>
+    </div>
+  </div>
+  <!-- Botones -->
+  <div style="padding:0 24px 20px;display:flex;flex-direction:column;gap:10px;">
+    <button class="btn" style="height:64px;background:#5E35B1;color:#fff;font-size:18px;">Jugar Escape Room</button>
+    <div style="display:flex;gap:10px;">
+      <button class="btn" style="flex:1;height:48px;background:#EDE7F6;color:#4527A0;font-size:14px;">Crear nivel</button>
+      <button class="btn" style="flex:1;height:48px;background:#EDE7F6;color:#4527A0;font-size:14px;">Iniciar sesión</button>
+    </div>
+    <button class="btn" style="height:40px;background:transparent;color:#9A93AC;font-size:12px;">Modo configuración</button>
+  </div>
+</div>
+</x-dc>
+<script data-dc-script data-props='{}'>
+class Component extends DCLogic { renderVals() { return {}; } }
+</script>
+</body>
+</html>

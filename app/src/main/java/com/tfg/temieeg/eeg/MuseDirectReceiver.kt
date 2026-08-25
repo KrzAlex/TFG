@@ -376,16 +376,21 @@ class MuseDirectReceiver(private val context: Context) : MuseReceiver {
      * Devuelve null si todos son NaN o no finitos.
      */
     private fun eegMean(p: MuseDataPacket): Float? {
-        val vals = listOf(
-            p.getEegChannelValue(Eeg.EEG1),
-            p.getEegChannelValue(Eeg.EEG2),
-            p.getEegChannelValue(Eeg.EEG3),
-            p.getEegChannelValue(Eeg.EEG4)
-        ).filter { it.isFinite() }
-        return if (vals.isEmpty()) null else vals.average().toFloat()
+        // Sin listOf()+filter(): se llama por cada paquete EEG de LibMuse, y esas
+        // dos listas intermedias (con boxing de Double) eran basura pura.
+        var sum = 0.0
+        var n = 0
+        for (ch in EEG_CHANNELS) {
+            val v = p.getEegChannelValue(ch)
+            if (v.isFinite()) { sum += v; n++ }
+        }
+        return if (n == 0) null else (sum / n).toFloat()
     }
 
     companion object {
+        /** Canales del MUSE, en un array reutilizable (evita crear la lista por paquete). */
+        private val EEG_CHANNELS = arrayOf(Eeg.EEG1, Eeg.EEG2, Eeg.EEG3, Eeg.EEG4)
+
         private const val TAG                = "MuseDirectReceiver"
         private const val CONNECT_TIMEOUT_MS = 10_000L
         const val PREF_DEVICE_NAME           = "preferred_muse_device"

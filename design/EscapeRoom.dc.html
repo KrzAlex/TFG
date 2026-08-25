@@ -1,0 +1,102 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Sora:wght@600;700;800&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@600;700&display=swap">
+  <style>
+    body { margin:0; font-family:'Inter', system-ui, sans-serif; }
+    a { color:#6C4BF0; } a:hover { color:#4A2CC7; }
+    .display { font-family:'Sora', system-ui, sans-serif; }
+    .mono { font-family:'JetBrains Mono', monospace; }
+    .btn { border:none; font-family:'Sora',sans-serif; font-weight:600; cursor:pointer; }
+  </style>
+</helmet>
+<div style="width:1280px;height:800px;background:#F5F3FC;display:flex;flex-direction:column;overflow:hidden;color:#1B1730;">
+
+  <!-- ── Barra de progreso ── -->
+  <div style="background:#fff;border-bottom:1px solid #E7E1F6;padding:16px 34px 0;">
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:14px;">
+      <span class="mono" style="font-size:13px;font-weight:700;color:#6C4BF0;background:#EEE8FE;padding:6px 13px;border-radius:9px;">SALA 2 / 4</span>
+      <span style="font-size:15px;color:#5C5473;font-weight:500;flex:1;">El santuario del silencio</span>
+      <button class="btn" style="background:#FFF4E5;color:#F79009;font-size:13px;padding:9px 16px;border-radius:11px;">Saltar sala</button>
+      <button class="btn" style="background:transparent;color:#6C4BF0;font-size:14px;padding:9px 12px;">Salir</button>
+    </div>
+    <div style="display:flex;gap:6px;padding-bottom:16px;">
+      <div style="flex:1;height:7px;border-radius:4px;background:#12B76A;"></div>
+      <div style="flex:1;height:7px;border-radius:4px;background:linear-gradient(90deg,#6C4BF0 55%,#E7E1F6 55%);"></div>
+      <div style="flex:1;height:7px;border-radius:4px;background:#E7E1F6;"></div>
+      <div style="flex:1;height:7px;border-radius:4px;background:#E7E1F6;"></div>
+    </div>
+  </div>
+
+  <!-- ── Cuerpo en dos columnas ── -->
+  <div style="flex:1;display:flex;padding:38px 44px;gap:40px;overflow:hidden;">
+
+    <!-- Izq: contexto -->
+    <div style="flex:1;display:flex;flex-direction:column;">
+      <div style="display:flex;align-items:center;gap:18px;margin-bottom:24px;">
+        <div style="width:88px;height:88px;border-radius:26px;display:flex;align-items:center;justify-content:center;flex-shrink:0;
+                    background:linear-gradient(150deg,#EEE8FE,#DCD2FB);box-shadow:0 12px 26px -14px rgba(108,75,240,0.5);">
+          <svg width="46" height="46" viewBox="0 0 24 24" fill="#6C4BF0"><circle cx="5" cy="12" r="2.2"/><rect x="9.5" y="10.5" width="6" height="3" rx="1.5"/><rect x="18" y="10.5" width="4" height="3" rx="1.5"/></svg>
+        </div>
+        <div class="display" style="font-size:30px;font-weight:800;color:#2A1F52;letter-spacing:-0.5px;line-height:1.1;">Descifra el<br>código Morse</div>
+      </div>
+      <div style="background:#fff;border:1px solid #E7E1F6;border-radius:24px;padding:30px;flex:1;
+                  box-shadow:0 10px 34px -20px rgba(74,44,199,0.35);display:flex;align-items:center;">
+        <p style="margin:0;font-size:19px;line-height:1.85;color:#5C5473;">
+          Las paredes susurran en destellos de luz. Para abrir la cerradura debes responder
+          con tu mente: parpadea el mensaje en clave — <b style="color:#2A1F52;">tres puntos</b>,
+          una breve pausa, y luego <b style="color:#2A1F52;">una raya larga</b>.
+        </p>
+      </div>
+    </div>
+
+    <!-- Der: acción -->
+    <div style="flex:1;display:flex;flex-direction:column;gap:22px;">
+      <!-- Pista -->
+      <div style="border-radius:22px;padding:24px;display:flex;align-items:center;gap:18px;
+                  background:linear-gradient(135deg,#EAF2FF,#DDEBFF);border:1px solid #C7DDFF;">
+        <div style="width:52px;height:52px;border-radius:16px;background:#3B82F6;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/></svg>
+        </div>
+        <div>
+          <div style="font-size:12px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:#5B87D6;">Tu acción</div>
+          <div style="font-size:21px;font-weight:800;color:#1E4C9A;">Parpadea la letra “S”</div>
+        </div>
+      </div>
+
+      <!-- Símbolos Morse -->
+      <div style="background:#fff;border:1px solid #E7E1F6;border-radius:22px;padding:28px;text-align:center;">
+        <div style="font-size:12px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:#8B7FB0;margin-bottom:18px;">Progreso Morse</div>
+        <div style="display:flex;justify-content:center;gap:20px;">
+          <span style="width:30px;height:30px;border-radius:50%;background:#6C4BF0;box-shadow:0 0 18px rgba(108,75,240,0.6);"></span>
+          <span style="width:30px;height:30px;border-radius:50%;background:#6C4BF0;box-shadow:0 0 18px rgba(108,75,240,0.6);"></span>
+          <span style="width:30px;height:30px;border-radius:50%;border:2px dashed #B9AEE8;background:transparent;"></span>
+        </div>
+      </div>
+
+      <!-- Feedback -->
+      <div style="border-radius:20px;padding:20px;text-align:center;
+                  background:linear-gradient(135deg,#E7F9F0,#D6F5E6);border:1px solid #A7E9CB;">
+        <span style="font-size:18px;font-weight:700;color:#0E8A50;">✓ ¡Dos de tres! Casi lo tienes.</span>
+      </div>
+
+      <div style="display:flex;justify-content:center;margin-top:auto;">
+        <button class="btn" style="background:#fff;border:1px solid #E7E1F6;color:#6C4BF0;font-size:15px;padding:14px 24px;border-radius:14px;display:flex;align-items:center;gap:9px;">
+          <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#6C4BF0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="3" width="16" height="18" rx="2"/><path d="M8 8h8M8 12h8M8 16h5"/></svg>Ver referencia Morse
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+</x-dc>
+<script data-dc-script data-props='{}'>
+class Component extends DCLogic { renderVals() { return {}; } }
+</script>
+</body>
+</html>

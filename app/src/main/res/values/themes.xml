@@ -10,6 +10,7 @@
         <item name="colorSecondary">@color/primary</item>
         <item name="colorSecondaryVariant">@color/primary_dark</item>
         <item name="colorAccent">@color/primary</item>
+        <item name="colorControlActivated">@color/primary</item>
         <item name="android:colorBackground">@color/background</item>
         <item name="android:windowBackground">@color/background</item>
         <item name="android:statusBarColor" tools:targetApi="l">@color/primary_dark</item>
@@ -19,12 +20,20 @@
 
     <!-- ── Tipografía ─────────────────────────────────────────────────────── -->
 
+    <!-- Título grande de pantalla / marca -->
+    <style name="Text.Display" parent="">
+        <item name="android:fontFamily">sans-serif</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:textColor">@color/heading</item>
+        <item name="android:letterSpacing">-0.01</item>
+    </style>
+
     <!-- Cabecera de sección: MAYÚSCULAS pequeñas en color de marca -->
     <style name="Text.Overline" parent="">
         <item name="android:textSize">12sp</item>
         <item name="android:textStyle">bold</item>
         <item name="android:textColor">@color/primary</item>
-        <item name="android:letterSpacing">0.08</item>
+        <item name="android:letterSpacing">0.12</item>
         <item name="android:textAllCaps">true</item>
     </style>
 
@@ -49,20 +58,25 @@
 
     <!-- ── Botones ────────────────────────────────────────────────────────── -->
 
-    <!-- Acción principal: relleno de marca -->
+    <!-- Acción principal: relleno de marca, esquinas amplias -->
     <style name="Button.Primary" parent="Widget.MaterialComponents.Button">
         <item name="backgroundTint">@color/primary</item>
         <item name="android:textColor">@color/text_on_primary</item>
-        <item name="cornerRadius">14dp</item>
-        <item name="android:textSize">15sp</item>
+        <item name="cornerRadius">20dp</item>
+        <item name="android:textSize">16sp</item>
+        <item name="android:textAllCaps">false</item>
+        <item name="android:letterSpacing">0</item>
+        <item name="elevation">6dp</item>
     </style>
 
     <!-- Acción secundaria: tono suave de marca -->
     <style name="Button.Tonal" parent="Widget.MaterialComponents.Button">
         <item name="backgroundTint">@color/surface_tint</item>
         <item name="android:textColor">@color/primary_dark</item>
-        <item name="cornerRadius">14dp</item>
+        <item name="cornerRadius">16dp</item>
         <item name="android:textSize">14sp</item>
+        <item name="android:textAllCaps">false</item>
+        <item name="android:letterSpacing">0</item>
         <item name="android:stateListAnimator">@null</item>
     </style>
 
@@ -70,6 +84,8 @@
     <style name="Button.Ghost" parent="Widget.MaterialComponents.Button.TextButton">
         <item name="android:textColor">@color/text_secondary</item>
         <item name="android:textSize">13sp</item>
+        <item name="android:textAllCaps">false</item>
+        <item name="android:letterSpacing">0</item>
     </style>
 
     <!-- ── Contenedores ───────────────────────────────────────────────────── -->
@@ -77,8 +93,23 @@
     <!-- Tarjeta blanca redondeada con borde sutil -->
     <style name="Card">
         <item name="android:background">@drawable/bg_card</item>
-        <item name="android:padding">16dp</item>
+        <item name="android:padding">18dp</item>
         <item name="android:orientation">vertical</item>
+        <item name="android:elevation">1dp</item>
+    </style>
+
+    <!-- ── Diálogos (popups) ──────────────────────────────────────────────── -->
+
+    <style name="ShapeAppearance.TemiEeg.Dialog" parent="">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSize">26dp</item>
+    </style>
+
+    <style name="ThemeOverlay.TemiEeg.Dialog" parent="ThemeOverlay.MaterialComponents.MaterialAlertDialog">
+        <item name="shapeAppearanceOverlay">@style/ShapeAppearance.TemiEeg.Dialog</item>
+        <item name="colorPrimary">@color/primary</item>
+        <item name="colorSurface">@color/surface</item>
+        <item name="android:colorBackground">@color/surface</item>
     </style>
 
     <!-- Separador horizontal fino -->

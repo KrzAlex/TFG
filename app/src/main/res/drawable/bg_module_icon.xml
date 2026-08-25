@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Contenedor redondeado del icono de tipo de módulo (escape room) -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="rectangle">
+    <gradient
+        android:angle="135"
+        android:startColor="@color/surface_tint"
+        android:endColor="#DCD2FB" />
+    <corners android:radius="26dp" />
+</shape>

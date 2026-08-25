@@ -56,37 +56,43 @@
     <string name="shake_indicator">❌ Negar</string>
 
     <!-- Configuración -->
-    <string name="btn_settings_mode">⚙ Configuración</string>
+    <string name="btn_settings_mode">Configuración</string>
     <string name="btn_settings_back">← Volver</string>
     <string name="settings_title">Configuración</string>
-    <string name="settings_section_general">🔊 General</string>
+    <string name="settings_section_general">General</string>
     <string name="settings_label_volume">Volumen del sistema</string>
-    <string name="settings_section_connection">📡 Conexión</string>
-    <string name="settings_mode_osc">📶  Mind Monitor (OSC / WiFi)</string>
-    <string name="settings_mode_bt">🔵  MUSE Directo (Bluetooth)</string>
+    <string name="settings_section_connection">Conexión</string>
+    <string name="settings_mode_osc">Mind Monitor (OSC / WiFi)</string>
+    <string name="settings_mode_bt">MUSE Directo (Bluetooth)</string>
     <string name="settings_mode_bt_note">Requiere libmuse_android.aar en app/libs/. El MUSE 2 se conecta directamente sin Mind Monitor.</string>
     <string name="settings_label_device_ip">IP de este dispositivo</string>
     <string name="settings_label_osc_port">Puerto OSC</string>
-    <string name="settings_section_eeg">🧠 Sensibilidad EEG</string>
+    <string name="settings_section_eeg">Sensibilidad EEG</string>
+    <string name="settings_calibrate">Calibrar en reposo</string>
+    <string name="settings_calibrate_hint">Mide tu línea base personal (necesita el MUSE conectado).</string>
+    <string name="settings_calibrating">Midiendo… %1$d s — relájate y mira al frente</string>
+    <string name="settings_calibrate_done">Calibrado ✓  estrés&lt;%1$.2f · atención&gt;%2$.2f · calma&gt;%3$.2f  (%4$d muestras)</string>
+    <string name="settings_calibrate_fail">Calibración cancelada: sin señal EEG suficiente. ¿MUSE conectado?</string>
+    <string name="tutorial_ok">¡Entendido, a jugar!</string>
     <string name="settings_label_stress">Umbral ESTRÉS  (mellow &lt;)</string>
     <string name="settings_label_attention">Umbral ATENCIÓN  (concentración &gt;)</string>
     <string name="settings_label_calm">Umbral CALMA  (mellow &gt;)</string>
-    <string name="settings_section_bci">👁 Detección BCI</string>
+    <string name="settings_section_bci">Detección BCI</string>
     <string name="settings_label_blink_debounce">Debounce parpadeo</string>
     <string name="settings_label_nod">✅ Umbral asentir — NOD  (gyroY, °/s)</string>
     <string name="settings_label_shake">❌ Umbral negar — SHAKE  (gyroZ, °/s)</string>
     <string name="settings_label_noise_mic">Micrófono — silencio en sala Morse</string>
     <string name="settings_reset">Restablecer por defecto</string>
-    <string name="settings_export_locations">📍 Exportar ubicaciones del mapa</string>
+    <string name="settings_export_locations">Exportar ubicaciones del mapa</string>
 
     <!-- Dev mode -->
-    <string name="btn_dev_mode">⚙ Desarrollador</string>
+    <string name="btn_dev_mode">Desarrollador</string>
     <string name="btn_dev_back">← Volver</string>
 
     <!-- Escape Room -->
-    <string name="btn_play_escape_room">🚪 Jugar Escape Room</string>
-    <string name="escape_room_exit">✕ Salir</string>
-    <string name="escape_room_skip">⏭ Saltar sala</string>
+    <string name="btn_play_escape_room">Jugar Escape Room</string>
+    <string name="escape_room_exit">Salir</string>
+    <string name="escape_room_skip">Saltar sala</string>
     <string name="escape_room_room1">La Puerta de la Calma</string>
     <string name="escape_room_room2">El Código Secreto</string>
     <string name="escape_room_room3">El Oráculo</string>
@@ -108,7 +114,7 @@
     <string name="video_skip">Saltar ⏭</string>
 
     <!-- Editor de niveles -->
-    <string name="btn_create_level">✏ Crear Nivel</string>
+    <string name="btn_create_level">Crear Nivel</string>
     <string name="level_editor_title">Editor de Niveles</string>
     <string name="level_editor_back">← Volver</string>
     <string name="level_list_empty">No hay niveles creados.</string>
