@@ -7,6 +7,11 @@ android {
     namespace 'com.tfg.temieeg'
     compileSdk 34
 
+    // Declarar el NDK permite a AGP encontrar llvm-strip y eliminar los simbolos de
+    // depuracion de libmuse_android.so al empaquetar: 53,7 MB -> 6,7 MB por ABI.
+    // Sin esta linea AGP no encuentra la herramienta y copia los .so sin estripar.
+    ndkVersion '27.1.12297006'
+
     defaultConfig {
         applicationId "com.tfg.temieeg"
         minSdk 23
@@ -19,8 +24,13 @@ android {
 
     buildTypes {
         release {
-            minifyEnabled false
+            // proguard-rules.pro ya conserva Temi SDK, LibMuse, OSC y coroutines.
+            minifyEnabled true
+            shrinkResources true
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            // El robot y los moviles de destino son ARM: descartar x86/x86_64
+            // (solo utiles para emuladores) evita duplicar la libreria nativa.
+            ndk { abiFilters 'arm64-v8a', 'armeabi-v7a' }
         }
         debug {
             // Para móviles normales: src/debug/AndroidManifest.xml elimina
@@ -31,6 +41,9 @@ android {
             // NO existe src/temi/AndroidManifest.xml, así que TemiSdkContentProvider
             // se conserva y el SDK se inicializa correctamente en el robot.
             initWith debug
+            // Temi es ARM: sin los ABI de emulador el APK del robot baja de ~213 MB
+            // a la libreria nativa de una sola arquitectura.
+            ndk { abiFilters 'arm64-v8a', 'armeabi-v7a' }
         }
     }
 
@@ -45,6 +58,19 @@ android {
 
     buildFeatures {
         viewBinding true
+        // Necesario en AGP 8+: expone BuildConfig.DEBUG para hacer perezosos los
+        // logs del camino caliente del EEG (se evalúan ~4 veces por segundo).
+        buildConfig true
+    }
+
+    testOptions {
+        unitTests {
+            // Log.* y otros métodos de android.jar devuelven valores por defecto
+            // en vez de lanzar en tests JVM puros (MentalStateProcessor, HeadGestureDetector).
+            returnDefaultValues = true
+            // Robolectric necesita recursos/manifest para las clases con Handler/Looper.
+            includeAndroidResources = true
+        }
     }
 }
 
@@ -68,6 +94,7 @@ dependencies {
     implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
 
     // ------------- ViewModel + LiveData -------------
+    implementation 'androidx.activity:activity-ktx:1.8.0'   // by viewModels() en Activity
     implementation 'androidx.lifecycle:lifecycle-viewmodel-ktx:2.7.0'
     implementation 'androidx.lifecycle:lifecycle-livedata-ktx:2.7.0'
     implementation 'androidx.lifecycle:lifecycle-runtime-ktx:2.7.0'
@@ -78,8 +105,12 @@ dependencies {
     // ------------- Visualización EEG (opcional) -------------
     implementation 'com.github.PhilJay:MPAndroidChart:v3.1.0'
 
-    // ------------- Test -------------
+    // ------------- Test (JVM unit tests) -------------
     testImplementation 'junit:junit:4.13.2'
+    // Robolectric: framework Android en la JVM (Handler/Looper/SystemClock virtuales)
+    // para testear MorseDecoder y EscapeRoomEngine sin dispositivo.
+    testImplementation 'org.robolectric:robolectric:4.11.1'
+    testImplementation 'androidx.test:core:1.5.0'
     androidTestImplementation 'androidx.test.ext:junit:1.1.5'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.5.1'
 }

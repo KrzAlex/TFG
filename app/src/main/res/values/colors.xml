@@ -1,29 +1,47 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- ── Marca ──────────────────────────────────────────────────────────── -->
-    <color name="primary">#5E35B1</color>
-    <color name="primary_dark">#4527A0</color>
-    <color name="primary_light">#B39DDB</color>
-    <color name="accent">#7E57C2</color>
+    <!-- ── Marca (violeta refinado) ────────────────────────────────────────── -->
+    <color name="primary">#6C4BF0</color>
+    <color name="primary_dark">#4A2CC7</color>
+    <color name="primary_light">#C4B5FD</color>
+    <color name="accent">#8B5CF6</color>
+
+    <!-- Cabecera (degradado) -->
+    <color name="grad_start">#4A2CC7</color>
+    <color name="grad_mid">#6C4BF0</color>
+    <color name="grad_end">#8B5CF6</color>
 
     <!-- ── Superficies ────────────────────────────────────────────────────── -->
-    <color name="background">#F6F4FB</color>
+    <color name="background">#F5F3FC</color>
     <color name="surface">#FFFFFF</color>
-    <color name="surface_tint">#EDE7F6</color>
-    <color name="divider">#E6E1F2</color>
+    <color name="surface_tint">#EEE8FE</color>
+    <color name="surface_tint_soft">#F3EFFE</color>
+    <color name="divider">#E7E1F6</color>
 
     <!-- ── Texto ──────────────────────────────────────────────────────────── -->
-    <color name="text_primary">#26223A</color>
-    <color name="text_secondary">#5F5970</color>
-    <color name="text_muted">#9A93AC</color>
+    <color name="heading">#2A1F52</color>
+    <color name="text_primary">#1B1730</color>
+    <color name="text_secondary">#5C5473</color>
+    <color name="text_muted">#948CA9</color>
     <color name="text_on_primary">#FFFFFF</color>
+    <color name="text_on_primary_soft">#CDBEFA</color>
 
     <!-- ── Informativo / enlaces ──────────────────────────────────────────── -->
-    <color name="info">#1565C0</color>
+    <color name="info">#3B82F6</color>
+    <color name="info_bg">#DDEBFF</color>
+    <color name="info_dark">#1E4C9A</color>
 
     <!-- ── Colores semánticos por estado mental ───────────────────────────── -->
-    <color name="state_stress">#E53935</color>
-    <color name="state_attention">#FB8C00</color>
-    <color name="state_calm">#43A047</color>
-    <color name="state_neutral">#757575</color>
+    <color name="state_stress">#F04438</color>
+    <color name="state_attention">#F79009</color>
+    <color name="state_calm">#12B76A</color>
+    <color name="state_neutral">#948CA9</color>
+
+    <!-- Fondos suaves de feedback -->
+    <color name="feedback_success_bg">#D6F5E6</color>
+    <color name="feedback_success_border">#A7E9CB</color>
+    <color name="feedback_success_text">#0E8A50</color>
+    <color name="feedback_error_bg">#FEE1DE</color>
+    <color name="feedback_error_border">#F5B5AE</color>
+    <color name="feedback_error_text">#B42318</color>
 </resources>

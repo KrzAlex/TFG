@@ -1,6 +1,7 @@
 package com.tfg.temieeg.eeg
 
 import android.util.Log
+import com.tfg.temieeg.BuildConfig
 import com.illposed.osc.OSCPortIn
 import com.tfg.temieeg.data.MuseState
 import java.net.SocketException
@@ -99,33 +100,33 @@ class OSCReceiver(private val port: Int = DEFAULT_PORT) : MuseReceiver {
 
         // ── Bandas EEG (4 electrodos, media) ──────────────────────────────
         server?.addListener("/muse/elements/alpha_absolute") { _, msg ->
-            val avg = msg.arguments.filterIsInstance<Float>().averageOrNull() ?: return@addListener
+            val avg = avgFloat(msg.arguments) ?: return@addListener
             val now = System.currentTimeMillis()
             lastMessageTime = now; lastAlphaTime = now
             currentState.updateAndGet { it.copy(alphaAbsolute = avg) }
         }
 
         server?.addListener("/muse/elements/beta_absolute") { _, msg ->
-            val avg = msg.arguments.filterIsInstance<Float>().averageOrNull() ?: return@addListener
+            val avg = avgFloat(msg.arguments) ?: return@addListener
             val now = System.currentTimeMillis()
             lastMessageTime = now; lastBetaTime = now
             currentState.updateAndGet { it.copy(betaAbsolute = avg) }
         }
 
         server?.addListener("/muse/elements/theta_absolute") { _, msg ->
-            val avg = msg.arguments.filterIsInstance<Float>().averageOrNull() ?: return@addListener
+            val avg = avgFloat(msg.arguments) ?: return@addListener
             lastMessageTime = System.currentTimeMillis()
             currentState.updateAndGet { it.copy(thetaAbsolute = avg) }
         }
 
         server?.addListener("/muse/elements/delta_absolute") { _, msg ->
-            val avg = msg.arguments.filterIsInstance<Float>().averageOrNull() ?: return@addListener
+            val avg = avgFloat(msg.arguments) ?: return@addListener
             lastMessageTime = System.currentTimeMillis()
             currentState.updateAndGet { it.copy(deltaAbsolute = avg) }
         }
 
         server?.addListener("/muse/elements/gamma_absolute") { _, msg ->
-            val avg = msg.arguments.filterIsInstance<Float>().averageOrNull() ?: return@addListener
+            val avg = avgFloat(msg.arguments) ?: return@addListener
             lastMessageTime = System.currentTimeMillis()
             currentState.updateAndGet { it.copy(gammaAbsolute = avg) }
         }
@@ -133,9 +134,7 @@ class OSCReceiver(private val port: Int = DEFAULT_PORT) : MuseReceiver {
         // ── Calidad de señal (horseshoe) ───────────────────────────────────
         // Valores: 1=buen contacto, 2=regular, 4=sin contacto
         server?.addListener("/muse/elements/horseshoe") { _, msg ->
-            val vals = msg.arguments.filterIsInstance<Float>()
-            if (vals.isEmpty()) return@addListener
-            val avg = vals.average().toFloat()
+            val avg = avgFloat(msg.arguments) ?: return@addListener
             lastMessageTime = System.currentTimeMillis()
             currentState.updateAndGet { it.copy(signalQuality = avg) }
         }
@@ -182,18 +181,18 @@ class OSCReceiver(private val port: Int = DEFAULT_PORT) : MuseReceiver {
 
         // ── Acelerómetro ───────────────────────────────────────────────────
         server?.addListener("/muse/acc") { _, msg ->
-            val args = msg.arguments.filterIsInstance<Float>()
-            if (args.size < 3) return@addListener
+            val xyz = FloatArray(3)
+            if (!first3Floats(msg.arguments, xyz)) return@addListener
             lastMessageTime = System.currentTimeMillis()
-            currentState.updateAndGet { it.copy(accX = args[0], accY = args[1], accZ = args[2]) }
+            currentState.updateAndGet { it.copy(accX = xyz[0], accY = xyz[1], accZ = xyz[2]) }
         }
 
         // ── Giroscopio ─────────────────────────────────────────────────────
         server?.addListener("/muse/gyro") { _, msg ->
-            val args = msg.arguments.filterIsInstance<Float>()
-            if (args.size < 3) return@addListener
+            val xyz = FloatArray(3)
+            if (!first3Floats(msg.arguments, xyz)) return@addListener
             lastMessageTime = System.currentTimeMillis()
-            currentState.updateAndGet { it.copy(gyroX = args[0], gyroY = args[1], gyroZ = args[2]) }
+            currentState.updateAndGet { it.copy(gyroX = xyz[0], gyroY = xyz[1], gyroZ = xyz[2]) }
         }
 
         // ── Batería ────────────────────────────────────────────────────────
@@ -224,7 +223,7 @@ class OSCReceiver(private val port: Int = DEFAULT_PORT) : MuseReceiver {
             // Temperatura en °C (opcional, solo para log)
             val tempRaw = (args.getOrNull(1) as? Number)?.toFloat() ?: 0f
             val tempC   = tempRaw * 0.1f - 273.15f
-            Log.d(TAG, "Batería: %d%%  |  Temp batería: %.1f°C".format(pct, tempC))
+            if (BuildConfig.DEBUG) Log.d(TAG, "Batería: %d%%  |  Temp batería: %.1f°C".format(pct, tempC))
 
             lastMessageTime = System.currentTimeMillis()
             currentState.updateAndGet { it.copy(battery = pct.coerceIn(0, 100)) }
@@ -265,8 +264,38 @@ class OSCReceiver(private val port: Int = DEFAULT_PORT) : MuseReceiver {
 
     // ── Helpers ───────────────────────────────────────────────────────────────
 
-    private fun List<Float>.averageOrNull(): Float? =
-        if (isEmpty()) null else average().toFloat()
+    /**
+     * Media de los argumentos Float de un mensaje OSC, sin asignar la lista
+     * intermedia que producía `filterIsInstance<Float>()`. Mind Monitor emite
+     * decenas de mensajes por segundo, así que esta ruta domina la basura
+     * generada en el hilo de red. Devuelve null si no hay ningún Float.
+     */
+    private fun avgFloat(args: List<Any?>): Float? {
+        var sum = 0.0
+        var n = 0
+        for (i in args.indices) {           // por índice: evita también el Iterator
+            val v = args[i]
+            if (v is Float) { sum += v; n++ }
+        }
+        return if (n == 0) null else (sum / n).toFloat()
+    }
+
+    /**
+     * Copia los tres primeros Float de [args] en [out] (acelerómetro/giroscopio).
+     * Mantiene la semántica de "primeros tres floats" del filtrado anterior pero
+     * sin crear una List<Float> con boxing por cada mensaje.
+     */
+    private fun first3Floats(args: List<Any?>, out: FloatArray): Boolean {
+        var n = 0
+        for (i in args.indices) {
+            val v = args[i]
+            if (v is Float) {
+                out[n++] = v
+                if (n == 3) return true
+            }
+        }
+        return false
+    }
 
     companion object {
         const val DEFAULT_PORT = 5000

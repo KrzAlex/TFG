@@ -19,6 +19,9 @@
     <!-- Micrófono (NoiseMonitor durante sala Morse del Escape Room) -->
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
 
+    <!-- Vibración (feedback háptico de acierto/fallo en el Escape Room) -->
+    <uses-permission android:name="android.permission.VIBRATE" />
+
     <!-- Red (CSV export, ConnectivityManager para mostrar IP) -->
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
@@ -50,6 +53,8 @@
 
         <activity
             android:name=".ui.MainActivity"
+            android:screenOrientation="landscape"
+            android:configChanges="orientation|screenSize|keyboardHidden"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

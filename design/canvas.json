@@ -1,0 +1,11 @@
+{
+  "artboards": [
+    { "file": "Main.dc.html",       "x": 0, "y": 0,    "w": 1280, "h": 800, "title": "Home · horizontal" },
+    { "file": "EscapeRoom.dc.html", "x": 0, "y": 900,  "w": 1280, "h": 800, "title": "Escape Room · horizontal" },
+    { "file": "Settings.dc.html",   "x": 0, "y": 1800, "w": 1280, "h": 800, "title": "Ajustes · horizontal" }
+  ],
+  "annotations": [
+    { "id": "note", "x": 1340, "y": 0, "w": 300, "text": "Orientación tablet Temi 1280×800 (landscape). Violeta refinado: Sora + Inter, degradados con profundidad, orbe de estado, iconos SVG, layout en columnas." }
+  ],
+  "launch": { "view": "canvas" }
+}

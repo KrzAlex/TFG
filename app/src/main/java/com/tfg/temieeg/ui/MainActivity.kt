@@ -26,6 +26,7 @@ import com.robotemi.sdk.Robot
 import com.tfg.temieeg.R
 import com.tfg.temieeg.data.MentalState
 import com.tfg.temieeg.data.SessionEntry
+import androidx.activity.viewModels
 import com.tfg.temieeg.databinding.ActivityMainBinding
 import com.tfg.temieeg.eeg.HeadGestureDetector
 import com.tfg.temieeg.eeg.MentalStateProcessor
@@ -80,7 +81,9 @@ class MainActivity : AppCompatActivity() {
     }
 
     private lateinit var temiController: TemiController
-    private lateinit var processor: MentalStateProcessor
+    // ── Pipeline BCI (propiedad de EegViewModel: sobrevive a cambios de config) ──
+    private val eegViewModel: EegViewModel by viewModels()
+    private val processor get() = eegViewModel.processor
     private lateinit var activeReceiver: MuseReceiver
     private lateinit var sessionLogger: SessionLogger
     private lateinit var prefs: SharedPreferences
@@ -104,18 +107,18 @@ class MainActivity : AppCompatActivity() {
     private val jawHandler = Handler(Looper.getMainLooper())
 
     /** Decodificador Morse + estado del modo. */
-    private val morseDecoder = MorseDecoder()
+    private val morseDecoder get() = eegViewModel.morseDecoder
     private var morseMode    = false
 
     /** Detector de gestos de cabeza (giroscopio). */
-    private val headGestureDetector = HeadGestureDetector()
+    private val headGestureDetector get() = eegViewModel.headGestureDetector
     private var nodTotal   = 0
     private var shakeTotal = 0
     private val nodHandler   = Handler(Looper.getMainLooper())
     private val shakeHandler = Handler(Looper.getMainLooper())
 
     /** Motor modular de Escape Room. */
-    private val escapeRoomEngine = EscapeRoomEngine()
+    private val escapeRoomEngine get() = eegViewModel.escapeRoomEngine
     private var escapeRoomActive = false
 
     /**
@@ -274,9 +277,9 @@ class MainActivity : AppCompatActivity() {
     private fun wireReceiverCallbacks() {
         activeReceiver.onMuseDataReceived = { museState ->
             runOnUiThread {
-                processor.addSample(museState)
-                val state   = processor.getCurrentState()
-                val metrics = processor.getMetrics()
+                // El ViewModel es el punto de entrada del procesado (publica su StateFlow).
+                val state   = eegViewModel.process(museState)
+                val metrics = eegViewModel.metrics.value
                 temiController.onStateChanged(state)
                 renderState(state, metrics)
                 updateAccDisplay(museState.accX, museState.accY, museState.accZ)
@@ -371,7 +374,6 @@ class MainActivity : AppCompatActivity() {
         setContentView(binding.root)
 
         temiController = TemiController(robot, applicationContext)
-        processor      = MentalStateProcessor()
         sessionLogger  = SessionLogger(this)
         gameLogger     = SessionLogger(this)
         prefs          = getSharedPreferences(PREFS_NAME, MODE_PRIVATE)
@@ -433,6 +435,21 @@ class MainActivity : AppCompatActivity() {
     override fun onDestroy() {
         super.onDestroy()
         temiController.shutdown()
+
+        // Los callbacks diferidos sobreviven a la Activity y mantienen viva su
+        // referencia (y tocarían vistas ya destruidas). Se cancelan explícitamente.
+        calibrationTimer?.cancel()
+        calibrationTimer = null
+        processor.cancelCalibration()
+        listOf(blinkHandler, jawHandler, nodHandler, shakeHandler, skipOfferHandler)
+            .forEach { it.removeCallbacksAndMessages(null) }
+
+        // Cortar la entrada del pipeline: el receptor vive en su propio hilo y
+        // podría emitir una ultima muestra hacia una UI ya destruida.
+        activeReceiver.onMuseDataReceived      = null
+        activeReceiver.onConnectionStateChanged = null
+        activeReceiver.onConnectingChanged      = null
+        noiseMonitor.onAmplitude                = null
     }
 
     // ── Pipeline MUSE → Procesador → Robot + UI ───────────────────────────────
@@ -465,20 +482,24 @@ class MainActivity : AppCompatActivity() {
         binding.btnStartSession.text     = label
         binding.btnHomeStartSession.text = label
 
-        val file = sessionLogger.exportCSV()
-        if (file == null) {
-            Toast.makeText(this, "Sin datos que guardar", Toast.LENGTH_SHORT).show()
-            return
-        }
+        // Serializacion + escritura en hilo de fondo: en sesiones largas son miles
+        // de filas y bloqueaban la UI. El callback vuelve al hilo principal.
+        sessionLogger.exportCSVAsync { file ->
+            if (isFinishing || isDestroyed) return@exportCSVAsync
+            if (file == null) {
+                Toast.makeText(this, "Sin datos que guardar", Toast.LENGTH_SHORT).show()
+                return@exportCSVAsync
+            }
 
-        val uri = FileProvider.getUriForFile(this, "$packageName.fileprovider", file)
-        val intent = android.content.Intent(android.content.Intent.ACTION_SEND).apply {
-            type = "text/csv"
-            putExtra(android.content.Intent.EXTRA_STREAM, uri)
-            putExtra(android.content.Intent.EXTRA_SUBJECT, file.name)
-            addFlags(android.content.Intent.FLAG_GRANT_READ_URI_PERMISSION)
+            val uri = FileProvider.getUriForFile(this, "$packageName.fileprovider", file)
+            val intent = android.content.Intent(android.content.Intent.ACTION_SEND).apply {
+                type = "text/csv"
+                putExtra(android.content.Intent.EXTRA_STREAM, uri)
+                putExtra(android.content.Intent.EXTRA_SUBJECT, file.name)
+                addFlags(android.content.Intent.FLAG_GRANT_READ_URI_PERMISSION)
+            }
+            startActivity(android.content.Intent.createChooser(intent, getString(R.string.share_session)))
         }
-        startActivity(android.content.Intent.createChooser(intent, getString(R.string.share_session)))
     }
 
     // ── Modo Morse ─────────────────────────────────────────────────────────────
@@ -509,7 +530,7 @@ class MainActivity : AppCompatActivity() {
         }
 
         // Tabla de referencia: se genera una vez y se muestra/oculta con el botón ?
-        binding.tvMorseReference.text = buildMorseReference()
+        binding.tvMorseReference.text = morseReference
         binding.btnMorseHelp.setOnClickListener {
             binding.tvMorseReference.visibility =
                 if (binding.tvMorseReference.visibility == View.VISIBLE) View.GONE else View.VISIBLE
@@ -530,6 +551,9 @@ class MainActivity : AppCompatActivity() {
      * misma [MorseDecoder.MORSE_TABLE] que usa el decodificador, garantizando
      * que la referencia visual y la lógica siempre estén sincronizadas.
      */
+    /** La tabla es constante: se construye una vez y se reutiliza. */
+    private val morseReference: String by lazy { buildMorseReference() }
+
     private fun buildMorseReference(): String {
         val entries = MorseDecoder.MORSE_TABLE.entries
             .sortedWith(compareBy({ it.value.isDigit() }, { it.value }))
@@ -549,8 +573,8 @@ class MainActivity : AppCompatActivity() {
      * [metrics] puede ser vacío (estado inicial).
      */
     private fun renderState(state: MentalState, metrics: Map<String, Float>) {
-        // Texto localizado
-        binding.tvMentalState.text = when (state) {
+        // Texto localizado (una sola resolución de string para ambas pantallas)
+        val stateText = when (state) {
             MentalState.STRESS    -> getString(R.string.state_stress)
             MentalState.ATTENTION -> getString(R.string.state_attention)
             MentalState.CALM      -> getString(R.string.state_calm)
@@ -565,10 +589,19 @@ class MainActivity : AppCompatActivity() {
             MentalState.NEUTRAL   -> R.color.state_neutral
         }
         val stateColor = ContextCompat.getColor(this, colorRes)
+
+        // Home — el orbe de estado mental solo se repinta si la pantalla se ve.
+        if (homeScreenVisible) {
+            binding.tvHomeMentalState.text = stateText
+            binding.tvHomeMentalState.setTextColor(stateColor)
+        }
+
+        // El resto (texto grande, barras y bandas brutas) es exclusivo de Dev:
+        // sin la pantalla visible nos ahorramos varios .format() por muestra.
+        if (!devScreenVisible) return
+
+        binding.tvMentalState.text = stateText
         binding.tvMentalState.setTextColor(stateColor)
-        // Home screen — mismo estado mental
-        binding.tvHomeMentalState.text = binding.tvMentalState.text
-        binding.tvHomeMentalState.setTextColor(stateColor)
 
         // Barras de progreso + valores numéricos — concentration y mellow están en [0, 1]
         val conc  = metrics["concentration"] ?: 0f
@@ -660,17 +693,29 @@ class MainActivity : AppCompatActivity() {
             state.signalQuality <= 2.5f -> androidx.core.content.ContextCompat.getColor(this, R.color.state_attention)
             else                        -> androidx.core.content.ContextCompat.getColor(this, R.color.state_stress)
         }
-        binding.tvSignalQuality.text = sigText
-        binding.tvSignalQuality.setTextColor(sigColor)
 
         val battText = if (state.battery >= 0) "🔋 ${state.battery}%" else ""
-        // Batería (dev)
+
+        // La calidad de señal y la batería cambian muy rara vez, pero este método
+        // corre a ~4 Hz: si nada ha cambiado evitamos reasignar texto/color (cada
+        // setText invalida y vuelve a medir la vista).
+        if (sigText == lastSigText && battText == lastBattText) return
+        lastSigText  = sigText
+        lastBattText = battText
+
+        // Dev
+        binding.tvSignalQuality.text = sigText
+        binding.tvSignalQuality.setTextColor(sigColor)
         binding.tvBattery.text = battText
         // Home screen
         binding.tvHomeSignalQuality.text = sigText
         binding.tvHomeSignalQuality.setTextColor(sigColor)
         binding.tvHomeBattery.text = battText
     }
+
+    /** Últimos valores pintados de señal/batería — evitan setText redundantes. */
+    private var lastSigText: String? = null
+    private var lastBattText: String? = null
 
     // ── Acelerómetro: flecha + gráfico ───────────────────────────────────────
 
@@ -722,6 +767,10 @@ class MainActivity : AppCompatActivity() {
      * El gráfico muestra siempre los últimos [CHART_WINDOW] puntos.
      */
     private fun updateAccDisplay(x: Float, y: Float, z: Float) {
+        // La flecha y la gráfica solo existen en la pantalla Dev: si está oculta
+        // nos ahorramos el redibujado completo en cada muestra (~4 Hz).
+        if (!devScreenVisible) return
+
         // Flecha de orientación
         binding.headDirectionView.update(x, y, z)
 
@@ -784,6 +833,10 @@ class MainActivity : AppCompatActivity() {
 
     /** Actualiza el texto de valores brutos y añade una muestra al gráfico de giroscopio. */
     private fun updateGyroDisplay(gyroX: Float, gyroY: Float, gyroZ: Float) {
+        // Texto y gráfica son exclusivos de Dev: evitamos formateo y redibujado
+        // cuando la pantalla no está visible (la detección de gestos NO pasa por aquí).
+        if (!devScreenVisible) return
+
         // X se muestra en texto pero no en el gráfico (no se usa para gestos)
         binding.tvRawGyro.text = "X: %+.1f   Y: %+.1f   Z: %+.1f  °/s".format(gyroX, gyroY, gyroZ)
 
@@ -829,6 +882,18 @@ class MainActivity : AppCompatActivity() {
             binding.btnStartSession.text = binding.btnHomeStartSession.text
         }
     }
+
+    /**
+     * El pipeline corre a ~4 Hz y redibujar gráficas o medidores que no se ven es
+     * puro coste de CPU y batería, así que las actualizaciones exclusivas de cada
+     * pantalla se saltan cuando está oculta.
+     *
+     * Se derivan de la visibilidad real de la vista en lugar de un flag propio:
+     * [LevelEditorController] también oculta [homeScreen] por su cuenta, y un flag
+     * manual se desincronizaría en ese camino.
+     */
+    private val devScreenVisible  get() = binding.devScreen.visibility  == View.VISIBLE
+    private val homeScreenVisible get() = binding.homeScreen.visibility == View.VISIBLE
 
     private fun showHome() {
         binding.homeScreen.visibility        = View.VISIBLE
@@ -923,6 +988,9 @@ class MainActivity : AppCompatActivity() {
             override fun onStopTrackingTouch(sb: SeekBar?) {}
         })
 
+        // ── Calibración por usuario ──────────────────────────────────────────
+        binding.btnCalibrate.setOnClickListener { startCalibration() }
+
         // ── Debounce parpadeo (SeekBar 0-18, step 50ms → 100-1000 ms) ────────
         binding.sbBlinkDebounce.progress = ((activeReceiver.blinkDebounceMs - 100) / 50).toInt()
         updateBlinkDebounceLabel()
@@ -972,9 +1040,10 @@ class MainActivity : AppCompatActivity() {
 
         // ── Restablecer por defecto ───────────────────────────────────────────
         binding.btnSettingsReset.setOnClickListener {
-            processor.stressThreshold    = 0.22f
-            processor.attentionThreshold = 0.38f
-            processor.calmThreshold      = 0.52f
+            processor.stressThreshold        = 0.22f
+            processor.attentionThreshold     = 0.38f
+            processor.calmThreshold          = 0.52f
+            processor.gammaActivityThreshold = 0.15f
             activeReceiver.blinkDebounceMs         = MuseReceiver.BLINK_DEBOUNCE_DEFAULT_MS
             headGestureDetector.nodThreshold   = DEFAULT_NOD_THRESHOLD
             headGestureDetector.shakeThreshold = DEFAULT_SHAKE_THRESHOLD
@@ -998,6 +1067,7 @@ class MainActivity : AppCompatActivity() {
                 .putFloat(PREF_STRESS,          0.22f)
                 .putFloat(PREF_ATTENTION,        0.38f)
                 .putFloat(PREF_CALM,             0.52f)
+                .putFloat(PREF_GAMMA,            0.15f)
                 .putLong(PREF_BLINK_DEBOUNCE,    MuseReceiver.BLINK_DEBOUNCE_DEFAULT_MS)
                 .putFloat(PREF_NOD_THRESHOLD,    DEFAULT_NOD_THRESHOLD)
                 .putFloat(PREF_SHAKE_THRESHOLD,  DEFAULT_SHAKE_THRESHOLD)
@@ -1024,6 +1094,64 @@ class MainActivity : AppCompatActivity() {
         val cur = audioManager.getStreamVolume(AudioManager.STREAM_MUSIC)
         val max = audioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC)
         binding.tvVolumeValue.text = "$cur / $max"
+    }
+
+    private var calibrationTimer: android.os.CountDownTimer? = null
+
+    /**
+     * Calibración por usuario: captura [CALIBRATION_SECONDS] s de línea base en
+     * reposo y deriva umbrales personalizados (media ± σ de mellow/conc/gamma).
+     * Requiere el MUSE conectado (el pipeline alimenta processor.addSample).
+     */
+    private fun startCalibration() {
+        calibrationTimer?.cancel()
+        processor.beginCalibration()
+        binding.btnCalibrate.isEnabled = false
+
+        calibrationTimer = object : android.os.CountDownTimer(CALIBRATION_SECONDS * 1000L, 1000L) {
+            override fun onTick(msLeft: Long) {
+                binding.btnCalibrate.text =
+                    getString(R.string.settings_calibrating, (msLeft / 1000L).toInt() + 1)
+            }
+
+            override fun onFinish() {
+                val result = processor.finishCalibration()
+                binding.btnCalibrate.isEnabled = true
+                binding.btnCalibrate.text = getString(R.string.settings_calibrate)
+
+                if (result == null) {
+                    android.widget.Toast.makeText(
+                        this@MainActivity, R.string.settings_calibrate_fail,
+                        android.widget.Toast.LENGTH_LONG
+                    ).show()
+                    return
+                }
+
+                // Reflejar en los sliders + etiquetas (fromUser=false → no re-persiste).
+                binding.sbStressThreshold.progress    = (processor.stressThreshold * 100).toInt()
+                binding.sbAttentionThreshold.progress = (processor.attentionThreshold * 100).toInt()
+                binding.sbCalmThreshold.progress      = (processor.calmThreshold * 100).toInt()
+                updateThresholdLabels()
+
+                // Persistir los umbrales personalizados.
+                prefs.edit()
+                    .putFloat(PREF_STRESS,    processor.stressThreshold)
+                    .putFloat(PREF_ATTENTION, processor.attentionThreshold)
+                    .putFloat(PREF_CALM,      processor.calmThreshold)
+                    .putFloat(PREF_GAMMA,     processor.gammaActivityThreshold)
+                    .apply()
+
+                android.widget.Toast.makeText(
+                    this@MainActivity,
+                    getString(
+                        R.string.settings_calibrate_done,
+                        result.stressThreshold, result.attentionThreshold,
+                        result.calmThreshold, result.samples
+                    ),
+                    android.widget.Toast.LENGTH_LONG
+                ).show()
+            }
+        }.start()
     }
 
     private fun updateThresholdLabels() {
@@ -1243,21 +1371,69 @@ class MainActivity : AppCompatActivity() {
         currentSignalQuality in 0f..2.0f
 
     /** Emoji representativo del tipo de módulo activo. */
-    private fun moduleEmoji(typeName: String?): String = when (typeName) {
-        "CalmModule"        -> "🧘"
-        "MorseModule"       -> "📡"
-        "YesNoModule"       -> "🤔"
-        "BlinkClenchModule" -> "⚡"
-        "RobotAnimModule"   -> "🤖"
-        "VideoStateModule"  -> "🎯"
-        else                -> "🔮"
+    private fun moduleIconRes(typeName: String?): Int = when (typeName) {
+        "CalmModule"        -> R.drawable.ic_mod_calm
+        "MorseModule"       -> R.drawable.ic_mod_morse
+        "YesNoModule"       -> R.drawable.ic_mod_yesno
+        "BlinkClenchModule" -> R.drawable.ic_mod_blink
+        "RobotAnimModule"   -> R.drawable.ic_mod_robot
+        "VideoStateModule"  -> R.drawable.ic_mod_target
+        else                -> R.drawable.ic_mod_default
+    }
+
+    // ── UX: feedback háptico + tutorial ─────────────────────────────────────────
+
+    private val vibrator: android.os.Vibrator? by lazy {
+        if (android.os.Build.VERSION.SDK_INT >= 31) {
+            (getSystemService(android.content.Context.VIBRATOR_MANAGER_SERVICE)
+                as? android.os.VibratorManager)?.defaultVibrator
+        } else {
+            @Suppress("DEPRECATION")
+            getSystemService(android.content.Context.VIBRATOR_SERVICE) as? android.os.Vibrator
+        }
+    }
+
+    /** Refuerzo háptico multimodal: pulso corto en acierto, doble en fallo. */
+    private fun vibrateFeedback(success: Boolean) {
+        val v = vibrator ?: return
+        if (!v.hasVibrator()) return
+        if (android.os.Build.VERSION.SDK_INT >= 26) {
+            val effect = if (success)
+                android.os.VibrationEffect.createOneShot(110L, android.os.VibrationEffect.DEFAULT_AMPLITUDE)
+            else
+                android.os.VibrationEffect.createWaveform(longArrayOf(0, 70, 80, 70), -1)
+            v.vibrate(effect)
+        } else {
+            @Suppress("DEPRECATION")
+            if (success) v.vibrate(110L) else v.vibrate(longArrayOf(0, 70, 80, 70), -1)
+        }
+    }
+
+    /**
+     * Muestra el tutorial de gestos la primera vez que se juega (persistido).
+     * Después ejecuta [next]. Reduce la frustración y la necesidad del botón de rescate.
+     */
+    private fun maybeShowTutorialThen(next: () -> Unit) {
+        if (prefs.getBoolean(PREF_TUTORIAL_SEEN, false)) { next(); return }
+        val content = layoutInflater.inflate(R.layout.dialog_tutorial, null)
+        com.google.android.material.dialog.MaterialAlertDialogBuilder(
+            this, R.style.ThemeOverlay_TemiEeg_Dialog
+        )
+            .setView(content)
+            .setCancelable(false)
+            .setPositiveButton(R.string.tutorial_ok) { d, _ ->
+                prefs.edit().putBoolean(PREF_TUTORIAL_SEEN, true).apply()
+                d.dismiss()
+                next()
+            }
+            .show()
     }
 
     // ── Escape Room BCI ───────────────────────────────────────────────────────
 
     private fun setupEscapeRoom() {
-        // Botón play → selector de historia
-        binding.btnPlayEscapeRoom.setOnClickListener { showEscapeRoomPicker() }
+        // Botón play → tutorial (1ª vez) → selector de historia
+        binding.btnPlayEscapeRoom.setOnClickListener { maybeShowTutorialThen { showEscapeRoomPicker() } }
         binding.btnEscapeExit.setOnClickListener { stopEscapeRoom() }
         binding.btnEscapeSkip.setOnClickListener {
             cancelSkipOffer()
@@ -1276,7 +1452,7 @@ class MainActivity : AppCompatActivity() {
             restartSkipOffer()
             binding.tvEscapeProgress.text = "Sala $current / $total"
             binding.progressEscapeRooms.progress = ((current - 1) * 100) / total
-            binding.tvEscapeModuleType.text = moduleEmoji(escapeRoomEngine.currentModuleTypeName)
+            binding.tvEscapeModuleType.setImageResource(moduleIconRes(escapeRoomEngine.currentModuleTypeName))
             binding.tvEscapeRoomName.text     = title
             binding.tvEscapeFeedback.text     = ""
             binding.tvEscapeFeedback.background = null
@@ -1307,13 +1483,15 @@ class MainActivity : AppCompatActivity() {
                         binding.tvEscapeFeedback.animate()
                             .scaleX(1f).scaleY(1f).setDuration(120).start()
                     }.start()
+                // Feedback háptico: refuerzo multimodal cuando la vista está en el juego
+                vibrateFeedback(isSuccess)
             }
         }
 
         escapeRoomEngine.onCompleted = {
             cancelSkipOffer()
             binding.progressEscapeRooms.progress = 100
-            binding.tvEscapeModuleType.text       = "🏆"
+            binding.tvEscapeModuleType.setImageResource(R.drawable.ic_trophy)
             binding.tvEscapeRoomName.text         = "¡Misión completada!"
             binding.tvEscapeNarration.text        = "Has superado todos los desafíos mentales.\n¡Enhorabuena!"
             binding.tvEscapeHint.text             = ""
@@ -1346,10 +1524,10 @@ class MainActivity : AppCompatActivity() {
         escapeRoomEngine.onTemiSpeakingChanged = { speaking ->
             if (speaking) {
                 savedHintBeforeSpeaking = binding.tvEscapeHint.text.toString()
-                binding.tvEscapeModuleType.text = "🎙"
-                binding.tvEscapeHint.text = "🎙 Escucha al robot… (BCI en pausa)"
+                binding.tvEscapeModuleType.setImageResource(R.drawable.ic_mic)
+                binding.tvEscapeHint.text = "Escucha al robot… (BCI en pausa)"
             } else {
-                binding.tvEscapeModuleType.text = moduleEmoji(escapeRoomEngine.currentModuleTypeName)
+                binding.tvEscapeModuleType.setImageResource(moduleIconRes(escapeRoomEngine.currentModuleTypeName))
                 binding.tvEscapeHint.text = savedHintBeforeSpeaking
             }
         }
@@ -1471,15 +1649,30 @@ class MainActivity : AppCompatActivity() {
         val builtin = EscapeRoomCatalog.all
         val custom  = CustomLevelStorage.loadAll(this)
         val rooms   = builtin + custom
-        val names   = rooms.map { it.name }.toTypedArray()
-        AlertDialog.Builder(this)
-            .setTitle("Selecciona una historia")
-            .setItems(names) { _, which ->
-                escapeRoomEngine.load(rooms[which])
+
+        val content   = layoutInflater.inflate(R.layout.dialog_story_picker, null)
+        val container = content.findViewById<android.widget.LinearLayout>(R.id.storyListContainer)
+
+        val dialog = com.google.android.material.dialog.MaterialAlertDialogBuilder(
+            this, R.style.ThemeOverlay_TemiEeg_Dialog
+        )
+            .setView(content)
+            .setNegativeButton("Cancelar", null)
+            .create()
+
+        rooms.forEachIndexed { index, room ->
+            val row = layoutInflater.inflate(R.layout.item_story_row, container, false)
+            row.findViewById<android.widget.TextView>(R.id.storyRowName).text = room.name
+            row.findViewById<android.widget.ImageView>(R.id.storyRowIcon)
+                .setImageResource(if (index < builtin.size) R.drawable.ic_play else R.drawable.ic_mod_default)
+            row.setOnClickListener {
+                dialog.dismiss()
+                escapeRoomEngine.load(room)
                 startEscapeRoom()
             }
-            .setNegativeButton("Cancelar", null)
-            .show()
+            container.addView(row)
+        }
+        dialog.show()
     }
 
     private fun startEscapeRoom() {
@@ -1538,7 +1731,7 @@ class MainActivity : AppCompatActivity() {
         // Resetear estado visual para la próxima partida
         binding.progressEscapeRooms.progress   = 0
         binding.tvEscapeFeedback.background    = null
-        binding.tvEscapeModuleType.text        = ""
+        binding.tvEscapeModuleType.setImageDrawable(null)
 
         // ── Exportar log de partida ──────────────────────────────────────────
         exportGameLog()
@@ -1559,12 +1752,17 @@ class MainActivity : AppCompatActivity() {
             Log.d(TAG, "Game log vacío — no se exporta CSV")
             return
         }
-        val file = gameLogger.exportCSV(levelName = levelName)
-        if (file != null) {
-            Log.i(TAG, "Game log exportado: ${file.absolutePath} (${gameLogger.size()} muestras)")
-            Toast.makeText(this, "💾 Sesión guardada:\n${file.name}", Toast.LENGTH_LONG).show()
-        } else {
-            Log.e(TAG, "Error exportando game log")
+        val rows = gameLogger.size()
+        // Export en hilo de fondo (ver exportCSVAsync): evita bloquear la UI al
+        // terminar la partida, justo cuando el robot sigue narrando.
+        gameLogger.exportCSVAsync(levelName = levelName) { file ->
+            if (isFinishing || isDestroyed) return@exportCSVAsync
+            if (file != null) {
+                Log.i(TAG, "Game log exportado: ${file.absolutePath} ($rows muestras)")
+                Toast.makeText(this, "💾 Sesión guardada:\n${file.name}", Toast.LENGTH_LONG).show()
+            } else {
+                Log.e(TAG, "Error exportando game log")
+            }
         }
     }
 
@@ -1589,9 +1787,10 @@ class MainActivity : AppCompatActivity() {
      * [activeReceiver] y [headGestureDetector].
      */
     private fun loadSavedSettings() {
-        processor.stressThreshold    = prefs.getFloat(PREF_STRESS,     0.22f)
-        processor.attentionThreshold = prefs.getFloat(PREF_ATTENTION,  0.38f)
-        processor.calmThreshold      = prefs.getFloat(PREF_CALM,       0.52f)
+        processor.stressThreshold        = prefs.getFloat(PREF_STRESS,     0.22f)
+        processor.attentionThreshold     = prefs.getFloat(PREF_ATTENTION,  0.38f)
+        processor.calmThreshold          = prefs.getFloat(PREF_CALM,       0.52f)
+        processor.gammaActivityThreshold = prefs.getFloat(PREF_GAMMA,      0.15f)
         activeReceiver.blinkDebounceMs =
             prefs.getLong(PREF_BLINK_DEBOUNCE, MuseReceiver.BLINK_DEBOUNCE_DEFAULT_MS)
         headGestureDetector.nodThreshold   =
@@ -1613,9 +1812,12 @@ class MainActivity : AppCompatActivity() {
         private const val PREF_STRESS               = "stress_threshold"
         private const val PREF_ATTENTION            = "attention_threshold"
         private const val PREF_CALM                 = "calm_threshold"
+        private const val PREF_GAMMA                = "gamma_activity_threshold"
+        private const val CALIBRATION_SECONDS       = 20
         private const val PREF_BLINK_DEBOUNCE       = "blink_debounce"
         private const val PREF_NOD_THRESHOLD        = "nod_threshold"
         private const val PREF_SHAKE_THRESHOLD      = "shake_threshold"
         private const val PREF_NOISE_MIC            = "noise_mic_enabled"
+        private const val PREF_TUTORIAL_SEEN        = "tutorial_seen"
     }
 }

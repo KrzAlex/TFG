@@ -1,0 +1,121 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Sora:wght@600;700;800&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@600&display=swap">
+  <style>
+    body { margin:0; font-family:'Inter', system-ui, sans-serif; }
+    a { color:#6C4BF0; } a:hover { color:#4A2CC7; }
+    .display { font-family:'Sora', system-ui, sans-serif; }
+    .mono { font-family:'JetBrains Mono', monospace; }
+    .over { font-size:11.5px;font-weight:700;letter-spacing:0.13em;text-transform:uppercase;color:#6C4BF0; }
+    .card { background:#fff;border:1px solid #E7E1F6;border-radius:22px;padding:22px;box-shadow:0 8px 28px -20px rgba(74,44,199,0.4); }
+    .track { height:7px;border-radius:4px;background:#E7E1F6;position:relative; }
+    .fill { position:absolute;left:0;top:0;bottom:0;border-radius:4px; }
+    .knob { position:absolute;top:50%;transform:translate(-50%,-50%);width:20px;height:20px;border-radius:50%;background:#fff;border:3px solid #6C4BF0;box-shadow:0 2px 6px rgba(0,0,0,0.15); }
+  </style>
+</helmet>
+<div style="width:1280px;height:800px;background:#F5F3FC;display:flex;flex-direction:column;overflow:hidden;color:#1B1730;">
+
+  <!-- Cabecera -->
+  <div style="padding:22px 40px;display:flex;align-items:center;gap:14px;">
+    <button style="width:44px;height:44px;border-radius:14px;border:1px solid #E7E1F6;background:#fff;display:flex;align-items:center;justify-content:center;cursor:pointer;">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#6C4BF0" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+    </button>
+    <div class="display" style="font-size:26px;font-weight:800;letter-spacing:-0.5px;flex:1;">Configuración</div>
+    <button class="btn" style="border:none;background:#EEE8FE;color:#4A2CC7;font-family:'Sora';font-weight:600;font-size:14px;padding:11px 18px;border-radius:12px;cursor:pointer;">Restablecer</button>
+  </div>
+
+  <!-- Rejilla de tarjetas -->
+  <div style="flex:1;padding:0 40px 32px;display:grid;grid-template-columns:1.15fr 1fr;gap:22px;overflow:hidden;">
+
+    <!-- Columna izquierda -->
+    <div style="display:flex;flex-direction:column;gap:22px;">
+      <!-- Conexión -->
+      <div class="card">
+        <div class="over" style="margin-bottom:16px;">Conexión</div>
+        <div style="display:flex;gap:14px;margin-bottom:18px;">
+          <div style="flex:1;border-radius:16px;padding:16px;text-align:center;background:linear-gradient(135deg,#6C4BF0,#8B5CF6);color:#fff;">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-bottom:6px;"><path d="M5 12.5a10 10 0 0 1 14 0M8.5 16a5 5 0 0 1 7 0"/><circle cx="12" cy="19.5" r="1" fill="#fff"/></svg>
+            <div style="font-size:15px;font-weight:700;">Mind Monitor</div>
+            <div style="font-size:12px;opacity:0.85;">OSC · WiFi</div>
+          </div>
+          <div style="flex:1;border-radius:16px;padding:16px;text-align:center;background:#F5F3FC;border:1px solid #E7E1F6;color:#5C5473;">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#948CA9" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-bottom:6px;"><path d="M7 7l10 10-5 5V2l5 5L7 17"/></svg>
+            <div style="font-size:15px;font-weight:700;">Bluetooth</div>
+            <div style="font-size:12px;opacity:0.8;">LibMuse</div>
+          </div>
+        </div>
+        <div style="display:flex;justify-content:space-between;padding:9px 2px;border-top:1px solid #F0ECFA;">
+          <span style="font-size:14px;color:#5C5473;">IP del dispositivo</span>
+          <span class="mono" style="font-size:15px;font-weight:600;color:#3B82F6;">192.168.1.42</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;padding:9px 2px;">
+          <span style="font-size:14px;color:#5C5473;">Puerto OSC</span>
+          <span class="mono" style="font-size:15px;font-weight:600;color:#2A1F52;">5000</span>
+        </div>
+      </div>
+
+      <!-- BCI -->
+      <div class="card">
+        <div class="over" style="margin-bottom:16px;">Detección BCI</div>
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
+          <div>
+            <div style="font-size:15px;font-weight:600;color:#2A1F52;">Micrófono anti-ruido</div>
+            <div style="font-size:12.5px;color:#948CA9;">Filtra el silencio en modo Morse</div>
+          </div>
+          <div style="width:52px;height:30px;border-radius:999px;background:#6C4BF0;position:relative;flex-shrink:0;">
+            <div style="position:absolute;top:3px;right:3px;width:24px;height:24px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,0.25);"></div>
+          </div>
+        </div>
+        <div style="display:flex;justify-content:space-between;padding-top:14px;border-top:1px solid #F0ECFA;">
+          <span style="font-size:14px;color:#5C5473;">Debounce parpadeo</span>
+          <span class="mono" style="font-size:15px;font-weight:600;color:#2A1F52;">500 ms</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Columna derecha: Umbrales -->
+    <div class="card" style="display:flex;flex-direction:column;">
+      <div class="over" style="margin-bottom:22px;">Umbrales EEG</div>
+
+      <div style="display:flex;justify-content:space-between;margin-bottom:10px;">
+        <span style="font-size:15px;font-weight:600;color:#F04438;">Estrés</span>
+        <span class="mono" style="font-size:14px;color:#5C5473;">0.22</span>
+      </div>
+      <div class="track" style="margin-bottom:28px;"><div class="fill" style="width:22%;background:#F04438;"></div><div class="knob" style="left:22%;border-color:#F04438;"></div></div>
+
+      <div style="display:flex;justify-content:space-between;margin-bottom:10px;">
+        <span style="font-size:15px;font-weight:600;color:#F79009;">Atención</span>
+        <span class="mono" style="font-size:14px;color:#5C5473;">0.38</span>
+      </div>
+      <div class="track" style="margin-bottom:28px;"><div class="fill" style="width:38%;background:#F79009;"></div><div class="knob" style="left:38%;border-color:#F79009;"></div></div>
+
+      <div style="display:flex;justify-content:space-between;margin-bottom:10px;">
+        <span style="font-size:15px;font-weight:600;color:#12B76A;">Calma</span>
+        <span class="mono" style="font-size:14px;color:#5C5473;">0.52</span>
+      </div>
+      <div class="track" style="margin-bottom:auto;"><div class="fill" style="width:52%;background:#12B76A;"></div><div class="knob" style="left:52%;border-color:#12B76A;"></div></div>
+
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-top:22px;padding-top:18px;border-top:1px solid #F0ECFA;">
+        <span style="font-size:14px;color:#5C5473;">Volumen del robot</span>
+        <div style="display:flex;align-items:center;gap:12px;width:180px;">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#948CA9" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5 6 9H2v6h4l5 4V5z"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/></svg>
+          <div class="track" style="flex:1;"><div class="fill" style="width:70%;background:#6C4BF0;"></div><div class="knob" style="left:70%;"></div></div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+</x-dc>
+<script data-dc-script data-props='{}'>
+class Component extends DCLogic { renderVals() { return {}; } }
+</script>
+</body>
+</html>

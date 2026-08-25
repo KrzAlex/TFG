@@ -1,6 +1,8 @@
 package com.tfg.temieeg.logging
 
 import android.content.Context
+import android.os.Handler
+import android.os.Looper
 import android.util.Log
 import com.tfg.temieeg.data.SessionEntry
 import java.io.File
@@ -29,10 +31,39 @@ import java.util.Locale
  */
 class SessionLogger(private val context: Context) {
 
-    private val entries = mutableListOf<SessionEntry>()
+    // Pre-dimensionada para ~10 min a 4 Hz: evita las recopias de crecimiento
+    // del ArrayList durante la partida (el camino caliente del logger).
+    private val entries = ArrayList<SessionEntry>(INITIAL_CAPACITY)
+
+    /** true si se alcanzó [MAX_ENTRIES] y se están descartando muestras. */
+    var truncated: Boolean = false
+        private set
 
     fun log(entry: SessionEntry) {
+        // Techo de memoria: una sesión olvidada abierta podía crecer sin límite
+        // (~4 muestras/s). Al alcanzarlo dejamos de acumular y avisamos una vez.
+        if (entries.size >= MAX_ENTRIES) {
+            if (!truncated) {
+                truncated = true
+                Log.w(TAG, "Límite de $MAX_ENTRIES muestras alcanzado — se dejan de registrar")
+            }
+            return
+        }
         entries.add(entry)
+    }
+
+    /**
+     * Igual que [exportCSV] pero fuera del hilo principal: serializar miles de
+     * filas y escribirlas en disco bloqueaba la UI (riesgo de ANR en sesiones
+     * largas). [onDone] se invoca en el hilo principal con el fichero o null.
+     */
+    fun exportCSVAsync(levelName: String = "", onDone: (File?) -> Unit) {
+        val snapshot = ArrayList(entries)   // copia estable para el hilo de fondo
+        val main = Handler(Looper.getMainLooper())
+        Thread({
+            val file = writeCsv(snapshot, levelName)
+            main.post { onDone(file) }
+        }, "SessionLogger-export").start()
     }
 
     /**
@@ -43,8 +74,10 @@ class SessionLogger(private val context: Context) {
      *                   `session_<timestamp>.csv`.
      * @return  El [File] creado, o null si no hay entradas o falla la escritura.
      */
-    fun exportCSV(levelName: String = ""): File? {
-        if (entries.isEmpty()) return null
+    fun exportCSV(levelName: String = ""): File? = writeCsv(entries, levelName)
+
+    private fun writeCsv(rows: List<SessionEntry>, levelName: String): File? {
+        if (rows.isEmpty()) return null
 
         val timestamp = SimpleDateFormat("yyyy-MM-dd_HH-mm-ss", Locale.getDefault())
             .format(Date())
@@ -68,7 +101,7 @@ class SessionLogger(private val context: Context) {
                     "robot_action,room_index,room_title," +
                     "escape_room_name,module_type,temi_speaking\n"
                 )
-                entries.forEach { e ->
+                rows.forEach { e ->
                     writer.write(
                         "${e.timestamp},${e.state}," +
                         "${e.concentration},${e.mellow},${e.gammaActivity}," +
@@ -82,7 +115,7 @@ class SessionLogger(private val context: Context) {
                     )
                 }
             }
-            Log.i(TAG, "CSV exportado: ${file.absolutePath} (${entries.size} filas)")
+            Log.i(TAG, "CSV exportado: ${file.absolutePath} (${rows.size} filas)")
             file
         } catch (e: Exception) {
             Log.e(TAG, "Error exportando CSV", e)
@@ -90,11 +123,17 @@ class SessionLogger(private val context: Context) {
         }
     }
 
-    fun clearSession() { entries.clear() }
+    fun clearSession() { entries.clear(); truncated = false }
     fun size(): Int = entries.size
 
     companion object {
         private const val TAG = "SessionLogger"
+
+        /** ~10 min a 4 Hz — capacidad inicial para evitar recopias del ArrayList. */
+        private const val INITIAL_CAPACITY = 2_400
+
+        /** Techo de muestras en memoria (~2,5 h a 4 Hz) para no agotar el heap. */
+        private const val MAX_ENTRIES = 36_000
         private fun Boolean.toInt() = if (this) 1 else 0
 
         /** Campo CSV entrecomillado con las comillas internas dobladas (RFC 4180). */

@@ -29,7 +29,9 @@ class MorseDecoder(
     /** Silencio tras el que se cierra la letra. */
     var letterGapMs: Long = LETTER_GAP_DEFAULT_MS,
     /** Silencio adicional tras el que se inserta un espacio. */
-    var wordGapMs: Long = WORD_GAP_DEFAULT_MS
+    var wordGapMs: Long = WORD_GAP_DEFAULT_MS,
+    /** Fuente de tiempo (ms). Inyectable para tests deterministas; por defecto el reloj real. */
+    private val clock: () -> Long = { System.currentTimeMillis() }
 ) {
 
     var onSymbolsUpdated: ((String) -> Unit)? = null
@@ -63,7 +65,7 @@ class MorseDecoder(
      * Debe usarse con blinkDebounceMs ≤ 150 ms en modo Morse.
      */
     fun recordBlink() {
-        val now = System.currentTimeMillis()
+        val now = clock()
 
         // Cancelar cierres pendientes mientras el usuario sigue parpadeando
         handler.removeCallbacks(letterRunnable)
