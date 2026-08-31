@@ -108,4 +108,50 @@ class EscapeRoomEngineTest {
         assertFalse(completed)
         assertFalse(engine.isRunning)
     }
+
+    /** Modulo que salta a una sala concreta, como hace YesNoModule al bifurcar. */
+    private class BranchingModule(title: String, private val target: Int) :
+        RoomModule(title, "narracion", "pista") {
+        override fun onBlink() { onSuccessAt?.invoke(target) }
+    }
+
+    @Test
+    fun bifurcacion_saltaALaSalaIndicada() {
+        val engine = EscapeRoomEngine()
+        val rooms = mutableListOf<Triple<Int, Int, String>>()
+        engine.onRoomChanged = { c, t, ti -> rooms.add(Triple(c, t, ti)) }
+
+        // La sala 0 bifurca al indice 2, saltandose la 1.
+        engine.load(EscapeRoomDef("branch", "Con bifurcacion", listOf(
+            BranchingModule("Eleccion", target = 2),
+            InstantModule("Rama descartada"),
+            InstantModule("Destino")
+        )))
+        engine.start()
+
+        engine.onBlink(); idle()
+
+        assertEquals("debe saltar directamente a la tercera sala",
+            Triple(3, 3, "Destino"), rooms.last())
+        assertEquals("la sala intermedia no debe visitarse",
+            listOf("Eleccion", "Destino"), rooms.map { it.third })
+    }
+
+    @Test
+    fun trasLaBifurcacion_elJuegoSigueSuCursoNormal() {
+        val engine = EscapeRoomEngine()
+        var completed = false
+        engine.onCompleted = { completed = true }
+        engine.load(EscapeRoomDef("branch", "Con bifurcacion", listOf(
+            BranchingModule("Eleccion", target = 2),
+            InstantModule("Rama descartada"),
+            InstantModule("Destino")
+        )))
+        engine.start()
+
+        engine.onBlink(); idle()   // bifurca a la sala 2
+        engine.onBlink(); idle()   // supera la sala 2 -> fin
+
+        assertTrue("el nivel debe completarse tras la rama", completed)
+    }
 }

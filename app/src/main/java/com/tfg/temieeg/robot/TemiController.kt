@@ -224,9 +224,12 @@ class TemiController(private val robot: Robot?, private val appContext: Context)
     fun speak(text: String) {
         log("TTS → \"$text\"")
         if (isSimulated) {
-            // Sin hardware real: simulamos el fin del TTS para no bloquear la cadena
-            // de dispatchActions (igual que hace goTo() en modo simulado).
-            handler.postDelayed({ onTtsEnd?.invoke() }, 300L)
+            // Sin robot (movil o emulador) la narracion se oye por el TTS nativo
+            // de Android, que ya esta inicializado arriba con su listener de fin.
+            // Antes solo se logueaba y se falseaba el fin a los 300 ms, asi que
+            // en el movil el juego avanzaba en silencio y sin respetar el tiempo
+            // real de la locucion.
+            speakAndroid(text)
             return
         }
         if (!robotReady) { log("Robot no listo — usando Android TTS (fallback)"); speakAndroid(text); return }

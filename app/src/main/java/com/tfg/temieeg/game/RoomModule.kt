@@ -167,6 +167,14 @@ class CalmModule(
 
     private var calmSeconds = 0
     private var tickActive  = false
+    /**
+     * true en cuanto se supera la sala. Sin esta marca, cada nueva muestra de
+     * estado mental (llegan ~4 por segundo y NO se bloquean mientras el robot
+     * habla) volvia a entrar por onMentalState, veia tickActive=false y
+     * relanzaba el contador: la felicitacion sonaba repetida y los segundos se
+     * disparaban durante el segundo y medio previo al cambio de sala.
+     */
+    private var completed   = false
 
     private val calmTick = object : Runnable {
         override fun run() {
@@ -175,6 +183,7 @@ class CalmModule(
             onHintChanged?.invoke("$calmSeconds / $secondsRequired s 🧘")
             if (calmSeconds >= secondsRequired) {
                 tickActive = false
+                completed  = true
                 onFeedback?.invoke("✅ ¡Calma mantenida! Puerta abierta.", true)
                 onTemiSpeak?.invoke("¡Perfecto! La puerta se abre.")
                 handler.postDelayed({ onSuccess?.invoke() }, 1500L)
@@ -187,6 +196,7 @@ class CalmModule(
     override fun start() {
         calmSeconds = 0
         tickActive  = false
+        completed   = false   // los modulos del catalogo se reutilizan entre partidas
         if (!hasRobotSpeech) onTemiSpeak?.invoke(narration)
     }
 
@@ -196,6 +206,7 @@ class CalmModule(
     }
 
     override fun onMentalState(state: MentalState) {
+        if (completed) return   // sala ya superada: ignorar el resto de muestras
         if (state == MentalState.CALM) {
             if (!tickActive) {
                 tickActive = true
@@ -225,7 +236,7 @@ class CalmModule(
 class MorseModule(
     title: String,
     narration: String,
-    hint: String = "Escribe en Morse la letra indicada",
+    hint: String = "1 parpadeo = ·      2 parpadeos rápidos = —",
     /** Letras que pueden salir (elige las más sencillas para niños). */
     val letterPool: List<Char> = "ETISAN".toList(),
     /**
@@ -280,8 +291,23 @@ class MorseModule(
 
     private fun pickNewLetter() {
         targetLetter = letterPool.random()
-        onHintChanged?.invoke("Escribe en Morse → $targetLetter")
-        speakSilenced("Escribe la letra $targetLetter en código Morse.")
+        // Se muestra tambien el patron de puntos y rayas: obligar a abrir el
+        // menu de ayuda en cada letra rompia el ritmo del juego.
+        onHintChanged?.invoke(hintFor(targetLetter))
+        speakSilenced("Escribe la letra $targetLetter en código Morse. ${spokenCode(targetLetter)}")
+    }
+
+    /** Pista con la letra objetivo y su patron, p.ej. "Letra S  →  · · ·". */
+    private fun hintFor(letter: Char): String {
+        val code = MorseDecoder.spacedCodeFor(letter)
+        return if (code != null) "Letra $letter  →  $code" else "Escribe en Morse → $letter"
+    }
+
+    /** El patron dictado en voz alta ("punto punto punto"), para reforzar por audio. */
+    private fun spokenCode(letter: Char): String {
+        val code = MorseDecoder.codeFor(letter) ?: return ""
+        return code.map { if (it == MorseDecoder.DASH_CHAR) "raya" else "punto" }
+            .joinToString(", ")
     }
 
     private fun evaluateLetter(letter: Char) {
@@ -292,7 +318,12 @@ class MorseModule(
             speakSilenced("¡Muy bien! El código es correcto.")
             handler.postDelayed({ onSuccess?.invoke() }, 1500L)
         } else {
-            onFeedback?.invoke("❌ Era «$targetLetter» — inténtalo de nuevo.", false)
+            val code = MorseDecoder.spacedCodeFor(targetLetter)
+            onFeedback?.invoke(
+                if (code != null) "❌ Era «$targetLetter»  ($code) — inténtalo de nuevo."
+                else              "❌ Era «$targetLetter» — inténtalo de nuevo.",
+                false
+            )
             speakSilenced("No es correcto. La letra era $targetLetter. Inténtalo de nuevo.")
             handler.postDelayed(::pickNewLetter, 1800L)
         }
@@ -605,6 +636,8 @@ class VideoStateModule(
 
     private var seconds    = 0
     private var tickActive = false
+    /** Ver CalmModule: impide que la sala se vuelva a superar en bucle. */
+    private var completed  = false
 
     private val tick = object : Runnable {
         override fun run() {
@@ -618,6 +651,7 @@ class VideoStateModule(
             onHintChanged?.invoke("$seconds / $secondsRequired s — $label")
             if (seconds >= secondsRequired) {
                 tickActive = false
+                completed  = true
                 onStopConcurrentVideo?.invoke()
                 onFeedback?.invoke("✅ ¡Superado!", true)
                 onTemiSpeak?.invoke("¡Perfecto! Lo has conseguido.")
@@ -631,6 +665,7 @@ class VideoStateModule(
     override fun start() {
         seconds    = 0
         tickActive = false
+        completed  = false
         if (!hasRobotSpeech) onTemiSpeak?.invoke(narration)
         if (videoPath != null || videoResId != null) onStartConcurrentVideo?.invoke(videoPath)
 
@@ -650,6 +685,7 @@ class VideoStateModule(
     }
 
     override fun onMentalState(state: MentalState) {
+        if (completed) return                // sala ya superada
         val target = targetState ?: return   // modo libre: ignorar estado EEG
         if (state == target) {
             if (!tickActive) { tickActive = true; handler.post(tick) }

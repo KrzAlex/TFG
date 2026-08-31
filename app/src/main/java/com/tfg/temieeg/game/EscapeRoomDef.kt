@@ -45,217 +45,342 @@ data class EscapeRoomDef(
  */
 object EscapeRoomCatalog {
 
+    // ══════════════════════════════════════════════════════════════════════════
+    // Los tres niveles narrativos forman una curva de dificultad:
+    //
+    //   CLASSIC  tutorial      · introduce un mecanismo por sala, tiempos amplios
+    //   SPACE    intermedio    · añade elección de ruta (bifurcación real)
+    //   CASTLE   exigente      · letras Morse largas, calma larga, ventana corta
+    //
+    // Convención de textos: `narration` es lo que se lee en pantalla (breve) y
+    // el SPEAK de robotActions es lo que dice el robot (más extenso, con la
+    // instrucción). No se duplican: cuando un módulo tiene SPEAK, el motor no
+    // vuelve a narrar por su cuenta (RoomModule.hasRobotSpeech).
+    //
+    // Ninguno usa GOTO a propósito: las ubicaciones dependen del mapa concreto
+    // de cada robot y un nivel del catálogo debe funcionar en cualquiera.
+    // ══════════════════════════════════════════════════════════════════════════
+
     // ── Historia 1: El Escape Clásico ─────────────────────────────────────────
+    //
+    // Nivel tutorial. Cada sala enseña UN mecanismo y perdona los fallos:
+    // calma corta, las dos letras Morse de un solo símbolo (E = ·, T = —),
+    // dos preguntas y una ventana de mandíbula generosa.
 
     val CLASSIC = EscapeRoomDef(
-        id      = "classic",
-        name    = "El Escape Clásico",
+        id                   = "classic",
+        name                 = "El Escape Clásico",
+        introVideoResId      = com.tfg.temieeg.R.raw.clasico_intro,
+        transitionVideoResId = com.tfg.temieeg.R.raw.clasico_transicion,
         modules = listOf(
 
             CalmModule(
                 title           = "La Puerta de la Calma",
-                narration       = "Ante ti se alza una puerta sellada por la energía " +
-                                  "mental. Solo la calma puede abrirla.",
-                hint            = "Mantén la calma 5 segundos",
-                secondsRequired = 5,
+                narration       = "Una puerta sellada por energía mental. Solo se abre " +
+                                  "cuando tu mente se serena.",
+                hint            = "Respira despacio y mantén la calma",
+                secondsRequired = 4,
                 robotActions    = listOf(
                     RobotAction(RobotAction.Type.TILT_HEAD, "25"),
                     RobotAction(RobotAction.Type.SPEAK,
-                        "Ante ti se alza una puerta sellada por la energía mental. " +
-                        "Solo la calma puede abrirla. Mantén la calma durante cinco segundos.")
+                        "Bienvenido. Ante ti hay una puerta sellada por energía mental. " +
+                        "Para abrirla solo tienes que relajarte: respira despacio y mantén " +
+                        "la calma durante cuatro segundos. Yo te aviso cuando lo consigas.")
                 )
             ),
 
             MorseModule(
                 title      = "El Código Secreto",
-                narration  = "Un panel críptico pide una clave en código Morse. " +
-                             "Escucha la letra y escríbela con tus parpadeos.",
-                hint       = "Escribe en Morse la letra que te digo",
-                letterPool = "ETISAN".toList(),
+                narration  = "Un panel pide una clave en código Morse. Escríbela con " +
+                             "tus parpadeos.",
+                hint       = "1 parpadeo = ·      2 parpadeos rápidos = —",
+                // Solo E y T: son las dos letras de un único símbolo, ideales para
+                // aprender la diferencia entre punto y raya sin encadenar señales.
+                letterPool = "ET".toList(),
                 robotActions = listOf(
                     RobotAction(RobotAction.Type.TILT_HEAD, "25"),
                     RobotAction(RobotAction.Type.SPEAK,
-                        "Un panel críptico pide una clave en código Morse. " +
-                        "Escucha la letra y escríbela con tus parpadeos.")
+                        "Este panel pide una clave en código Morse. Es más fácil de lo que " +
+                        "parece: un parpadeo normal es un punto, y dos parpadeos seguidos y " +
+                        "rápidos son una raya. Te diré qué letra necesito y la verás en pantalla.")
                 )
             ),
 
             YesNoModule(
-                title     = "El Oráculo",
-                narration = "Una figura sabia bloquea el paso. Responde sus tres " +
-                            "preguntas correctamente para continuar.",
-                hint      = "Asiente ✅ SÍ  ·  Niega ❌ NO",
+                title     = "El Guardián de la Sala",
+                narration = "Un guardián antiguo te cierra el paso. Responde moviendo " +
+                            "la cabeza.",
+                hint      = "Asiente para SÍ  ·  Niega para NO",
                 questions = listOf(
-                    YesNoQuestion("¿Eres capaz de mantener la calma?",         true),
-                    YesNoQuestion("¿Tienes miedo de los retos mentales?",       false),
-                    YesNoQuestion("¿Estás listo para el último desafío?",       true)
+                    YesNoQuestion("El guardián pregunta: ¿vienes en son de paz?", expectedYes = true),
+                    YesNoQuestion("¿Piensas llevarte el tesoro de la sala?",      expectedYes = false)
                 ),
                 robotActions = listOf(
                     RobotAction(RobotAction.Type.TILT_HEAD, "25"),
                     RobotAction(RobotAction.Type.SPEAK,
-                        "Una figura sabia bloquea el paso. Responde mis tres preguntas correctamente. " +
-                        "Asiente para Sí. Niega para No.")
+                        "Un guardián antiguo bloquea la salida. Para responderle, asiente con " +
+                        "la cabeza si tu respuesta es sí, o niega si es no. Te pediré que " +
+                        "repitas el gesto para confirmar, así no cuentan los movimientos sin querer.")
                 )
             ),
 
             BlinkClenchModule(
                 title       = "La Cerradura Final",
-                narration   = "La última puerta tiene dos mecanismos. " +
-                              "Usa todos tus poderes mentales para escapar.",
-                hint        = "Parpadea 👁 para girar la llave · Aprieta 😬 la mandíbula para abrir",
-                jawWindowMs = 4000L,
+                narration   = "La última puerta tiene dos mecanismos: una llave y un cerrojo.",
+                hint        = "Primero parpadea · Después aprieta la mandíbula",
+                jawWindowMs = 5500L,   // tutorial: ventana amplia para no frustrar
                 robotActions = listOf(
                     RobotAction(RobotAction.Type.TILT_HEAD, "25"),
                     RobotAction(RobotAction.Type.SPEAK,
-                        "La última puerta tiene dos mecanismos. " +
-                        "Parpadea para girar la llave. Luego aprieta la mandíbula para abrirla.")
+                        "Última puerta. Tiene dos mecanismos y hay que accionarlos en orden. " +
+                        "Primero parpadea para girar la llave. Después aprieta la mandíbula " +
+                        "para descorrer el cerrojo. Tendrás tiempo de sobra.")
                 )
             )
         )
     )
 
     // ── Historia 2: Aventura Espacial ─────────────────────────────────────────
+    //
+    // Nivel intermedio. Introduce una BIFURCACIÓN real: en la sala 2 el jugador
+    // elige la ruta y su respuesta decide qué salas juega.
+    //
+    //   índice 2 · «¿Atajo por el cinturón?»
+    //        SÍ  → 3  cinturón de asteroides (Morse) → 4 maniobra evasiva → 5 → 6
+    //        NO  → 5  ruta larga: se salta las salas 3 y 4 y va al desenlace
+    //
+    // El desenlace (5 y 6) es común a las dos rutas.
 
     val SPACE = EscapeRoomDef(
-        id      = "space",
-        name    = "Aventura Espacial",
+        id                   = "space",
+        name                 = "Aventura Espacial",
+        introVideoResId      = com.tfg.temieeg.R.raw.espacial_intro,
+        transitionVideoResId = com.tfg.temieeg.R.raw.espacial_transicion,
         modules = listOf(
 
-            CalmModule(
-                title           = "Nave en Deriva",
-                narration       = "La nave espacial está a la deriva en el vacío. " +
-                                  "Solo tu mente en calma puede estabilizarla.",
-                hint            = "Estabiliza la nave — mantén la calma 4 s",
-                secondsRequired = 4,
-                robotActions    = listOf(
-                    RobotAction(RobotAction.Type.TILT_HEAD, "25"),
+            // 0 ── Briefing
+            RobotAnimModule(
+                title     = "Puente de mando",
+                narration = "La nave ha perdido el rumbo. Recibes las instrucciones de a bordo.",
+                hint      = "Escucha el informe de la nave",
+                delayMs   = 4000L,
+                robotActions = listOf(
+                    RobotAction(RobotAction.Type.TILT_HEAD, "30"),
                     RobotAction(RobotAction.Type.SPEAK,
-                        "La nave espacial está a la deriva en el vacío. " +
-                        "Solo tu mente en calma puede estabilizarla. Mantén la calma durante cuatro segundos.")
+                        "Alerta. La nave ha perdido el rumbo y tú eres el único tripulante " +
+                        "despierto. Soy la inteligencia de a bordo y voy a guiarte."),
+                    RobotAction(RobotAction.Type.WAIT,      "800"),
+                    RobotAction(RobotAction.Type.TURN,      "45"),
+                    RobotAction(RobotAction.Type.WAIT,      "600"),
+                    RobotAction(RobotAction.Type.TURN,      "-45"),
+                    RobotAction(RobotAction.Type.SPEAK,     "Sistemas revisados. Empezamos.")
                 )
             ),
 
+            // 1 ── Calma
+            CalmModule(
+                title           = "Cámara de criogenia",
+                narration       = "Sales del sueño criogénico. El sistema necesita tus " +
+                                  "constantes estables antes de liberarte.",
+                hint            = "Mantén la calma para estabilizar tus constantes",
+                secondsRequired = 6,
+                robotActions    = listOf(
+                    RobotAction(RobotAction.Type.TILT_HEAD, "25"),
+                    RobotAction(RobotAction.Type.SPEAK,
+                        "Acabas de salir del sueño criogénico. La cápsula no te liberará hasta " +
+                        "que tus constantes se estabilicen: respira hondo y mantén la calma " +
+                        "durante seis segundos.")
+                )
+            ),
+
+            // 2 ── Elección de ruta (bifurcación)
             YesNoModule(
-                title     = "El Robot Guardián",
-                narration = "Un robot guardián custodia la sala de control. " +
-                            "Responde correctamente a sus preguntas de seguridad.",
-                hint      = "Asiente ✅ SÍ  ·  Niega ❌ NO",
+                title     = "Rumbo de la nave",
+                narration = "Dos rutas hasta la estación. Tú decides cuál tomamos.",
+                hint      = "Asiente para SÍ  ·  Niega para NO",
                 questions = listOf(
-                    YesNoQuestion("¿Vienes en misión de paz?",        true),
-                    YesNoQuestion("¿Eres un intruso peligroso?",       false),
-                    YesNoQuestion("¿Conoces el protocolo estelar?",    true)
+                    YesNoQuestion("¿Confirmas que los motores responden?", expectedYes = true),
+                    // Última pregunta: al llevar goto, decide la ruta y salta de sala.
+                    // Cualquier pregunta posterior no llegaría a formularse.
+                    YesNoQuestion(
+                        text      = "Atajo por el cinturón de asteroides: más corto, pero peligroso. ¿Lo tomamos?",
+                        gotoOnYes = 3,   // ruta peligrosa: dos salas extra
+                        gotoOnNo  = 5    // ruta larga: directo al desenlace
+                    )
                 ),
                 robotActions = listOf(
                     RobotAction(RobotAction.Type.TILT_HEAD, "25"),
                     RobotAction(RobotAction.Type.SPEAK,
-                        "Soy el robot guardián de la sala de control. " +
-                        "Responde correctamente a mis preguntas de seguridad. " +
-                        "Asiente para Sí. Niega para No.")
+                        "Tenemos dos rutas posibles hasta la estación y la decisión es tuya. " +
+                        "Responde asintiendo o negando con la cabeza.")
                 )
             ),
 
+            // 3 ── Ruta peligrosa: Morse
             MorseModule(
-                title      = "La Señal SOS",
-                narration  = "Los sistemas de comunicación fallan. " +
-                             "Debes enviar una señal de socorro en código Morse.",
-                hint       = "Transmite en Morse la letra indicada",
-                // Solo letras sencillas: punto (E·T), punto-punto (I··), punto-raya (A·-)
-                // y raya-punto (N-·). Evitamos M(--) y O(---) que requieren
-                // secuencias de doble parpadeo muy largas y generan falsos negativos.
-                letterPool = "ETISAN".toList(),
+                title      = "El cinturón de asteroides",
+                narration  = "Entre las rocas hay una baliza de rescate. Contéstale en Morse.",
+                hint       = "1 parpadeo = ·      2 parpadeos rápidos = —",
+                letterPool = "ESITAN".toList(),
+                videoResId = com.tfg.temieeg.R.raw.espacial_ruta_asteroides,
                 robotActions = listOf(
                     RobotAction(RobotAction.Type.TILT_HEAD, "25"),
                     RobotAction(RobotAction.Type.SPEAK,
-                        "Los sistemas de comunicación fallan. " +
-                        "Debes enviar una señal de socorro en código Morse. " +
-                        "Parpadea la letra que veas en pantalla.")
+                        "Ruta peligrosa confirmada. Entre los asteroides hay una baliza de " +
+                        "rescate emitiendo en Morse. Respóndele con tus parpadeos para que " +
+                        "nos abra un corredor seguro.")
                 )
             ),
 
+            // 4 ── Ruta peligrosa: reflejos
             BlinkClenchModule(
-                title       = "Panel de Evacuación",
-                narration   = "El panel de evacuación requiere dos gestos precisos " +
-                              "y coordinados para activarse.",
-                hint        = "Parpadea 👁 para activar · Aprieta 😬 la mandíbula para lanzar",
-                // 4 s desde que el robot termina de hablar (no desde el parpadeo).
-                // El timer empieza después del TTS gracias a onTemiSpeakDone.
+                title       = "Maniobra evasiva",
+                narration   = "Un asteroide viene de frente. Escudo y propulsor, en ese orden.",
+                hint        = "Parpadea para el escudo · Aprieta la mandíbula para impulsar",
+                jawWindowMs = 4500L,
+                robotActions = listOf(
+                    RobotAction(RobotAction.Type.TILT_HEAD, "20"),
+                    RobotAction(RobotAction.Type.SPEAK,
+                        "¡Asteroide de frente! Parpadea para levantar el escudo y aprieta la " +
+                        "mandíbula enseguida para activar el propulsor.")
+                )
+            ),
+
+            // 5 ── Desenlace común
+            CalmModule(
+                title           = "Reserva de oxígeno",
+                narration       = "Queda poco oxígeno. Cuanto más tranquilo respires, más durará.",
+                hint            = "Mantén la calma para ahorrar oxígeno",
+                secondsRequired = 6,
+                robotActions    = listOf(
+                    RobotAction(RobotAction.Type.TILT_HEAD, "25"),
+                    RobotAction(RobotAction.Type.SPEAK,
+                        "La reserva de oxígeno está al mínimo. Cuanto más tranquila sea tu " +
+                        "respiración, más nos durará. Mantén la calma seis segundos.")
+                )
+            ),
+
+            // 6 ── Final común
+            BlinkClenchModule(
+                title       = "Secuencia de aterrizaje",
+                narration   = "La estación te abre la compuerta. Ejecuta la secuencia final.",
+                hint        = "Parpadea para alinear · Aprieta la mandíbula para acoplar",
                 jawWindowMs = 4000L,
+                videoResId  = com.tfg.temieeg.R.raw.espacial_aterrizaje,
                 robotActions = listOf(
                     RobotAction(RobotAction.Type.TILT_HEAD, "25"),
                     RobotAction(RobotAction.Type.SPEAK,
-                        "El panel de evacuación requiere dos gestos precisos. " +
-                        "Parpadea para activar los motores. " +
-                        "Luego aprieta la mandíbula para lanzar la cápsula.")
+                        "Estación a la vista. Última maniobra: parpadea para alinear la nave " +
+                        "y aprieta la mandíbula para completar el acoplamiento.")
                 )
             )
         )
     )
 
     // ── Historia 3: El Castillo Encantado ─────────────────────────────────────
+    //
+    // Nivel exigente: letras Morse de tres símbolos, calma más larga y ventana
+    // de mandíbula corta. La bifurcación aquí penaliza el error en vez de
+    // ofrecer una ruta:
+    //
+    //   índice 1 · el espejo miente
+    //        acierto → 3  sigue camino
+    //        fallo   → 2  sala de castigo, y desde ahí continúa a 3
+    //
+    // Así el error cuesta una sala extra, pero nunca deja al jugador atascado.
 
     val CASTLE = EscapeRoomDef(
         id      = "castle",
         name    = "El Castillo Encantado",
         modules = listOf(
 
+            // 0 ── Morse difícil
             MorseModule(
                 title      = "El Grimorio",
-                narration  = "El grimorio del castillo requiere una contraseña mágica " +
-                             "escrita en el antiguo código de los magos.",
-                hint       = "Escribe en Morse la runa indicada",
-                letterPool = "MAGIE".toList(),
+                narration  = "Un libro de hechizos exige la runa correcta, trazada con " +
+                             "puntos y rayas.",
+                hint       = "1 parpadeo = ·      2 parpadeos rápidos = —",
+                // Letras de tres símbolos: más largas de trazar que las del tutorial.
+                letterPool = "RUDKGO".toList(),
                 robotActions = listOf(
-                    RobotAction(RobotAction.Type.TILT_HEAD, "25"),
+                    RobotAction(RobotAction.Type.TILT_HEAD, "28"),
                     RobotAction(RobotAction.Type.SPEAK,
-                        "El grimorio del castillo requiere una contraseña mágica " +
-                        "escrita en el antiguo código de los magos. Parpadea la runa que aparezca.")
+                        "Este grimorio solo se abre con la runa exacta. Las runas de este " +
+                        "castillo son más largas que las que has visto hasta ahora: tres " +
+                        "señales cada una. Tómate tu tiempo, verás el trazo en pantalla.")
                 )
             ),
 
+            // 1 ── El espejo (bifurcación por acierto/fallo)
             YesNoModule(
-                title     = "El Fantasma del Torreón",
-                narration = "El fantasma del torreón te reta con acertijos. " +
-                            "Responde bien y te dejará pasar.",
-                hint      = "Asiente ✅ SÍ  ·  Niega ❌ NO",
+                title     = "El Espejo que Miente",
+                narration = "Un espejo encantado te interroga. Dicen que solo miente " +
+                            "cuando le conviene.",
+                hint      = "Asiente para SÍ  ·  Niega para NO",
                 questions = listOf(
-                    YesNoQuestion("¿Eres un mago valiente?",           true),
-                    YesNoQuestion("¿Le tienes miedo a los fantasmas?", false),
-                    YesNoQuestion("¿Puedes resolver este acertijo?",   true),
-                    YesNoQuestion("¿El sol sale por el oeste?",        false)
+                    YesNoQuestion("¿Has cruzado ya la sala del grimorio?", expectedYes = true),
+                    YesNoQuestion("¿Te fías de lo que dice un espejo encantado?", expectedYes = false),
+                    // Al llevar goto, esta pregunta decide el camino y salta de sala.
+                    YesNoQuestion(
+                        text      = "El espejo te ofrece un atajo. ¿Rechazas su ayuda?",
+                        gotoOnYes = 3,   // desconfiar era lo correcto: sigues camino
+                        gotoOnNo  = 2    // aceptar el atajo: caes en la sala de los susurros
+                    )
                 ),
                 robotActions = listOf(
                     RobotAction(RobotAction.Type.TILT_HEAD, "25"),
                     RobotAction(RobotAction.Type.SPEAK,
-                        "Soy el fantasma del torreón. Te retaré con acertijos. " +
-                        "Responde bien y te dejaré pasar. Asiente para Sí. Niega para No.")
+                        "Un espejo encantado te cierra el paso y quiere hacerte preguntas. " +
+                        "Ten cuidado con lo que aceptas: en este castillo la ayuda gratis " +
+                        "suele salir cara.")
                 )
             ),
 
-            CalmModule(
-                title           = "La Sala de los Espejos",
-                narration       = "Los espejos mágicos solo se rompen con la energía " +
-                                  "de una mente completamente en calma.",
-                hint            = "Siente la calma… 6 segundos",
-                secondsRequired = 6,
-                robotActions    = listOf(
-                    RobotAction(RobotAction.Type.TILT_HEAD, "25"),
+            // 2 ── Castigo por fiarse del espejo
+            MorseModule(
+                title      = "El Eco del Hechizo",
+                narration  = "El atajo era una trampa. Para salir del eco hay que repetir " +
+                             "la runa que lo cerró.",
+                hint       = "1 parpadeo = ·      2 parpadeos rápidos = —",
+                letterPool = "RUDK".toList(),
+                robotActions = listOf(
+                    RobotAction(RobotAction.Type.TILT_HEAD, "20"),
+                    RobotAction(RobotAction.Type.TURN,      "60"),
+                    RobotAction(RobotAction.Type.WAIT,      "600"),
+                    RobotAction(RobotAction.Type.TURN,      "-60"),
                     RobotAction(RobotAction.Type.SPEAK,
-                        "Los espejos mágicos solo se rompen con la energía de una mente completamente en calma. " +
-                        "Siente la calma durante seis segundos.")
+                        "Te has fiado del espejo y el atajo era una trampa. Estás en la sala " +
+                        "del eco. Repite la runa que la cerró y te dejará salir.")
                 )
             ),
 
+            // 3 ── Calma larga
+            CalmModule(
+                title           = "La Cripta",
+                narration       = "El frío de la cripta solo se soporta con la mente serena.",
+                hint            = "Mantén la calma, ahora durante más tiempo",
+                secondsRequired = 8,   // el más largo de los tres niveles
+                robotActions    = listOf(
+                    RobotAction(RobotAction.Type.TILT_HEAD, "30"),
+                    RobotAction(RobotAction.Type.SPEAK,
+                        "Has llegado a la cripta. Aquí el frío solo se soporta con la mente " +
+                        "serena, y hace falta más aguante que antes: ocho segundos de calma " +
+                        "sin perderla.")
+                )
+            ),
+
+            // 4 ── Final con ventana corta
             BlinkClenchModule(
-                title       = "El Portal Dimensional",
-                narration   = "El portal al mundo real se activa con dos gestos " +
-                              "mágicos realizados en el momento exacto.",
-                hint        = "Parpadea 👁 para abrir el portal · Aprieta 😬 la mandíbula para cruzar",
-                jawWindowMs = 4500L,
+                title       = "El Portón de Hierro",
+                narration   = "El portón cede un instante. Hay que aprovecharlo.",
+                hint        = "Parpadea y aprieta la mandíbula sin demora",
+                jawWindowMs = 3000L,   // ventana corta: exige reaccionar rápido
                 robotActions = listOf(
                     RobotAction(RobotAction.Type.TILT_HEAD, "25"),
                     RobotAction(RobotAction.Type.SPEAK,
-                        "El portal al mundo real se activa con dos gestos mágicos. " +
-                        "Parpadea para abrir el portal. Luego aprieta la mandíbula para cruzar.")
+                        "El portón de hierro es lo único que te separa de la salida, pero " +
+                        "solo cede un instante. Parpadea para soltar el pestillo y aprieta " +
+                        "la mandíbula enseguida, sin esperar.")
                 )
             )
         )

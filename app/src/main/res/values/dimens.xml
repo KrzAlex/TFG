@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Medidas base — pantallas estrechas (móviles en horizontal).
+
+    La app se fija en landscape, así que en un móvil la altura disponible es
+    mucho menor que en la tablet del robot y el contenido de la pantalla
+    principal no cabía: la última fila (el botón de Configuración) quedaba
+    recortada. Estos valores son los seguros; values-sw600dp/dimens.xml los
+    sustituye por los tamaños grandes en tablets de 600dp o más.
+-->
+<resources>
+
+    <!-- ── Cabecera ─────────────────────────────────────────────────────── -->
+    <dimen name="header_padding_h">20dp</dimen>
+    <dimen name="header_padding_top">10dp</dimen>
+    <dimen name="header_padding_bottom">12dp</dimen>
+    <dimen name="header_logo_size">44dp</dimen>
+    <dimen name="header_logo_padding">10dp</dimen>
+    <dimen name="header_logo_margin_end">10dp</dimen>
+    <dimen name="header_title_text">21sp</dimen>
+    <dimen name="header_subtitle_text">9sp</dimen>
+    <dimen name="header_status_text">11sp</dimen>
+
+    <!-- Chips de estado (señal, batería) -->
+    <dimen name="chip_padding_h">10dp</dimen>
+    <dimen name="chip_padding_v">5dp</dimen>
+    <dimen name="chip_text">11sp</dimen>
+
+    <!-- ── Pantalla principal ───────────────────────────────────────────── -->
+    <dimen name="home_body_padding_h">20dp</dimen>
+    <dimen name="home_body_padding_v">10dp</dimen>
+    <dimen name="home_column_gap">12dp</dimen>
+
+    <!-- Orbe de estado mental -->
+    <dimen name="orb_size">160dp</dimen>
+    <dimen name="orb_inner_size">126dp</dimen>
+    <dimen name="orb_state_text">28sp</dimen>
+    <dimen name="orb_label_margin">10dp</dimen>
+
+    <!-- Columna de acciones -->
+    <dimen name="home_cta_text">16sp</dimen>
+    <dimen name="home_cta_margin">10dp</dimen>
+    <dimen name="btn_play_height">52dp</dimen>
+    <dimen name="btn_play_text">16sp</dimen>
+    <dimen name="btn_secondary_height">44dp</dimen>
+    <dimen name="btn_secondary_text">13sp</dimen>
+    <dimen name="btn_ghost_text">12sp</dimen>
+
+    <!-- ── Escape room ──────────────────────────────────────────────────── -->
+    <dimen name="er_body_padding_h">18dp</dimen>
+    <dimen name="er_body_padding_v">14dp</dimen>
+    <dimen name="er_module_icon">56dp</dimen>
+    <dimen name="er_module_icon_padding">13dp</dimen>
+    <dimen name="er_room_title_text">19sp</dimen>
+    <dimen name="er_card_padding">16dp</dimen>
+    <dimen name="er_narration_text">14sp</dimen>
+    <dimen name="er_hint_text">16sp</dimen>
+    <dimen name="er_morse_text">26sp</dimen>
+    <dimen name="er_feedback_text">15sp</dimen>
+
+</resources>

@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Medidas para tablets (ancho mínimo de 600dp), que es el caso de la tablet
+    del robot Temi (1280x800). Son los tamaños con los que se diseñó la
+    interfaz; values/dimens.xml mantiene los equivalentes reducidos para que
+    la misma pantalla quepa en un móvil en horizontal.
+-->
+<resources>
+
+    <!-- ── Cabecera ─────────────────────────────────────────────────────── -->
+    <dimen name="header_padding_h">40dp</dimen>
+    <dimen name="header_padding_top">18dp</dimen>
+    <dimen name="header_padding_bottom">20dp</dimen>
+    <dimen name="header_logo_size">56dp</dimen>
+    <dimen name="header_logo_padding">12dp</dimen>
+    <dimen name="header_logo_margin_end">16dp</dimen>
+    <dimen name="header_title_text">28sp</dimen>
+    <dimen name="header_subtitle_text">12sp</dimen>
+    <dimen name="header_status_text">13sp</dimen>
+
+    <dimen name="chip_padding_h">14dp</dimen>
+    <dimen name="chip_padding_v">7dp</dimen>
+    <dimen name="chip_text">12sp</dimen>
+
+    <!-- ── Pantalla principal ───────────────────────────────────────────── -->
+    <dimen name="home_body_padding_h">44dp</dimen>
+    <dimen name="home_body_padding_v">24dp</dimen>
+    <dimen name="home_column_gap">20dp</dimen>
+
+    <dimen name="orb_size">264dp</dimen>
+    <dimen name="orb_inner_size">206dp</dimen>
+    <dimen name="orb_state_text">44sp</dimen>
+    <dimen name="orb_label_margin">20dp</dimen>
+
+    <dimen name="home_cta_text">21sp</dimen>
+    <dimen name="home_cta_margin">16dp</dimen>
+    <dimen name="btn_play_height">74dp</dimen>
+    <dimen name="btn_play_text">19sp</dimen>
+    <dimen name="btn_secondary_height">60dp</dimen>
+    <dimen name="btn_secondary_text">16sp</dimen>
+    <dimen name="btn_ghost_text">13sp</dimen>
+
+    <!-- ── Escape room ──────────────────────────────────────────────────── -->
+    <dimen name="er_body_padding_h">44dp</dimen>
+    <dimen name="er_body_padding_v">28dp</dimen>
+    <dimen name="er_module_icon">80dp</dimen>
+    <dimen name="er_module_icon_padding">18dp</dimen>
+    <dimen name="er_room_title_text">26sp</dimen>
+    <dimen name="er_card_padding">26dp</dimen>
+    <dimen name="er_narration_text">17sp</dimen>
+    <dimen name="er_hint_text">19sp</dimen>
+    <dimen name="er_morse_text">34sp</dimen>
+    <dimen name="er_feedback_text">17sp</dimen>
+
+</resources>

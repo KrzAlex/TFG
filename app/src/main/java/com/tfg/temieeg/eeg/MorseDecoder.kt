@@ -165,6 +165,25 @@ class MorseDecoder(
 
         private const val TAG = "MorseDecoder"
 
+        /** Simbolo de punto y de raya tal y como se muestran en pantalla. */
+        const val DOT_CHAR  = DOT
+        const val DASH_CHAR = DASH
+
+        /** Indice inverso letra -> codigo, construido una sola vez. */
+        private val REVERSE_TABLE: Map<Char, String> by lazy {
+            MORSE_TABLE.entries.associate { (code, letter) -> letter to code }
+        }
+
+        /** Codigo Morse de una letra o digito, o null si no esta en la tabla. */
+        fun codeFor(letter: Char): String? = REVERSE_TABLE[letter.uppercaseChar()]
+
+        /**
+         * Codigo con los simbolos separados por espacios ("..." -> ". . ."),
+         * que se lee mucho mejor en pantalla que los simbolos pegados.
+         */
+        fun spacedCodeFor(letter: Char): String? =
+            codeFor(letter)?.toCharArray()?.joinToString(" ")
+
         /** Tabla de código Morse internacional (ITU-R M.1677-1). */
         val MORSE_TABLE: Map<String, Char> = mapOf(
             // Letras

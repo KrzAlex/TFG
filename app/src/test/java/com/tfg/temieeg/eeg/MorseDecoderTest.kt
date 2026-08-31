@@ -77,4 +77,29 @@ class MorseDecoderTest {
         assertEquals('5', MorseDecoder.MORSE_TABLE["·····"])
         assertEquals(36, MorseDecoder.MORSE_TABLE.size)   // 26 letras + 10 dígitos
     }
+
+    @Test
+    fun busquedaInversa_devuelveElPatronDeCadaLetra() {
+        // Lo usa la sala Morse para mostrar en pantalla que hay que hacer,
+        // en vez de obligar a abrir el menu de ayuda en cada letra.
+        assertEquals("···", MorseDecoder.codeFor('S'))
+        assertEquals("—", MorseDecoder.codeFor('T'))
+        assertEquals("·—", MorseDecoder.codeFor('a'))   // acepta minusculas
+        assertEquals(null, MorseDecoder.codeFor('Ñ'))         // fuera de la tabla ITU
+    }
+
+    @Test
+    fun patronEspaciado_seLeeMejorEnPantalla() {
+        assertEquals("· · ·", MorseDecoder.spacedCodeFor('S'))
+        assertEquals("· —", MorseDecoder.spacedCodeFor('A'))
+        assertEquals(null, MorseDecoder.spacedCodeFor('Ñ'))
+    }
+
+    @Test
+    fun tablaInversa_cubreTodaLaTabla() {
+        // Ninguna letra o digito puede quedarse sin patron que mostrar.
+        MorseDecoder.MORSE_TABLE.values.forEach { letra ->
+            assertEquals("patron de $letra", true, MorseDecoder.codeFor(letra) != null)
+        }
+    }
 }

@@ -7,9 +7,11 @@ respondiendo con gestos de cabeza y combinando parpadeo con apriete de mandíbul
 El robot narra la historia, se desplaza por el mapa y encadena sus acciones con el
 avance del juego.
 
-La interfaz está fijada en horizontal para la tablet del robot (1280×800). La app
-también se ejecuta en cualquier móvil Android: sin hardware Temi las acciones del
-robot no se ejecutan, se registran en Logcat.
+La interfaz está fijada en horizontal para la tablet del robot (1280×800) y se
+adapta a pantallas más estrechas mediante `res/values-sw600dp`. La app también se
+ejecuta en cualquier móvil Android: sin hardware Temi los desplazamientos y giros
+no se ejecutan y quedan registrados en Logcat, pero **la narración sí se oye**,
+porque se usa el motor de voz de Android.
 
 ---
 
@@ -87,15 +89,57 @@ los buffers.
 | `RobotAnimModule` | Sala sin prueba: el robot actúa y la sala avanza sola |
 | `VideoStateModule` | Mantener un estado mental mientras se reproduce un vídeo |
 
+Una sala de tipo `YesNoModule` puede **bifurcar**: si una pregunta lleva
+`gotoOnYes` o `gotoOnNo`, la respuesta decide a qué sala se salta en lugar de
+continuar en orden. Solo funciona en la última pregunta del módulo, porque el
+salto ocurre al resolverla. Lo usan dos de los niveles del catálogo.
+
 El ciclo es `load() → start() → [módulos en orden] → onCompleted()`, con `abort()`
 disponible en cualquier momento. El motor encadena las acciones del robot con los
 callbacks reales del SDK (fin de TTS, llegada a destino), no con retardos fijos, y
 mantiene temporizadores de seguridad por si el callback no llega.
 
-Dos comportamientos protegen la detección: los gestos se ignoran cuando la calidad
-de señal es mala (HSI > 2) y mientras el robot habla, con 1,2 s de margen añadido
-para que el eco de los altavoces no genere parpadeos falsos. Si el jugador lleva
-30 s en la misma sala aparece el botón «Saltar sala».
+Dos comportamientos protegen la detección. El primero: los gestos se ignoran
+cuando la calidad de señal es mala (HSI > 2). El segundo: se ignoran también
+mientras el robot habla, porque el eco de los altavoces hace que la diadema
+registre parpadeos falsos.
+
+Ese segundo bloqueo no se fía solo del aviso de «fin de TTS» del SDK, que en
+algunos firmwares llega antes de que el robot haya terminado. El motor estima
+además cuánto durará la locución por la longitud del texto y no libera la entrada
+antes de ese tiempo, más 1,2 s de margen para el eco; si el aviso no llega nunca,
+un temporizador de seguridad la libera igualmente.
+
+Si el jugador lleva 30 s en la misma sala aparece el botón «Saltar sala».
+
+### Los niveles del catálogo
+
+Cinco niveles incluidos. Los tres narrativos forman una curva de dificultad:
+
+| Nivel | Papel | Calma | Morse | Ventana mandíbula |
+|---|---|---|---|---|
+| El Escape Clásico | Tutorial | 4 s | `E T` (un solo símbolo) | 5,5 s |
+| Aventura Espacial | Intermedio | 6 s | `E S I T A N` | 4–4,5 s |
+| El Castillo Encantado | Exigente | 8 s | `R U D K G O` (tres símbolos) | 3 s |
+
+Los dos últimos usan bifurcaciones con intenciones distintas: en el Espacial la
+elección de ruta hace que se jueguen dos salas extra o se salte directo al
+desenlace; en el Castillo, fiarse del espejo encantado cuesta una sala de castigo.
+Ambas rutas convergen siempre, así que ninguna decisión deja al jugador atascado.
+
+Los otros dos son *El Laboratorio del Dr. Mente*, que recorre los seis tipos de
+módulo y usa vídeos y ubicaciones del mapa, y *Prueba de Navegación*, que solo
+comprueba los desplazamientos `GOTO` del robot.
+
+### Vídeos
+
+Cada nivel admite un vídeo de entrada y uno de transición entre salas, y cada sala
+puede tener el suyo propio. Se declaran con `introVideoResId` / `transitionVideoResId`
+en el nivel y `videoResId` en la sala, apuntando a ficheros de `res/raw` (H.264 en
+MP4; los nombres solo admiten `a–z`, `0–9` y `_`). Con `introVideoPath` /
+`videoPath` se leen en cambio de almacenamiento externo, que es lo que usan los
+niveles importados por ZIP. Los campos admiten `null`: sin vídeo, la sala arranca
+directa.
 
 ---
 
@@ -250,11 +294,16 @@ En `files/` hay sesiones de ejemplo y `dashboard.html`, que las representa.
 .\gradlew.bat test
 ```
 
-38 tests unitarios que se ejecutan en la JVM, sin robot ni diadema, sobre el
-clasificador de estado mental, el detector de gestos, el decodificador Morse, el
-motor de escape room, el parseo de acciones del robot y la calibración.
-`OSCReceiverTest` levanta el receptor y le envía paquetes OSC reales por UDP a
-localhost para comprobar el parseo completo.
+60 tests unitarios que se ejecutan en la JVM, sin robot ni diadema: clasificador de
+estado mental, detector de gestos, decodificador Morse, calibración, motor de escape
+room y sus bifurcaciones, bloqueo del BCI mientras el robot habla, salas de calma y
+parseo de acciones.
+
+Dos merecen mención porque cubren cosas que de otro modo solo se verían jugando:
+`OSCReceiverTest` levanta el receptor y le envía **paquetes OSC reales por UDP** a
+localhost, y `EscapeRoomCatalogTest` valida el catálogo — que los índices de
+bifurcación existan, que las letras Morse estén en la tabla ITU y que la curva de
+dificultad sea la esperada.
 
 ## Estructura del proyecto
 

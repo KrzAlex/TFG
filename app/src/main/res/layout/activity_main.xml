@@ -23,21 +23,21 @@
             android:background="@drawable/bg_header"
             android:orientation="horizontal"
             android:gravity="center_vertical"
-            android:paddingStart="40dp"
-            android:paddingEnd="40dp"
-            android:paddingTop="18dp"
-            android:paddingBottom="20dp">
+            android:paddingStart="@dimen/header_padding_h"
+            android:paddingEnd="@dimen/header_padding_h"
+            android:paddingTop="@dimen/header_padding_top"
+            android:paddingBottom="@dimen/header_padding_bottom">
 
             <ImageView
-                android:layout_width="56dp"
-                android:layout_height="56dp"
+                android:layout_width="@dimen/header_logo_size"
+                android:layout_height="@dimen/header_logo_size"
                 android:src="@drawable/ic_brain"
                 android:scaleType="centerInside"
                 android:background="@drawable/bg_chip"
-                android:padding="12dp"
+                android:padding="@dimen/header_logo_padding"
                 app:tint="@color/text_on_primary"
                 android:contentDescription="@string/app_name"
-                android:layout_marginEnd="16dp" />
+                android:layout_marginEnd="@dimen/header_logo_margin_end" />
 
             <LinearLayout
                 android:layout_width="0dp"
@@ -50,16 +50,18 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/app_name"
-                    android:textSize="28sp"
+                    android:textSize="@dimen/header_title_text"
+                    android:maxLines="1"
                     android:textColor="@color/text_on_primary" />
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="BCI · ESCAPE ROOM"
-                    android:textSize="12sp"
+                    android:textSize="@dimen/header_subtitle_text"
                     android:letterSpacing="0.14"
                     android:textStyle="bold"
+                    android:maxLines="1"
                     android:textColor="@color/text_on_primary_soft" />
 
             </LinearLayout>
@@ -69,21 +71,25 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/muse_disconnected"
-                android:textSize="13sp"
+                android:textSize="@dimen/header_status_text"
+                android:maxLines="2"
+                android:ellipsize="end"
+                android:gravity="end"
                 android:textColor="@color/text_on_primary_soft"
-                android:layout_marginEnd="12dp" />
+                android:layout_marginEnd="10dp" />
 
             <TextView
                 android:id="@+id/tvHomeSignalQuality"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:background="@drawable/bg_chip"
-                android:paddingStart="14dp"
-                android:paddingEnd="14dp"
-                android:paddingTop="7dp"
-                android:paddingBottom="7dp"
+                android:paddingStart="@dimen/chip_padding_h"
+                android:paddingEnd="@dimen/chip_padding_h"
+                android:paddingTop="@dimen/chip_padding_v"
+                android:paddingBottom="@dimen/chip_padding_v"
                 android:text=""
-                android:textSize="12sp"
+                android:maxLines="1"
+                android:textSize="@dimen/chip_text"
                 android:textStyle="bold"
                 android:textColor="@color/text_on_primary"
                 android:layout_marginEnd="8dp" />
@@ -93,33 +99,45 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:background="@drawable/bg_chip"
-                android:paddingStart="14dp"
-                android:paddingEnd="14dp"
-                android:paddingTop="7dp"
-                android:paddingBottom="7dp"
+                android:paddingStart="@dimen/chip_padding_h"
+                android:paddingEnd="@dimen/chip_padding_h"
+                android:paddingTop="@dimen/chip_padding_v"
+                android:paddingBottom="@dimen/chip_padding_v"
                 android:text=""
-                android:textSize="12sp"
+                android:maxLines="1"
+                android:textSize="@dimen/chip_text"
                 android:textStyle="bold"
                 android:textColor="@color/text_on_primary" />
 
         </LinearLayout>
 
-        <!-- Cuerpo en dos columnas -->
-        <LinearLayout
+        <!-- Cuerpo en dos columnas.
+             Va dentro de un scroll con fillViewport: en la tablet el contenido
+             cabe y queda centrado, y en pantallas bajas (movil en horizontal)
+             se puede desplazar en lugar de recortar la ultima fila. -->
+        <androidx.core.widget.NestedScrollView
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_weight="1"
+            android:fillViewport="true"
+            android:overScrollMode="never">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:minHeight="0dp"
             android:orientation="horizontal"
-            android:paddingStart="44dp"
-            android:paddingEnd="44dp"
-            android:paddingTop="24dp"
-            android:paddingBottom="24dp"
+            android:baselineAligned="false"
+            android:paddingStart="@dimen/home_body_padding_h"
+            android:paddingEnd="@dimen/home_body_padding_h"
+            android:paddingTop="@dimen/home_body_padding_v"
+            android:paddingBottom="@dimen/home_body_padding_v"
             android:gravity="center_vertical">
 
             <!-- Columna izquierda: orbe de estado mental -->
             <LinearLayout
                 android:layout_width="0dp"
-                android:layout_height="match_parent"
+                android:layout_height="wrap_content"
                 android:layout_weight="1.15"
                 android:orientation="vertical"
                 android:gravity="center">
@@ -130,11 +148,11 @@
                     android:layout_height="wrap_content"
                     android:text="Estado mental"
                     android:textColor="@color/text_muted"
-                    android:layout_marginBottom="20dp" />
+                    android:layout_marginBottom="@dimen/orb_label_margin" />
 
                 <FrameLayout
-                    android:layout_width="264dp"
-                    android:layout_height="264dp">
+                    android:layout_width="@dimen/orb_size"
+                    android:layout_height="@dimen/orb_size">
 
                     <View
                         android:layout_width="match_parent"
@@ -142,19 +160,21 @@
                         android:background="@drawable/bg_orb_outer" />
 
                     <View
-                        android:layout_width="206dp"
-                        android:layout_height="206dp"
+                        android:layout_width="@dimen/orb_inner_size"
+                        android:layout_height="@dimen/orb_inner_size"
                         android:layout_gravity="center"
                         android:background="@drawable/bg_orb_inner" />
 
                     <TextView
                         android:id="@+id/tvHomeMentalState"
-                        android:layout_width="206dp"
-                        android:layout_height="206dp"
+                        android:layout_width="@dimen/orb_inner_size"
+                        android:layout_height="@dimen/orb_inner_size"
                         android:layout_gravity="center"
                         android:gravity="center"
                         android:text="@string/state_neutral"
-                        android:textSize="44sp"
+                        android:textSize="@dimen/orb_state_text"
+                        android:maxLines="1"
+                        android:autoSizeTextType="uniform"
                         android:textStyle="bold" />
 
                 </FrameLayout>
@@ -167,28 +187,29 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:orientation="vertical"
-                android:layout_marginStart="20dp">
+                android:layout_marginStart="@dimen/home_column_gap">
 
                 <TextView
                     style="@style/Text.Display"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Empieza tu aventura mental"
-                    android:textSize="21sp"
-                    android:layout_marginBottom="16dp" />
+                    android:textSize="@dimen/home_cta_text"
+                    android:layout_marginBottom="@dimen/home_cta_margin" />
 
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/btnPlayEscapeRoom"
                     style="@style/Button.Primary"
                     android:layout_width="match_parent"
-                    android:layout_height="74dp"
+                    android:layout_height="@dimen/btn_play_height"
                     android:text="@string/btn_play_escape_room"
-                    android:textSize="19sp"
+                    android:textSize="@dimen/btn_play_text"
+                    android:maxLines="1"
                     app:icon="@drawable/ic_play"
                     app:iconGravity="textStart"
-                    app:iconSize="24dp"
+                    app:iconSize="22dp"
                     app:iconTint="@color/text_on_primary"
-                    android:layout_marginBottom="12dp" />
+                    android:layout_marginBottom="10dp" />
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -200,24 +221,30 @@
                         android:id="@+id/btnCreateLevel"
                         style="@style/Button.Tonal"
                         android:layout_width="0dp"
-                        android:layout_height="60dp"
+                        android:layout_height="@dimen/btn_secondary_height"
                         android:layout_weight="1"
-                        android:layout_marginEnd="6dp"
+                        android:layout_marginEnd="5dp"
                         android:text="@string/btn_create_level"
+                        android:textSize="@dimen/btn_secondary_text"
+                        android:maxLines="1"
                         app:icon="@drawable/ic_plus"
                         app:iconGravity="textStart"
+                        app:iconSize="18dp"
                         app:iconTint="@color/primary_dark" />
 
                     <com.google.android.material.button.MaterialButton
                         android:id="@+id/btnHomeStartSession"
                         style="@style/Button.Tonal"
                         android:layout_width="0dp"
-                        android:layout_height="60dp"
+                        android:layout_height="@dimen/btn_secondary_height"
                         android:layout_weight="1"
-                        android:layout_marginStart="6dp"
+                        android:layout_marginStart="5dp"
                         android:text="@string/btn_start_session"
+                        android:textSize="@dimen/btn_secondary_text"
+                        android:maxLines="1"
                         app:icon="@drawable/ic_history"
                         app:iconGravity="textStart"
+                        app:iconSize="18dp"
                         app:iconTint="@color/primary_dark" />
 
                 </LinearLayout>
@@ -227,17 +254,21 @@
                     style="@style/Button.Ghost"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:minHeight="40dp"
                     android:text="@string/btn_settings_mode"
-                    android:textSize="13sp"
+                    android:textSize="@dimen/btn_ghost_text"
+                    android:maxLines="1"
                     android:textColor="@color/text_muted"
                     app:icon="@drawable/ic_gear"
                     app:iconGravity="textStart"
-                    app:iconSize="18dp"
+                    app:iconSize="16dp"
                     app:iconTint="@color/text_muted" />
 
             </LinearLayout>
 
         </LinearLayout>
+
+        </androidx.core.widget.NestedScrollView>
 
     </LinearLayout>
 
@@ -1483,10 +1514,10 @@
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
                 android:gravity="center_vertical"
-                android:paddingStart="44dp"
-                android:paddingEnd="44dp"
-                android:paddingTop="28dp"
-                android:paddingBottom="28dp"
+                android:paddingStart="@dimen/er_body_padding_h"
+                android:paddingEnd="@dimen/er_body_padding_h"
+                android:paddingTop="@dimen/er_body_padding_v"
+                android:paddingBottom="@dimen/er_body_padding_v"
                 android:baselineAligned="false">
 
                 <!-- Columna izquierda: contexto de la sala -->
@@ -1506,14 +1537,14 @@
 
                         <ImageView
                             android:id="@+id/tvEscapeModuleType"
-                            android:layout_width="80dp"
-                            android:layout_height="80dp"
-                            android:padding="18dp"
+                            android:layout_width="@dimen/er_module_icon"
+                            android:layout_height="@dimen/er_module_icon"
+                            android:padding="@dimen/er_module_icon_padding"
                             android:scaleType="fitCenter"
                             android:background="@drawable/bg_module_icon"
                             app:tint="@color/primary"
                             android:contentDescription="@null"
-                            android:layout_marginEnd="16dp" />
+                            android:layout_marginEnd="14dp" />
 
                         <TextView
                             android:id="@+id/tvEscapeRoomName"
@@ -1522,7 +1553,7 @@
                             android:layout_weight="1"
                             android:text=""
                             android:textColor="@color/heading"
-                            android:textSize="26sp"
+                            android:textSize="@dimen/er_room_title_text"
                             android:textStyle="bold" />
 
                     </LinearLayout>
@@ -1534,7 +1565,7 @@
                         android:orientation="vertical"
                         android:background="@drawable/bg_game_card"
                         android:elevation="2dp"
-                        android:padding="26dp">
+                        android:padding="@dimen/er_card_padding">
 
                         <TextView
                             android:id="@+id/tvEscapeNarration"
@@ -1542,8 +1573,8 @@
                             android:layout_height="wrap_content"
                             android:text=""
                             android:textColor="@color/text_secondary"
-                            android:textSize="17sp"
-                            android:lineSpacingMultiplier="1.7" />
+                            android:textSize="@dimen/er_narration_text"
+                            android:lineSpacingMultiplier="1.5" />
                     </LinearLayout>
 
                 </LinearLayout>
@@ -1570,7 +1601,7 @@
                             android:layout_height="wrap_content"
                             android:text=""
                             android:textColor="@color/info_dark"
-                            android:textSize="19sp"
+                            android:textSize="@dimen/er_hint_text"
                             android:textStyle="bold"
                             android:gravity="center" />
                     </LinearLayout>
@@ -1584,7 +1615,7 @@
                         android:text=""
                         android:fontFamily="monospace"
                         android:textColor="@color/primary"
-                        android:textSize="34sp"
+                        android:textSize="@dimen/er_morse_text"
                         android:gravity="center" />
 
                     <!-- Botón de referencia (Morse / imagen personalizada) -->
@@ -1611,7 +1642,7 @@
                         android:layout_height="wrap_content"
                         android:layout_marginTop="4dp"
                         android:text=""
-                        android:textSize="17sp"
+                        android:textSize="@dimen/er_feedback_text"
                         android:textStyle="bold"
                         android:gravity="center"
                         android:lineSpacingMultiplier="1.4"

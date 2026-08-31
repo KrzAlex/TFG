@@ -158,6 +158,16 @@ class EscapeRoomEngine {
      */
     private var pendingTemiSpeakingReset: Runnable? = null
 
+    /**
+     * Momento (reloj monotono, el mismo que usa Handler.postDelayed) en que
+     * arranco la locucion actual, y su duracion minima estimada.
+     */
+    private var speechStartedAt = 0L
+    private var speechMinMs     = 0L
+
+    /** Libera el BCI si el callback de fin de TTS no llega nunca. */
+    private var pendingSpeechFailsafe: Runnable? = null
+
     /** Continuación pendiente tras un GOTO — se invoca cuando el robot llega. */
     private var pendingGotoContinuation: (() -> Unit)? = null
 
@@ -234,6 +244,8 @@ class EscapeRoomEngine {
         currentIndex           = -1
         pendingTemiSpeakingReset?.let { handler.removeCallbacks(it) }
         pendingTemiSpeakingReset = null
+        pendingSpeechFailsafe?.let { handler.removeCallbacks(it) }
+        pendingSpeechFailsafe    = null
         temiSpeaking             = false
         pendingTtsContinuation   = null
         pendingTtsTimeout?.let { handler.removeCallbacks(it) }
@@ -346,7 +358,7 @@ class EscapeRoomEngine {
                 handler.postDelayed({ dispatchActions(tail, onDone) }, ms)
             }
             RobotAction.Type.SPEAK -> {
-                beginTemiSpeech()
+                beginTemiSpeech(head.param)
                 onRobotAction?.invoke(head)
                 pendingTtsContinuation = { dispatchActions(tail, onDone) }
                 // Timeout de seguridad: si onTtsStatusChanged no llega en el tiempo
@@ -410,7 +422,7 @@ class EscapeRoomEngine {
         module.onFeedback               = onFeedback
         module.onMorseSymbols           = onMorseSymbols
         // Intercepta el habla del módulo: cancela resets pendientes y activa el bloqueo BCI
-        module.onTemiSpeak              = { text -> beginTemiSpeech(); onTemiSpeak?.invoke(text) }
+        module.onTemiSpeak              = { text -> beginTemiSpeech(text); onTemiSpeak?.invoke(text) }
         module.onSetBlinkDebounce       = onSetBlinkDebounce
         module.onHintChanged            = onHint
         module.onStartConcurrentVideo   = onStartConcurrentVideo
@@ -432,14 +444,48 @@ class EscapeRoomEngine {
      * Marca el inicio de un habla del robot: cancela cualquier reset pendiente
      * y activa el bloqueo BCI.  Llamar siempre que el robot vaya a hablar.
      */
-    private fun beginTemiSpeech() {
+    private fun beginTemiSpeech(text: String? = null) {
         pendingTemiSpeakingReset?.let { handler.removeCallbacks(it) }
         pendingTemiSpeakingReset = null
+        pendingSpeechFailsafe?.let { handler.removeCallbacks(it) }
+        pendingSpeechFailsafe = null
+
+        // Duracion minima estimada del habla. El callback de fin de TTS no es
+        // fiable como unica referencia: Temi lo notifica en cuanto acepta la
+        // peticion en algunos firmwares, y el modo simulado lo falsea. Si nos
+        // fiamos solo de el, el BCI se desbloquea con el robot aun hablando y
+        // el eco de los altavoces se cuela como parpadeos o gestos.
+        speechStartedAt = android.os.SystemClock.uptimeMillis()
+        speechMinMs = estimateSpeechMs(text)
+
         if (!temiSpeaking) {
             temiSpeaking = true
             onTemiSpeakingChanged?.invoke(true)
-            log("🔒 BCI bloqueada — robot hablando")
+            log("🔒 BCI bloqueada — robot hablando (~${speechMinMs}ms estimados)")
         }
+
+        // Red de seguridad: si el callback de fin de TTS no llega nunca, el BCI
+        // quedaria bloqueado para siempre. Se libera solo pasado un margen amplio.
+        val failsafe = Runnable {
+            pendingSpeechFailsafe = null
+            if (temiSpeaking) {
+                log("⚠ Sin callback de fin de TTS — liberando BCI por seguridad")
+                scheduleTemiSpeechEnd()
+            }
+        }
+        pendingSpeechFailsafe = failsafe
+        handler.postDelayed(failsafe, speechMinMs + SPEECH_FAILSAFE_EXTRA_MS)
+    }
+
+    /**
+     * Estima cuanto durara una locucion a partir de su longitud. Temi habla
+     * despacio; [SPEECH_MS_PER_CHAR] esta calibrado por debajo de su ritmo real
+     * para no penalizar al jugador mas de lo necesario.
+     */
+    private fun estimateSpeechMs(text: String?): Long {
+        val n = text?.length ?: 0
+        if (n == 0) return SPEECH_MIN_MS
+        return (n * SPEECH_MS_PER_CHAR).coerceIn(SPEECH_MIN_MS, SPEECH_MAX_MS)
     }
 
     /**
@@ -449,6 +495,16 @@ class EscapeRoomEngine {
      */
     private fun scheduleTemiSpeechEnd() {
         pendingTemiSpeakingReset?.let { handler.removeCallbacks(it) }
+        pendingSpeechFailsafe?.let { handler.removeCallbacks(it) }
+        pendingSpeechFailsafe = null
+
+        // No liberar antes de que la locucion haya podido terminar de verdad:
+        // se espera lo que falte de la duracion estimada y, encima, la gracia
+        // para que se disipe el eco de los altavoces.
+        val elapsed   = android.os.SystemClock.uptimeMillis() - speechStartedAt
+        val remaining = (speechMinMs - elapsed).coerceAtLeast(0L)
+        val delay     = remaining + BCI_GRACE_MS
+
         val reset = Runnable {
             pendingTemiSpeakingReset = null
             temiSpeaking = false
@@ -458,7 +514,7 @@ class EscapeRoomEngine {
             currentModule?.onTemiSpeakDone?.also { currentModule?.onTemiSpeakDone = null }?.invoke()
         }
         pendingTemiSpeakingReset = reset
-        handler.postDelayed(reset, BCI_GRACE_MS)
+        handler.postDelayed(reset, delay)
     }
 
     private fun log(msg: String) = Log.d(TAG, msg)
@@ -471,5 +527,12 @@ class EscapeRoomEngine {
          * de Temi se disipe y no genere parpadeos/mandíbulas falsos en la diadema Muse.
          */
         private const val BCI_GRACE_MS = 1_200L
+
+        /** Ritmo estimado de habla (ms por caracter) para la duracion minima. */
+        private const val SPEECH_MS_PER_CHAR = 60L
+        private const val SPEECH_MIN_MS      = 1_200L
+        private const val SPEECH_MAX_MS      = 20_000L
+        /** Margen sobre la duracion estimada antes de liberar por seguridad. */
+        private const val SPEECH_FAILSAFE_EXTRA_MS = 8_000L
     }
 }
