@@ -113,6 +113,12 @@ abstract class RoomModule(
     internal var onSetBlinkDebounce:       ((Long) -> Unit)?            = null
     /** Permite al módulo actualizar la pista en tiempo real (e.g. "3/5 s"). */
     internal var onHintChanged:            ((String) -> Unit)?          = null
+    /**
+     * Suceso propio del módulo para el registro de sesión: (tipo, detalle).
+     * Lo usa MorseModule para dejar constancia de qué letra se pidió y cuál
+     * decodificó el jugador, que es lo que permite medir la tasa de acierto.
+     */
+    internal var onLogEvent:               ((String, String) -> Unit)?  = null
     /** Inicia reproducción de vídeo en paralelo al reto (loop hasta que abort lo detenga). */
     internal var onStartConcurrentVideo:   ((path: String?) -> Unit)?   = null
     /** Detiene el vídeo concurrente iniciado con [onStartConcurrentVideo]. */
@@ -294,6 +300,7 @@ class MorseModule(
         // Se muestra tambien el patron de puntos y rayas: obligar a abrir el
         // menu de ayuda en cada letra rompia el ritmo del juego.
         onHintChanged?.invoke(hintFor(targetLetter))
+        onLogEvent?.invoke("MORSE_TARGET", "$targetLetter ${MorseDecoder.codeFor(targetLetter) ?: ""}")
         speakSilenced("Escribe la letra $targetLetter en código Morse. ${spokenCode(targetLetter)}")
     }
 
@@ -311,6 +318,7 @@ class MorseModule(
     }
 
     private fun evaluateLetter(letter: Char) {
+        onLogEvent?.invoke("MORSE_LETTER", "$letter ${if (letter == targetLetter) "ok" else "esperada:$targetLetter"}")
         decoder.clear()
         onMorseSymbols?.invoke("")
         if (letter == targetLetter) {

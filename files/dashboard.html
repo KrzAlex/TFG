@@ -136,6 +136,31 @@
     .charts { grid-template-columns: 1fr; }
     aside { width: 220px; }
   }
+
+  /* ── Tablas de análisis ─────────────────────────────────────────── */
+  .tablewrap { overflow-x: auto; }
+  table.rooms { border-collapse: collapse; width: 100%; font-size: .88rem; }
+  table.rooms th, table.rooms td {
+    text-align: left; padding: 8px 12px;
+    border-bottom: 1px solid rgba(128,128,128,.22);
+  }
+  table.rooms th {
+    font-size: .72rem; letter-spacing: .06em; text-transform: uppercase;
+    opacity: .7; font-weight: 600; white-space: nowrap;
+  }
+  table.rooms td.num, table.rooms th.num {
+    text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap;
+  }
+  table.rooms tfoot td { font-weight: 600; border-bottom: none; }
+  table.rooms tbody tr:hover { background: rgba(128,128,128,.07); }
+  .tag {
+    font-size: .72rem; padding: 2px 8px; border-radius: 999px;
+    border: 1px solid currentColor; white-space: nowrap;
+  }
+  .tag.ok   { color: #12B76A; }
+  .tag.warn { color: #F79009; }
+  .tag.bad  { color: #F04438; }
+  .nometa { opacity: .7; font-size: .88rem; margin: 0; }
 </style>
 </head>
 <body>
@@ -172,19 +197,30 @@ let activeIdx = -1;
 const charts  = {};    // chart instances
 
 // ── Parseo CSV ────────────────────────────────────────────────────────────────
+// Devuelve { rows, meta }. Las lineas '#' iniciales llevan las condiciones de la
+// grabacion (umbrales en uso, dispositivo, nivel...). Los CSV antiguos no las
+// tienen y se siguen leyendo igual.
 function parseCSV(text) {
-  const lines = text.trim().split('\n');
-  if (lines.length < 2) return [];
-  const headers = lines[0].split(',').map(h => h.trim().replace(/"/g,''));
-  return lines.slice(1).map(line => {
+  const all = text.trim().split(/\r?\n/);
+  const meta = {};
+  let i = 0;
+  while (i < all.length && all[i].trim().startsWith("#")) {
+    const m = all[i].replace("#", "").trim().match(/^([a-z_]+)=(.*)$/);
+    if (m) meta[m[1]] = m[2];
+    i++;
+  }
+  const lines = all.slice(i);
+  if (lines.length < 2) return { rows: [], meta };
+  const headers = lines[0].split(",").map(h => h.trim().replace(/"/g, ""));
+  const rows = lines.slice(1).map(line => {
     const cols = splitCSVLine(line);
     const obj = {};
-    headers.forEach((h, i) => {
-      const v = (cols[i] || '').replace(/"/g,'').trim();
-      obj[h] = v;
+    headers.forEach((h, k) => {
+      obj[h] = (cols[k] || "").replace(/"/g, "").trim();
     });
     return obj;
   }).filter(r => r.timestamp);
+  return { rows, meta };
 }
 
 function splitCSVLine(line) {
@@ -205,16 +241,121 @@ function loadFiles(files) {
     if (!file.name.endsWith('.csv')) return;
     const reader = new FileReader();
     reader.onload = e => {
-      const rows = parseCSV(e.target.result);
+      const { rows, meta } = parseCSV(e.target.result);
       if (!rows.length) return;
-      const isGame = !!rows[0].escape_room_name;
+      const isGame = !!rows.find(r => r.escape_room_name);
       const name = file.name.replace('.csv','');
-      sessions.push({ name, type: isGame ? 'game' : 'session', rows });
+      sessions.push({ name, type: isGame ? 'game' : 'session', rows, meta });
       renderSidebar();
       if (sessions.length === 1) selectSession(0);
     };
     reader.readAsText(file, 'UTF-8');
   });
+}
+
+// ── Análisis por sala ─────────────────────────────────────────────────────────
+// Reconstruye la partida a partir de los sucesos discretos del CSV. Sin ellos
+// solo se puede saber en qué sala estaba cada muestra, no cuánto duró ni cuántos
+// intentos costó.
+function analyzeRooms(rows) {
+  const salas = [];
+  let actual = null;
+
+  const cerrar = (fin, desenlace) => {
+    if (!actual) return;
+    actual.finMs = fin;
+    actual.duracionS = Math.max(0, Math.round((fin - actual.inicioMs) / 1000));
+    actual.desenlace = desenlace || actual.desenlace;
+    salas.push(actual);
+    actual = null;
+  };
+
+  rows.forEach(r => {
+    const t = +r.elapsed_ms || 0;
+    switch (r.event) {
+      case "ROOM_START":
+        cerrar(t, "interrumpida");
+        actual = {
+          titulo: r.room_title || r.event_detail || "(sala)",
+          modulo: r.module_type || "",
+          inicioMs: t, fallos: 0, gestos: 0,
+          desenlace: "en curso", morseOk: 0, morseErr: 0
+        };
+        break;
+      case "ROOM_SUCCESS": cerrar(t, "superada"); break;
+      case "ROOM_FAIL":    if (actual) actual.fallos++; break;
+      case "ROOM_SKIP":    cerrar(t, "saltada"); break;
+      case "MORSE_LETTER":
+        if (actual) (r.event_detail || "").includes("ok") ? actual.morseOk++ : actual.morseErr++;
+        break;
+      case "GAME_END":     cerrar(t, actual && actual.desenlace === "en curso" ? "sin terminar" : null); break;
+    }
+    if (actual && (r.blink === "1" || r.jaw_clench === "1" || r.nod === "1" || r.shake === "1")) {
+      actual.gestos++;
+    }
+  });
+  cerrar(+rows[rows.length - 1].elapsed_ms || 0, "sin terminar");
+  return salas;
+}
+
+function renderRoomTable(rows) {
+  const salas = analyzeRooms(rows);
+  if (!salas.length) return "";
+
+  const badge = d =>
+    d === "superada"  ? '<span class="tag ok">superada</span>'  :
+    d === "saltada"   ? '<span class="tag warn">saltada</span>'  :
+                        '<span class="tag bad">' + d + '</span>';
+
+  const filas = salas.map((s, i) => {
+    const morse = (s.morseOk + s.morseErr) > 0
+      ? s.morseOk + "/" + (s.morseOk + s.morseErr)
+      : "—";
+    return "<tr><td>" + (i + 1) + "</td><td>" + s.titulo + "</td>" +
+      "<td>" + (s.modulo || "—") + "</td>" +
+      "<td class=\"num\">" + s.duracionS + " s</td>" +
+      "<td class=\"num\">" + s.fallos + "</td>" +
+      "<td class=\"num\">" + s.gestos + "</td>" +
+      "<td class=\"num\">" + morse + "</td>" +
+      "<td>" + badge(s.desenlace) + "</td></tr>";
+  }).join("");
+
+  const total = salas.reduce((a, s) => a + s.duracionS, 0);
+  const fallos = salas.reduce((a, s) => a + s.fallos, 0);
+
+  return '<div class="chart-box full"><h3>Recorrido por salas</h3>' +
+    '<div class="tablewrap"><table class="rooms">' +
+    "<thead><tr><th>#</th><th>Sala</th><th>Tipo</th><th>Tiempo</th>" +
+    "<th>Fallos</th><th>Gestos</th><th>Morse</th><th>Desenlace</th></tr></thead>" +
+    "<tbody>" + filas + "</tbody>" +
+    '<tfoot><tr><td colspan="3">Total</td><td class="num">' + total + ' s</td>' +
+    '<td class="num">' + fallos + '</td><td colspan="3"></td></tr></tfoot>' +
+    "</table></div></div>";
+}
+
+// ── Condiciones de la grabación ──────────────────────────────────────────────
+function renderMeta(meta) {
+  if (!meta || !Object.keys(meta).length) {
+    return '<div class="chart-box full"><h3>Condiciones de la grabación</h3>' +
+      '<p class="nometa">Este CSV es de un formato anterior y no guarda los umbrales ' +
+      'con los que se grabó, así que no es directamente comparable con los nuevos.</p></div>';
+  }
+  const fila = (k, v) => v ? "<tr><td>" + k + '</td><td class="num">' + v + "</td></tr>" : "";
+  return '<div class="chart-box full"><h3>Condiciones de la grabación</h3>' +
+    '<div class="tablewrap"><table class="rooms"><tbody>' +
+    fila("Nivel", meta.level) +
+    fila("Dispositivo", meta.device) +
+    fila("Conexión", meta.connection) +
+    fila("Inicio", meta.started_at) +
+    fila("Versión de la app", meta.app_version) +
+    fila("Umbral estrés (mellow &lt;)", meta.threshold_stress) +
+    fila("Umbral atención (conc &gt;)", meta.threshold_attention) +
+    fila("Umbral calma (mellow &gt;)", meta.threshold_calm) +
+    fila("Umbral gamma", meta.threshold_gamma) +
+    fila("Debounce parpadeo", meta.blink_debounce_ms ? meta.blink_debounce_ms + " ms" : "") +
+    fila("Umbral asentir", meta.threshold_nod ? meta.threshold_nod + " °/s" : "") +
+    fila("Umbral negar", meta.threshold_shake ? meta.threshold_shake + " °/s" : "") +
+    "</tbody></table></div></div>";
 }
 
 // ── Sidebar ───────────────────────────────────────────────────────────────────
@@ -323,6 +464,8 @@ function renderMain(s) {
     </div>
 
     <div class="charts">
+      ${isGame ? renderRoomTable(rows) : ''}
+      ${renderMeta(s.meta)}
       <div class="chart-box full tall">
         <h3>Estado mental a lo largo del tiempo</h3>
         <canvas id="chartTimeline"></canvas>

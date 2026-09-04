@@ -53,6 +53,16 @@ class EscapeRoomEngine {
     /** Se llama cada vez que se supera una sala (antes de avanzar a la siguiente). */
     var onCelebrate: (() -> Unit)? = null
 
+    /**
+     * Se llama cuando una respuesta bifurca el recorrido, con los indices de
+     * sala de origen y destino (0-based). Permite dejar constancia en el log de
+     * que rama tomo el jugador, que si no seria imposible de reconstruir.
+     */
+    var onBranch: ((from: Int, to: Int) -> Unit)? = null
+
+    /** Suceso propio de un módulo para el registro de sesión: (tipo, detalle). */
+    var onModuleEvent: ((String, String) -> Unit)? = null
+
     /** Permite al motor ajustar el debounce de parpadeo en [MuseDirectReceiver]. */
     var onSetBlinkDebounce: ((Long) -> Unit)? = null
 
@@ -418,13 +428,20 @@ class EscapeRoomEngine {
                 }
             }
         }
-        module.onSuccessAt              = { idx -> handler.post { onCelebrate?.invoke(); advance(d, idx) } }
+        module.onSuccessAt              = { idx ->
+            handler.post {
+                onBranch?.invoke(currentIndex, idx)
+                onCelebrate?.invoke()
+                advance(d, idx)
+            }
+        }
         module.onFeedback               = onFeedback
         module.onMorseSymbols           = onMorseSymbols
         // Intercepta el habla del módulo: cancela resets pendientes y activa el bloqueo BCI
         module.onTemiSpeak              = { text -> beginTemiSpeech(text); onTemiSpeak?.invoke(text) }
         module.onSetBlinkDebounce       = onSetBlinkDebounce
         module.onHintChanged            = onHint
+        module.onLogEvent               = { type, detail -> onModuleEvent?.invoke(type, detail) }
         module.onStartConcurrentVideo   = onStartConcurrentVideo
         module.onStopConcurrentVideo    = onStopConcurrentVideo
     }

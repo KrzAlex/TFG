@@ -64,6 +64,20 @@ atención: exigir gamma alto separa el foco real de la beta de ansiedad. Las
 muestras con calidad de señal mala (horseshoe > 3) se descartan antes de entrar en
 los buffers.
 
+**Delta se recibe y se registra, pero no entra en el cálculo**, y theta solo
+interviene a través del denominador. No es un olvido: delta es la banda de mayor
+potencia con diferencia (media 0,79 en log10 frente a 0,49 de alpha), así que
+incluirla absorbería ~42 % del total y comprimiría el resto de índices. Medido
+sobre 2.655 muestras, la separación entre estados —d de Cohen del índice
+`mellow`— cae entre un 31 % y un 77 % según el par de estados. El script
+[`analisis_bandas.py`](analisis_bandas.py) reproduce el cálculo sobre cualquier
+conjunto de sesiones:
+
+```bash
+python analisis_bandas.py            # todas las de files/
+python analisis_bandas.py otra.csv   # o las que indiques
+```
+
 ### Gestos y Morse
 
 - **Asentir y negar**: `HeadGestureDetector` busca dos picos consecutivos de signo
@@ -279,12 +293,26 @@ estructura, y ZIP, que empaqueta también los vídeos e imágenes de referencia.
 
 Cada partida genera `game_<nivel>_<timestamp>.csv` en el almacenamiento externo de
 la app, compartible mediante `FileProvider`. El botón «Empezar registro» graba
-además sesiones libres, fuera del juego. Se escriben unas 4 muestras por segundo
-con estas columnas: marca de tiempo, estado clasificado, los tres índices
-(`concentration`, `mellow`, `gammaActivity`), las bandas crudas α β θ δ γ, calidad
-de señal, giroscopio y acelerómetro, eventos de parpadeo, mandíbula, asentir y
-negar, acción del robot en curso y contexto de juego (nivel, sala, tipo de módulo
-y si el robot estaba hablando).
+además sesiones libres, fuera del juego.
+
+El fichero tiene dos partes. Primero unas líneas que empiezan por `#` con las
+**condiciones de la grabación**: versión, dispositivo, modo de conexión y los
+umbrales en uso. Sin ellas dos sesiones no son comparables, porque los umbrales
+son ajustables y se personalizan por usuario con la calibración. Es el convenio
+habitual de comentario, así que `pandas.read_csv(..., comment='#')` las salta.
+
+Después, unas 4 filas por segundo con: marca de tiempo absoluta y relativa al
+inicio, estado clasificado, los tres índices (`concentration`, `mellow`,
+`gamma_activity`), las bandas crudas α β θ δ γ, calidad de señal, giroscopio en
+sus tres ejes, acelerómetro, eventos de parpadeo, mandíbula, asentir y negar,
+batería de la diadema, ruido ambiente, acción del robot y contexto de juego.
+
+Las dos últimas columnas, `event` y `event_detail`, llevan los **sucesos discretos
+de la partida**: entrada en cada sala, intentos superados o fallidos, salto por el
+botón de rescate, rama tomada en una bifurcación, letra Morse pedida y decodificada,
+y principio y fin de las locuciones del robot. El muestreo continuo por sí solo
+dice en qué sala estaba el jugador, pero no cuánto tardó ni cuántos intentos le
+costó; estos sucesos son los que permiten calcularlo.
 
 En `files/` hay sesiones de ejemplo y `dashboard.html`, que las representa.
 

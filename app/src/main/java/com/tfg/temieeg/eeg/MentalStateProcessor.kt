@@ -26,6 +26,43 @@ import kotlin.math.pow
  *     · STRESS/ansiedad               → beta ALTO + gamma normal/bajo
  *   Incluir gamma en el denominador también estabiliza los otros índices.
  *
+ * ── Por qué delta NO entra en el cálculo ──────────────────────────────────
+ *
+ *   Las cinco bandas se reciben y se registran en el CSV, pero delta queda
+ *   fuera del denominador y no tiene índice propio. Es una decisión medida,
+ *   no un olvido.
+ *
+ *   Sobre 2.655 muestras de las sesiones de prueba, delta es con diferencia la
+ *   banda de mayor potencia (media 0,79 en log10 frente a 0,49 de alpha y 0,33
+ *   de beta). Al normalizar sobre potencia lineal eso significa que delta
+ *   absorbería por sí sola el ~42 % del denominador, comprimiendo el resto de
+ *   índices contra el cero: el recorrido útil de `mellow` cae de 0–1,00 a
+ *   0–0,49 y su desviación se reduce a la mitad.
+ *
+ *   El coste real está en la capacidad de distinguir estados. Midiendo la d de
+ *   Cohen del índice `mellow` entre pares de estados, incluir delta la degrada:
+ *
+ *     CALM vs ATTENTION      1,59 → 0,84   (−47 %)
+ *     CALM vs NEUTRAL        1,16 → 0,80   (−31 %)
+ *     NEUTRAL vs ATTENTION   1,22 → 0,28   (−77 %)
+ *
+ *   Es decir: delta aporta sobre todo potencia de fondo, no información que
+ *   separe los estados que le interesan al juego, y su magnitud enmascara a las
+ *   bandas que sí los separan. En un EEG de electrodos secos sobre la frente,
+ *   además, 0,5–4 Hz es el rango donde caen los artefactos lentos de movimiento
+ *   ocular y muscular, aunque en estos datos no se ha podido confirmar una
+ *   correlación clara entre delta y los ticks con parpadeo o mandíbula.
+ *
+ *   Se sigue registrando en el CSV precisamente para poder rehacer este
+ *   análisis con datos nuevos y revisar la decisión si procede.
+ *
+ * ── Papel de theta ────────────────────────────────────────────────────────
+ *
+ *   Theta tampoco tiene índice propio, pero sí participa: está en el
+ *   denominador, así que los índices son proporciones sobre el total α+β+θ+γ.
+ *   Si theta sube, `mellow` y `concentration` bajan aunque alpha y beta no
+ *   cambien. Influye, por tanto, aunque no tenga umbral asociado.
+ *
  * ── Lógica de prioridad ───────────────────────────────────────────────────
  *
  *   STRESS     → mellow < [stressThreshold]

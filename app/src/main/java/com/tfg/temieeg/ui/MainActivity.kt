@@ -26,6 +26,8 @@ import com.robotemi.sdk.Robot
 import com.tfg.temieeg.R
 import com.tfg.temieeg.data.MentalState
 import com.tfg.temieeg.data.SessionEntry
+import com.tfg.temieeg.data.SessionEvent
+import com.tfg.temieeg.data.SessionMeta
 import androidx.activity.viewModels
 import com.tfg.temieeg.databinding.ActivityMainBinding
 import com.tfg.temieeg.eeg.HeadGestureDetector
@@ -120,6 +122,9 @@ class MainActivity : AppCompatActivity() {
     /** Motor modular de Escape Room. */
     private val escapeRoomEngine get() = eegViewModel.escapeRoomEngine
     private var escapeRoomActive = false
+
+    /** Ultima amplitud de ruido ambiente medida (-1 si el microfono esta apagado). */
+    private var lastNoiseAmplitude = -1
 
     /**
      * Botón de rescate: si el jugador lleva [SKIP_OFFER_DELAY_MS] en la misma
@@ -303,11 +308,14 @@ class MainActivity : AppCompatActivity() {
                         delta          = museState.deltaAbsolute,
                         gamma          = museState.gammaAbsolute,
                         signalQuality  = museState.signalQuality,
+                        gyroX          = museState.gyroX,
                         gyroY          = museState.gyroY,
                         gyroZ          = museState.gyroZ,
                         accX           = museState.accX,
                         accY           = museState.accY,
                         accZ           = museState.accZ,
+                        battery        = museState.battery,
+                        noiseLevel     = lastNoiseAmplitude,
                         blinkEvent     = pendingBlink,
                         jawClenchEvent = pendingJawClench,
                         nodEvent       = pendingNod,
@@ -467,6 +475,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun startSession() {
         sessionLogger.clearSession()
+        sessionLogger.startSession(buildSessionMeta("(registro libre)"))
         processor.reset()
         blinkSession = 0
         jawSession   = 0
@@ -1096,6 +1105,29 @@ class MainActivity : AppCompatActivity() {
         binding.tvVolumeValue.text = "$cur / $max"
     }
 
+    /**
+     * Condiciones en que se graba una sesion. Los umbrales son ajustables y
+     * personalizables por usuario, asi que sin registrarlos dos CSV no son
+     * comparables entre si.
+     */
+    private fun buildSessionMeta(levelName: String) = SessionMeta(
+        appVersion         = com.tfg.temieeg.BuildConfig.VERSION_NAME,
+        device             = "${android.os.Build.MANUFACTURER} ${android.os.Build.MODEL}" +
+                             if (temiController.isSimulated) " (sin robot)" else " (Temi)",
+        levelName          = levelName,
+        connectionMode     = connectionMode.name,
+        stressThreshold    = processor.stressThreshold,
+        attentionThreshold = processor.attentionThreshold,
+        calmThreshold      = processor.calmThreshold,
+        gammaThreshold     = processor.gammaActivityThreshold,
+        blinkDebounceMs    = activeReceiver.blinkDebounceMs,
+        nodThreshold       = headGestureDetector.nodThreshold,
+        shakeThreshold     = headGestureDetector.shakeThreshold,
+        startedAt          = java.text.SimpleDateFormat(
+                                 "yyyy-MM-dd HH:mm:ss", java.util.Locale.getDefault()
+                             ).format(java.util.Date())
+    )
+
     private var calibrationTimer: android.os.CountDownTimer? = null
 
     /**
@@ -1436,20 +1468,36 @@ class MainActivity : AppCompatActivity() {
         binding.btnPlayEscapeRoom.setOnClickListener { maybeShowTutorialThen { showEscapeRoomPicker() } }
         binding.btnEscapeExit.setOnClickListener { stopEscapeRoom() }
         binding.btnEscapeSkip.setOnClickListener {
+            if (gameLogging) gameLogger.logEvent(
+                SessionEvent.ROOM_SKIP, currentRoomTitle)
             cancelSkipOffer()
             escapeRoomEngine.skipCurrentRoom()
         }
 
         // NoiseMonitor → motor (el módulo activo decide si reaccionar o no)
-        noiseMonitor.onAmplitude = { amp -> escapeRoomEngine.onNoiseLevel(amp) }
+        noiseMonitor.onAmplitude = { amp ->
+            lastNoiseAmplitude = amp
+            escapeRoomEngine.onNoiseLevel(amp)
+        }
 
         // Callbacks del motor → UI
         escapeRoomEngine.onSetBlinkDebounce = { ms -> activeReceiver.blinkDebounceMs = ms }
+
+        escapeRoomEngine.onModuleEvent = { type, detail ->
+            if (gameLogging) gameLogger.logEvent(type, detail)
+        }
+
+        escapeRoomEngine.onBranch = { from, to ->
+            if (gameLogging) gameLogger.logEvent(
+                SessionEvent.BRANCH, "sala ${from + 1} -> sala ${to + 1}")
+        }
 
         escapeRoomEngine.onRoomChanged = { current, total, title ->
             currentRoomIndex = current
             currentRoomTitle = title
             restartSkipOffer()
+            if (gameLogging) gameLogger.logEvent(
+                SessionEvent.ROOM_START, "$current/$total $title")
             binding.tvEscapeProgress.text = "Sala $current / $total"
             binding.progressEscapeRooms.progress = ((current - 1) * 100) / total
             binding.tvEscapeModuleType.setImageResource(moduleIconRes(escapeRoomEngine.currentModuleTypeName))
@@ -1465,6 +1513,10 @@ class MainActivity : AppCompatActivity() {
         escapeRoomEngine.onMorseSymbols = { symbols -> binding.tvEscapeMorseSymbols.text = symbols }
 
         escapeRoomEngine.onFeedback = { msg, isSuccess ->
+            // El feedback es la unica senal fiable de intento resuelto: de aqui
+            // salen los tiempos por sala y el numero de intentos del analisis.
+            if (gameLogging && msg.isNotEmpty()) gameLogger.logEvent(
+                if (isSuccess) SessionEvent.ROOM_SUCCESS else SessionEvent.ROOM_FAIL, msg)
             binding.tvEscapeFeedback.text = msg
             if (msg.isEmpty()) {
                 binding.tvEscapeFeedback.background = null
@@ -1500,7 +1552,7 @@ class MainActivity : AppCompatActivity() {
             binding.tvEscapeMorseSymbols.text     = ""
             binding.tvEscapeProgress.text         = getString(R.string.escape_room_completed)
             // Exportar log al terminar la partida correctamente
-            exportGameLog()
+            exportGameLog("completed")
             Handler(Looper.getMainLooper()).postDelayed({ stopEscapeRoom() }, 4000L)
         }
 
@@ -1522,6 +1574,8 @@ class MainActivity : AppCompatActivity() {
         // Indicador visual de robot hablando — muestra 🎙 y bloquea la atención del usuario
         // mientras el BCI está suspendido para evitar confusión por gestos ignorados.
         escapeRoomEngine.onTemiSpeakingChanged = { speaking ->
+            if (gameLogging) gameLogger.logEvent(
+                if (speaking) SessionEvent.TTS_START else SessionEvent.TTS_END)
             if (speaking) {
                 savedHintBeforeSpeaking = binding.tvEscapeHint.text.toString()
                 binding.tvEscapeModuleType.setImageResource(R.drawable.ic_mic)
@@ -1696,7 +1750,9 @@ class MainActivity : AppCompatActivity() {
         // ── Logging automático de partida ────────────────────────────────────
         currentEscapeRoomName = escapeRoomEngine.currentLevelName
         gameLogger.clearSession()
+        gameLogger.startSession(buildSessionMeta(currentEscapeRoomName))
         gameLogging = true
+        gameLogger.logEvent(SessionEvent.GAME_START, currentEscapeRoomName)
         Log.d(TAG, "▶ Game log iniciado para «$currentEscapeRoomName»")
 
         startNoiseMonitor()
@@ -1743,8 +1799,9 @@ class MainActivity : AppCompatActivity() {
      * El archivo se guarda en el almacenamiento externo de la app y se muestra
      * un toast con el nombre del fichero para facilitar su localización.
      */
-    private fun exportGameLog() {
+    private fun exportGameLog(outcome: String = "aborted") {
         if (!gameLogging) return
+        gameLogger.logEvent(SessionEvent.GAME_END, outcome)
         gameLogging = false
         val levelName = currentEscapeRoomName
         currentEscapeRoomName = ""
