@@ -41,6 +41,7 @@ import android.content.SharedPreferences
 import android.widget.RadioGroup
 import com.tfg.temieeg.game.CustomLevelStorage
 import com.tfg.temieeg.game.EscapeRoomCatalog
+import com.tfg.temieeg.game.EscapeRoomDef
 import com.tfg.temieeg.game.EscapeRoomEngine
 import com.tfg.temieeg.game.RobotAction
 import android.widget.LinearLayout
@@ -177,7 +178,19 @@ class MainActivity : AppCompatActivity() {
     /** Monitor de ruido para la sala Morse (requiere RECORD_AUDIO). */
     private val noiseMonitor by lazy { NoiseMonitor(this) }
     /** true si el usuario ha habilitado el micrófono en Configuración. */
-    private var noiseMicEnabled = true
+    private var noiseMicEnabled = false
+
+    /** true mientras se ejecuta el calentamiento de gestos (no se registra log). */
+    private var runningWarmup = false
+    /** Nivel real que se lanzará al terminar el calentamiento, si lo hay. */
+    private var pendingLevel: EscapeRoomDef? = null
+
+    /** true mientras se capturan picos de giroscopio para calibrar nod/shake. */
+    private var capturingGestureCalib = false
+    /** Pico de |gyroY| (nod) medido durante la práctica del calentamiento. */
+    private var warmupPeakNod = 0f
+    /** Pico de |gyroZ| (shake) medido durante la práctica del calentamiento. */
+    private var warmupPeakShake = 0f
 
     /** Launcher de permiso RECORD_AUDIO — inicia el monitor si se concede. */
     private val requestAudioPermission =
@@ -291,6 +304,12 @@ class MainActivity : AppCompatActivity() {
                 updateDeviceStatus(museState)
                 headGestureDetector.addSample(museState.gyroX, museState.gyroY, museState.gyroZ)
                 updateGyroDisplay(museState.gyroX, museState.gyroY, museState.gyroZ)
+                if (capturingGestureCalib) {
+                    val ay = kotlin.math.abs(museState.gyroY)   // pitch → NOD
+                    val az = kotlin.math.abs(museState.gyroZ)   // yaw   → SHAKE
+                    if (ay > warmupPeakNod)   warmupPeakNod   = ay
+                    if (az > warmupPeakShake) warmupPeakShake = az
+                }
                 currentSignalQuality = museState.signalQuality
                 if (escapeRoomActive) escapeRoomEngine.onMentalStateUpdate(state)
                 if (museState.blink)     { pendingBlink     = true; onBlink() }
@@ -1065,8 +1084,8 @@ class MainActivity : AppCompatActivity() {
             binding.sbShakeThreshold.progress     = thresholdToProgress(DEFAULT_SHAKE_THRESHOLD)
             updateGyroChartLimitLines()
 
-            noiseMicEnabled = true
-            binding.switchNoiseMic.isChecked = true
+            noiseMicEnabled = false
+            binding.switchNoiseMic.isChecked = false
             updateThresholdLabels()
             updateBlinkDebounceLabel()
             updateGestureThresholdLabels()
@@ -1202,6 +1221,47 @@ class MainActivity : AppCompatActivity() {
     private fun updateGestureThresholdLabels() {
         binding.tvNodThresholdValue.text   = "%.0f °/s".format(headGestureDetector.nodThreshold)
         binding.tvShakeThresholdValue.text = "%.0f °/s".format(headGestureDetector.shakeThreshold)
+    }
+
+    /**
+     * Deriva umbrales personalizados de nod/shake a partir de los picos de
+     * giroscopio medidos mientras el usuario practicaba en el calentamiento.
+     * El umbral se fija a ~50 % del pico, acotado a un rango seguro, y solo se
+     * aplica si el pico indica un gesto real (evita umbrales demasiado bajos que
+     * dispararían falsos positivos). Se refleja en Configuración y se persiste.
+     */
+    private fun applyGestureCalibration() {
+        val minPeak  = 40f     // por debajo de esto no hubo gesto claro → no calibrar
+        val fraction = 0.5f    // umbral = mitad del pico medido
+        val lo = 15f
+        val hi = 120f
+        var changed = false
+
+        if (warmupPeakNod >= minPeak) {
+            val t = (warmupPeakNod * fraction).coerceIn(lo, hi)
+            headGestureDetector.nodThreshold = t
+            prefs.edit().putFloat(PREF_NOD_THRESHOLD, t).apply()
+            changed = true
+        }
+        if (warmupPeakShake >= minPeak) {
+            val t = (warmupPeakShake * fraction).coerceIn(lo, hi)
+            headGestureDetector.shakeThreshold = t
+            prefs.edit().putFloat(PREF_SHAKE_THRESHOLD, t).apply()
+            changed = true
+        }
+
+        if (changed) {
+            binding.sbNodThreshold.progress   = thresholdToProgress(headGestureDetector.nodThreshold)
+            binding.sbShakeThreshold.progress = thresholdToProgress(headGestureDetector.shakeThreshold)
+            updateGestureThresholdLabels()
+            updateGyroChartLimitLines()
+            Log.d(TAG, "Calibración gestos: nod=%.0f (pico %.0f) · shake=%.0f (pico %.0f)"
+                .format(headGestureDetector.nodThreshold, warmupPeakNod,
+                        headGestureDetector.shakeThreshold, warmupPeakShake))
+        } else {
+            Log.d(TAG, "Calibración de gestos omitida: picos bajos (nod=%.0f, shake=%.0f)"
+                .format(warmupPeakNod, warmupPeakShake))
+        }
     }
 
     /** Actualiza el RadioGroup y la visibilidad de los detalles de cada modo. */
@@ -1495,6 +1555,20 @@ class MainActivity : AppCompatActivity() {
         escapeRoomEngine.onRoomChanged = { current, total, title ->
             currentRoomIndex = current
             currentRoomTitle = title
+
+            // Auto-calibración de nod/shake durante el calentamiento: se capturan
+            // picos de giroscopio mientras el usuario practica en la sala de Sí/No.
+            if (runningWarmup) {
+                if (escapeRoomEngine.currentModuleTypeName == "YesNoModule") {
+                    warmupPeakNod   = 0f
+                    warmupPeakShake = 0f
+                    capturingGestureCalib = true
+                } else if (capturingGestureCalib) {
+                    capturingGestureCalib = false
+                    applyGestureCalibration()
+                }
+            }
+
             restartSkipOffer()
             if (gameLogging) gameLogger.logEvent(
                 SessionEvent.ROOM_START, "$current/$total $title")
@@ -1542,18 +1616,31 @@ class MainActivity : AppCompatActivity() {
 
         escapeRoomEngine.onCompleted = {
             cancelSkipOffer()
-            binding.progressEscapeRooms.progress = 100
-            binding.tvEscapeModuleType.setImageResource(R.drawable.ic_trophy)
-            binding.tvEscapeRoomName.text         = "¡Misión completada!"
-            binding.tvEscapeNarration.text        = "Has superado todos los desafíos mentales.\n¡Enhorabuena!"
-            binding.tvEscapeHint.text             = ""
-            binding.tvEscapeFeedback.text         = ""
-            binding.tvEscapeFeedback.background   = null
-            binding.tvEscapeMorseSymbols.text     = ""
-            binding.tvEscapeProgress.text         = getString(R.string.escape_room_completed)
-            // Exportar log al terminar la partida correctamente
-            exportGameLog("completed")
-            Handler(Looper.getMainLooper()).postDelayed({ stopEscapeRoom() }, 4000L)
+            if (runningWarmup) {
+                // Fin del calentamiento: encadena el nivel real sin cerrar el overlay.
+                runningWarmup = false
+                val next = pendingLevel
+                pendingLevel = null
+                if (next != null) {
+                    escapeRoomEngine.load(next)
+                    startEscapeRoom(warmup = false)
+                } else {
+                    stopEscapeRoom()
+                }
+            } else {
+                binding.progressEscapeRooms.progress = 100
+                binding.tvEscapeModuleType.setImageResource(R.drawable.ic_trophy)
+                binding.tvEscapeRoomName.text         = "¡Misión completada!"
+                binding.tvEscapeNarration.text        = "Has superado todos los desafíos mentales.\n¡Enhorabuena!"
+                binding.tvEscapeHint.text             = ""
+                binding.tvEscapeFeedback.text         = ""
+                binding.tvEscapeFeedback.background   = null
+                binding.tvEscapeMorseSymbols.text     = ""
+                binding.tvEscapeProgress.text         = getString(R.string.escape_room_completed)
+                // Exportar log al terminar la partida correctamente
+                exportGameLog("completed")
+                Handler(Looper.getMainLooper()).postDelayed({ stopEscapeRoom() }, 4000L)
+            }
         }
 
         escapeRoomEngine.onCelebrate    = { temiController.celebrate() }
@@ -1721,15 +1808,16 @@ class MainActivity : AppCompatActivity() {
                 .setImageResource(if (index < builtin.size) R.drawable.ic_play else R.drawable.ic_mod_default)
             row.setOnClickListener {
                 dialog.dismiss()
-                escapeRoomEngine.load(room)
-                startEscapeRoom()
+                offerWarmupThenPlay(room)
             }
             container.addView(row)
         }
         dialog.show()
     }
 
-    private fun startEscapeRoom() {
+    private fun startEscapeRoom(warmup: Boolean = false) {
+        runningWarmup = warmup
+
         // Diagnóstico de robot — visible en Logcat con tag "EscapeRoom"
         val simulated = temiController.isSimulated
         Log.d("EscapeRoom", if (simulated) "⚠ Robot en MODO SIMULADO — Robot.getInstance() = null" else "✅ Robot SDK activo")
@@ -1747,16 +1835,47 @@ class MainActivity : AppCompatActivity() {
         binding.levelEditorScreen.visibility = View.GONE
         binding.escapeRoomOverlay.visibility = View.VISIBLE
 
-        // ── Logging automático de partida ────────────────────────────────────
-        currentEscapeRoomName = escapeRoomEngine.currentLevelName
-        gameLogger.clearSession()
-        gameLogger.startSession(buildSessionMeta(currentEscapeRoomName))
-        gameLogging = true
-        gameLogger.logEvent(SessionEvent.GAME_START, currentEscapeRoomName)
-        Log.d(TAG, "▶ Game log iniciado para «$currentEscapeRoomName»")
+        if (warmup) {
+            // El calentamiento no cuenta como partida: no se registra en CSV.
+            gameLogging = false
+            Log.d(TAG, "▶ Calentamiento de gestos iniciado (sin log)")
+        } else {
+            // ── Logging automático de partida ────────────────────────────────
+            currentEscapeRoomName = escapeRoomEngine.currentLevelName
+            gameLogger.clearSession()
+            gameLogger.startSession(buildSessionMeta(currentEscapeRoomName))
+            gameLogging = true
+            gameLogger.logEvent(SessionEvent.GAME_START, currentEscapeRoomName)
+            Log.d(TAG, "▶ Game log iniciado para «$currentEscapeRoomName»")
+        }
 
         startNoiseMonitor()
         escapeRoomEngine.start()
+    }
+
+    /**
+     * Ofrece el calentamiento de gestos (común y saltable) antes de jugar [room].
+     * Si el usuario acepta, se ejecuta [EscapeRoomCatalog.WARMUP] y, al terminar,
+     * se encadena automáticamente el nivel elegido (ver onCompleted).
+     */
+    private fun offerWarmupThenPlay(room: EscapeRoomDef) {
+        com.google.android.material.dialog.MaterialAlertDialogBuilder(
+            this, R.style.ThemeOverlay_TemiEeg_Dialog
+        )
+            .setTitle("Calentamiento de gestos")
+            .setMessage("¿Quieres practicar los gestos (parpadeo, mandíbula, asentir y negar) " +
+                        "antes de empezar? Es rápido y no cuenta para nada.\n\n" +
+                        "Puedes saltarlo si ya sabes cómo funcionan.")
+            .setPositiveButton("Practicar") { _, _ ->
+                pendingLevel = room
+                escapeRoomEngine.load(EscapeRoomCatalog.WARMUP)
+                startEscapeRoom(warmup = true)
+            }
+            .setNegativeButton("Saltar") { _, _ ->
+                escapeRoomEngine.load(room)
+                startEscapeRoom(warmup = false)
+            }
+            .show()
     }
 
     /** Reinicia el contador del botón de rescate (se llama al entrar en cada sala). */
@@ -1777,6 +1896,9 @@ class MainActivity : AppCompatActivity() {
         noiseMonitor.stop()
         cancelSkipOffer()
         escapeRoomActive = false
+        runningWarmup = false
+        capturingGestureCalib = false
+        pendingLevel = null
         currentRoomIndex = -1
         currentRoomTitle = ""
         activeReceiver.blinkDebounceMs          = MuseReceiver.BLINK_DEBOUNCE_DEFAULT_MS
@@ -1854,7 +1976,7 @@ class MainActivity : AppCompatActivity() {
             prefs.getFloat(PREF_NOD_THRESHOLD,   DEFAULT_NOD_THRESHOLD)
         headGestureDetector.shakeThreshold =
             prefs.getFloat(PREF_SHAKE_THRESHOLD, DEFAULT_SHAKE_THRESHOLD)
-        noiseMicEnabled = prefs.getBoolean(PREF_NOISE_MIC, true)
+        noiseMicEnabled = prefs.getBoolean(PREF_NOISE_MIC, false)
     }
 
     companion object {

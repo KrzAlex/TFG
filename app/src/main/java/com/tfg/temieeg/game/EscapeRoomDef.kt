@@ -74,6 +74,25 @@ object EscapeRoomCatalog {
         transitionVideoResId = com.tfg.temieeg.R.raw.clasico_transicion,
         modules = listOf(
 
+            // Bienvenida temática (sin reto BCI): el robot abre la historia.
+            RobotAnimModule(
+                title     = "Ante la mazmorra",
+                narration = "Las antorchas se encienden. Tu mente es la única llave para " +
+                            "salir de aquí.",
+                hint      = "El robot te da la bienvenida",
+                delayMs   = 5000L,
+                robotActions = listOf(
+                    RobotAction(RobotAction.Type.TILT_HEAD, "20"),
+                    RobotAction(RobotAction.Type.SPEAK,
+                        "Bienvenido, aventurero. Estás ante una vieja mazmorra y solo tu mente " +
+                        "podrá abrir sus puertas. ¿Preparado? Empezamos."),
+                    RobotAction(RobotAction.Type.TURN,      "45"),
+                    RobotAction(RobotAction.Type.WAIT,      "500"),
+                    RobotAction(RobotAction.Type.TURN,      "-45"),
+                    RobotAction(RobotAction.Type.TILT_HEAD, "25")
+                )
+            ),
+
             CalmModule(
                 title           = "La Puerta de la Calma",
                 narration       = "Una puerta sellada por energía mental. Solo se abre " +
@@ -135,6 +154,23 @@ object EscapeRoomCatalog {
                         "Última puerta. Tiene dos mecanismos y hay que accionarlos en orden. " +
                         "Primero parpadea para girar la llave. Después aprieta la mandíbula " +
                         "para descorrer el cerrojo. Tendrás tiempo de sobra.")
+                )
+            ),
+
+            // Celebración temática final (sin reto BCI): cierra la historia.
+            RobotAnimModule(
+                title     = "¡Has escapado!",
+                narration = "Las puertas se abren de par en par. Lo has conseguido: has " +
+                            "escapado usando solo tu mente.",
+                hint      = "El robot celebra tu hazaña",
+                delayMs   = 6000L,
+                robotActions = listOf(
+                    RobotAction(RobotAction.Type.SPEAK,
+                        "¡Lo has conseguido! Has escapado usando solo la fuerza de tu mente. " +
+                        "Enhorabuena, aventurero."),
+                    RobotAction(RobotAction.Type.TILT_HEAD, "10"),
+                    RobotAction(RobotAction.Type.TURN,      "360"),
+                    RobotAction(RobotAction.Type.TILT_HEAD, "25")
                 )
             )
         )
@@ -273,6 +309,25 @@ object EscapeRoomCatalog {
                         "Estación a la vista. Última maniobra: parpadea para alinear la nave " +
                         "y aprieta la mandíbula para completar el acoplamiento.")
                 )
+            ),
+
+            // Celebración temática final (sin reto BCI): cierra la historia.
+            RobotAnimModule(
+                title     = "Estación alcanzada",
+                narration = "El acoplamiento ha sido un éxito. La tripulación está a salvo " +
+                            "gracias a ti.",
+                hint      = "El robot celebra la misión",
+                delayMs   = 6000L,
+                robotActions = listOf(
+                    RobotAction(RobotAction.Type.SPEAK,
+                        "Acoplamiento completado. Bienvenido a bordo de la estación, piloto. " +
+                        "La misión ha sido un éxito."),
+                    RobotAction(RobotAction.Type.TILT_HEAD, "10"),
+                    RobotAction(RobotAction.Type.TURN,      "90"),
+                    RobotAction(RobotAction.Type.WAIT,      "600"),
+                    RobotAction(RobotAction.Type.TURN,      "-90"),
+                    RobotAction(RobotAction.Type.TILT_HEAD, "25")
+                )
             )
         )
     )
@@ -283,18 +338,39 @@ object EscapeRoomCatalog {
     // de mandíbula corta. La bifurcación aquí penaliza el error en vez de
     // ofrecer una ruta:
     //
-    //   índice 1 · el espejo miente
-    //        acierto → 3  sigue camino
-    //        fallo   → 2  sala de castigo, y desde ahí continúa a 3
+    //   índice 2 · el espejo miente
+    //        acierto → 4  sigue camino
+    //        fallo   → 3  sala de castigo, y desde ahí continúa a 4
     //
     // Así el error cuesta una sala extra, pero nunca deja al jugador atascado.
 
     val CASTLE = EscapeRoomDef(
-        id      = "castle",
-        name    = "El Castillo Encantado",
+        id                   = "castle",
+        name                 = "El Castillo Encantado",
+        introVideoResId      = com.tfg.temieeg.R.raw.castillo_intro,
+        transitionVideoResId = com.tfg.temieeg.R.raw.castillo_transicion,
         modules = listOf(
 
-            // 0 ── Morse difícil
+            // 0 ── Bienvenida temática (sin reto BCI)
+            RobotAnimModule(
+                title     = "El castillo despierta",
+                narration = "Las puertas del castillo se cierran a tu espalda. La única salida " +
+                            "está en tu mente.",
+                hint      = "El robot te da la bienvenida",
+                delayMs   = 5500L,
+                robotActions = listOf(
+                    RobotAction(RobotAction.Type.TILT_HEAD, "20"),
+                    RobotAction(RobotAction.Type.SPEAK,
+                        "Bienvenido al castillo encantado. Sus puertas se han cerrado a tu " +
+                        "espalda y solo una mente serena podrá liberarte. El castillo despierta."),
+                    RobotAction(RobotAction.Type.TURN,      "60"),
+                    RobotAction(RobotAction.Type.WAIT,      "600"),
+                    RobotAction(RobotAction.Type.TURN,      "-60"),
+                    RobotAction(RobotAction.Type.TILT_HEAD, "28")
+                )
+            ),
+
+            // 1 ── Morse difícil
             MorseModule(
                 title      = "El Grimorio",
                 narration  = "Un libro de hechizos exige la runa correcta, trazada con " +
@@ -311,7 +387,7 @@ object EscapeRoomCatalog {
                 )
             ),
 
-            // 1 ── El espejo (bifurcación por acierto/fallo)
+            // 2 ── El espejo (bifurcación por acierto/fallo)
             YesNoModule(
                 title     = "El Espejo que Miente",
                 narration = "Un espejo encantado te interroga. Dicen que solo miente " +
@@ -323,8 +399,8 @@ object EscapeRoomCatalog {
                     // Al llevar goto, esta pregunta decide el camino y salta de sala.
                     YesNoQuestion(
                         text      = "El espejo te ofrece un atajo. ¿Rechazas su ayuda?",
-                        gotoOnYes = 3,   // desconfiar era lo correcto: sigues camino
-                        gotoOnNo  = 2    // aceptar el atajo: caes en la sala de los susurros
+                        gotoOnYes = 4,   // desconfiar era lo correcto: sigues camino
+                        gotoOnNo  = 3    // aceptar el atajo: caes en la sala de los susurros
                     )
                 ),
                 robotActions = listOf(
@@ -336,13 +412,14 @@ object EscapeRoomCatalog {
                 )
             ),
 
-            // 2 ── Castigo por fiarse del espejo
+            // 3 ── Castigo por fiarse del espejo
             MorseModule(
                 title      = "El Eco del Hechizo",
                 narration  = "El atajo era una trampa. Para salir del eco hay que repetir " +
                              "la runa que lo cerró.",
                 hint       = "1 parpadeo = ·      2 parpadeos rápidos = —",
                 letterPool = "RUDK".toList(),
+                videoResId = com.tfg.temieeg.R.raw.castillo_eco_hechizo,
                 robotActions = listOf(
                     RobotAction(RobotAction.Type.TILT_HEAD, "20"),
                     RobotAction(RobotAction.Type.TURN,      "60"),
@@ -354,7 +431,7 @@ object EscapeRoomCatalog {
                 )
             ),
 
-            // 3 ── Calma larga
+            // 4 ── Calma larga
             CalmModule(
                 title           = "La Cripta",
                 narration       = "El frío de la cripta solo se soporta con la mente serena.",
@@ -369,7 +446,7 @@ object EscapeRoomCatalog {
                 )
             ),
 
-            // 4 ── Final con ventana corta
+            // 5 ── Final con ventana corta
             BlinkClenchModule(
                 title       = "El Portón de Hierro",
                 narration   = "El portón cede un instante. Hay que aprovecharlo.",
@@ -382,120 +459,21 @@ object EscapeRoomCatalog {
                         "solo cede un instante. Parpadea para soltar el pestillo y aprieta " +
                         "la mandíbula enseguida, sin esperar.")
                 )
-            )
-        )
-    )
+            ),
 
-    // ── Historia 4: El Laboratorio del Dr. Mente (demo — todos los módulos) ──────
-    //
-    // Usa los comandos GOTO:entrada, GOTO:centro y GOTO:escritorio.
-    // Para que el robot se mueva hay que tener esas ubicaciones guardadas en el
-    // mapa del Temi (pulsación larga sobre un punto en la pantalla de inicio).
-    // Si no existen, el GOTO se ignora silenciosamente y el resto funciona igual.
-
-    val LABORATORIO = EscapeRoomDef(
-        id                   = "lvl_demo_laboratorio",
-        name                 = "El Laboratorio del Dr. Mente",
-        introVideoResId      = com.tfg.temieeg.R.raw.entrada,
-        transitionVideoResId = com.tfg.temieeg.R.raw.intermedio,
-        modules = listOf(
-
+            // Celebración temática final (sin reto BCI): cierra la historia.
             RobotAnimModule(
-                title     = "Bienvenida",
-                narration = "¡Bienvenido al Laboratorio del Dr. Mente! Soy Temi, tu guía en esta misión. " +
-                            "Voy a ponerte a prueba en seis experimentos mentales. Sígueme.",
-                hint      = "Observa y escucha al robot",
-                delayMs   = 15_000L,
+                title     = "El hechizo roto",
+                narration = "El portón cede con un crujido y la maldición del castillo se " +
+                            "desvanece. Eres libre.",
+                hint      = "El robot celebra tu victoria",
+                delayMs   = 6000L,
                 robotActions = listOf(
-                    RobotAction(RobotAction.Type.WAIT,      "1500"),
-                    RobotAction(RobotAction.Type.TILT_HEAD, "38"),
-                    RobotAction(RobotAction.Type.SPEAK,     "Bienvenido al Laboratorio del Dr. Mente. Soy tu asistente TEMI."),
-                    RobotAction(RobotAction.Type.WAIT,      "3000"),
-                    RobotAction(RobotAction.Type.TURN,      "90"),
-                    RobotAction(RobotAction.Type.WAIT,      "1000"),
-                    RobotAction(RobotAction.Type.TURN,      "-90"),
-                    RobotAction(RobotAction.Type.TILT_HEAD, "25"),
-                    RobotAction(RobotAction.Type.SPEAK,     "Prepárate. Comenzamos ahora.")
-                )
-            ),
-
-            CalmModule(
-                title           = "La Cámara de la Serenidad",
-                narration       = "Primera prueba. El sensor cerebral mide tu nivel de relajación. " +
-                                  "Cierra los ojos y respira despacio hasta alcanzar la calma.",
-                hint            = "Respira lentamente — mantén la calma durante 5 segundos",
-                secondsRequired = 5,
-                robotActions    = listOf(
-                    RobotAction(RobotAction.Type.TILT_HEAD, "25"),
-                    RobotAction(RobotAction.Type.SPEAK,     "Cierra los ojos. Inhala despacio. Exhala despacio.")
-                )
-            ),
-
-            MorseModule(
-                title        = "El Código Secreto",
-                narration    = "La puerta del laboratorio está cifrada con código Morse. " +
-                               "Parpadea la letra que te diga el robot. " +
-                               "Un parpadeo largo es punto, dos rápidos seguidos es raya.",
-                hint         = "Parpadea la letra en Morse — · punto  ·· raya",
-                letterPool   = "ETISAN".toList(),
-                robotActions = listOf(
-                    RobotAction(RobotAction.Type.TURN,      "90"),
-                    RobotAction(RobotAction.Type.WAIT,      "800"),
-                    RobotAction(RobotAction.Type.TURN,      "-90"),
-                    RobotAction(RobotAction.Type.TILT_HEAD, "25"),
-                    RobotAction(RobotAction.Type.SPEAK,     "Parpadea la letra que veas en pantalla usando código Morse.")
-                )
-            ),
-
-            YesNoModule(
-                title        = "El Interrogatorio",
-                narration    = "El sistema de seguridad verifica tu identidad. " +
-                               "Responde las preguntas con gestos: asiente para SÍ, niega para NO. " +
-                               "Debes repetir el gesto para confirmar.",
-                hint         = "NOD = Sí  ·  SHAKE = No  ·  Repite el gesto para confirmar",
-                questions    = listOf(
-                    YesNoQuestion(
-                        text        = "¿Eres el investigador autorizado para acceder al laboratorio?",
-                        expectedYes = true
-                    ),
-                    YesNoQuestion(
-                        text        = "¿Has compartido el código de acceso con alguien ajeno?",
-                        expectedYes = false
-                    )
-                ),
-                robotActions = listOf(
-                    RobotAction(RobotAction.Type.TILT_HEAD, "25"),
-                    RobotAction(RobotAction.Type.SPEAK,     "Voy a hacerte dos preguntas de seguridad. Responde con la cabeza.")
-                )
-            ),
-
-            BlinkClenchModule(
-                title        = "El Interruptor Neural",
-                narration    = "El generador principal está apagado. Para activarlo debes enviar una señal " +
-                               "neural combinada: primero parpadea para cargarlo, luego aprieta la mandíbula " +
-                               "para disparar el pulso.",
-                hint         = "Parpadea → aprieta la mandíbula en menos de 4 segundos",
-                jawWindowMs  = 4000L,
-                robotActions = listOf(
-                    RobotAction(RobotAction.Type.TURN,      "45"),
-                    RobotAction(RobotAction.Type.WAIT,      "800"),
-                    RobotAction(RobotAction.Type.TURN,      "-45"),
-                    RobotAction(RobotAction.Type.TILT_HEAD, "25"),
-                    RobotAction(RobotAction.Type.SPEAK,     "Parpadea primero para cargar. Luego aprieta la mandíbula para disparar.")
-                )
-            ),
-
-            VideoStateModule(
-                title           = "El Monitor Final",
-                narration       = "Última prueba. El sistema monitoriza tu estado mental en tiempo real. " +
-                                  "Mantén la calma durante 8 segundos. ¡Casi lo tienes!",
-                hint            = "Mantén la calma — 8 segundos",
-                targetState     = MentalState.CALM,
-                secondsRequired = 8,
-                robotActions    = listOf(
-                    RobotAction(RobotAction.Type.TILT_HEAD, "38"),
-                    RobotAction(RobotAction.Type.SPEAK,     "Esta es la prueba final. Confía en ti mismo y mantén la calma."),
-                    RobotAction(RobotAction.Type.WAIT,      "3500"),
+                    RobotAction(RobotAction.Type.SPEAK,
+                        "El hechizo se ha roto y el castillo te deja marchar. Has demostrado " +
+                        "tener una mente serena y valiente."),
+                    RobotAction(RobotAction.Type.TILT_HEAD, "10"),
+                    RobotAction(RobotAction.Type.TURN,      "360"),
                     RobotAction(RobotAction.Type.TILT_HEAD, "25")
                 )
             )
@@ -542,7 +520,77 @@ object EscapeRoomCatalog {
         )
     )
 
+    // ── Calentamiento de gestos ───────────────────────────────────────────────
+    //
+    // Minitutorial práctico, común a todos los niveles y saltable. NO aparece en
+    // el selector (no está en `all`): el motor lo ejecuta antes del nivel elegido
+    // si el usuario acepta. Sirve para comprobar que la diadema detecta los cuatro
+    // gestos antes de que empiece a contar la partida. Sin bifurcaciones.
+
+    val WARMUP = EscapeRoomDef(
+        id   = "warmup",
+        name = "Calentamiento de gestos",
+        modules = listOf(
+
+            RobotAnimModule(
+                title     = "Vamos a probar los gestos",
+                narration = "Antes de empezar vamos a comprobar que la diadema detecta bien " +
+                            "tus gestos. Esto no cuenta para nada: es solo para practicar.",
+                hint      = "Escucha al robot",
+                delayMs   = 5000L,
+                robotActions = listOf(
+                    RobotAction(RobotAction.Type.TILT_HEAD, "25"),
+                    RobotAction(RobotAction.Type.SPEAK,
+                        "Vamos a comprobar que te detecto bien. Tranquilo, esto no puntúa: " +
+                        "solo practicamos.")
+                )
+            ),
+
+            YesNoModule(
+                title     = "Asentir y negar",
+                narration = "Practica los gestos de cabeza. Primero asiente para decir sí y " +
+                            "luego niega para decir no.",
+                hint      = "Asiente para SÍ  ·  Niega para NO",
+                questions = listOf(
+                    YesNoQuestion("Asiente con la cabeza para decir SÍ.", expectedYes = true),
+                    YesNoQuestion("Ahora niega con la cabeza para decir NO.", expectedYes = false)
+                ),
+                robotActions = listOf(
+                    RobotAction(RobotAction.Type.TILT_HEAD, "25"),
+                    RobotAction(RobotAction.Type.SPEAK,
+                        "Primero asiente con la cabeza para decir sí. Luego niega para decir no.")
+                )
+            ),
+
+            BlinkClenchModule(
+                title       = "Parpadeo y mandíbula",
+                narration   = "Ahora los dos últimos gestos: parpadea para accionar y, justo " +
+                              "después, aprieta la mandíbula.",
+                hint        = "Parpadea → aprieta la mandíbula",
+                jawWindowMs = 6000L,   // ventana muy amplia: es práctica, sin prisa
+                robotActions = listOf(
+                    RobotAction(RobotAction.Type.TILT_HEAD, "25"),
+                    RobotAction(RobotAction.Type.SPEAK,
+                        "Último paso. Parpadea una vez y, justo después, aprieta la mandíbula. " +
+                        "Tienes tiempo de sobra.")
+                )
+            ),
+
+            RobotAnimModule(
+                title     = "¡Listo!",
+                narration = "Perfecto, te detecto bien. Empezamos la aventura.",
+                hint      = "Preparado para empezar",
+                delayMs   = 4000L,
+                robotActions = listOf(
+                    RobotAction(RobotAction.Type.SPEAK,
+                        "Perfecto. Te detecto sin problema. Empezamos la aventura."),
+                    RobotAction(RobotAction.Type.TILT_HEAD, "25")
+                )
+            )
+        )
+    )
+
     // ── Lista completa (MainActivity la itera para el selector) ───────────────
 
-    val all: List<EscapeRoomDef> = listOf(CLASSIC, SPACE, CASTLE, LABORATORIO, NAV_TEST)
+    val all: List<EscapeRoomDef> = listOf(CLASSIC, SPACE, CASTLE, NAV_TEST)
 }
