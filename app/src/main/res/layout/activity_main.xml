@@ -1152,7 +1152,7 @@
                         android:layout_height="wrap_content"
                         android:textSize="12sp"
                         android:textColor="@color/text_muted"
-                        android:text="α — β —" />
+                        android:text="δ — θ — α — β — γ —" />
                 </LinearLayout>
 
                 <TextView

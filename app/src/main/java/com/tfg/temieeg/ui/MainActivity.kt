@@ -640,11 +640,15 @@ class MainActivity : AppCompatActivity() {
         binding.tvConcentrationValue.text    = "%.2f".format(conc)
         binding.tvMellowValue.text           = "%.2f".format(mellow)
 
-        // Bandas brutas para calibración visual
+        // Bandas brutas para calibración visual — las 5 en orden de frecuencia
+        // (δ θ α β γ), aunque la clasificación no use todas.
+        val delta = metrics["delta"] ?: 0f
+        val theta = metrics["theta"] ?: 0f
         val alpha = metrics["alpha"] ?: 0f
         val beta  = metrics["beta"]  ?: 0f
-        val theta = metrics["theta"] ?: 0f
-        binding.tvRawBands.text = "α %.2f  β %.2f  θ %.2f".format(alpha, beta, theta)
+        val gamma = metrics["gamma"] ?: 0f
+        binding.tvRawBands.text = "δ %.2f  θ %.2f  α %.2f  β %.2f  γ %.2f"
+            .format(delta, theta, alpha, beta, gamma)
     }
 
     /** Muestra el indicador de parpadeo brevemente y actualiza el contador. */
