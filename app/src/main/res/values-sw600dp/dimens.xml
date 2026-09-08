@@ -47,7 +47,7 @@
     <dimen name="er_module_icon_padding">18dp</dimen>
     <dimen name="er_room_title_text">26sp</dimen>
     <dimen name="er_card_padding">26dp</dimen>
-    <dimen name="er_narration_text">17sp</dimen>
+    <dimen name="er_narration_text">22sp</dimen>
     <dimen name="er_hint_text">19sp</dimen>
     <dimen name="er_morse_text">34sp</dimen>
     <dimen name="er_feedback_text">17sp</dimen>

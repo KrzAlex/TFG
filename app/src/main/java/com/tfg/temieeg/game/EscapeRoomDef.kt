@@ -165,11 +165,16 @@ object EscapeRoomCatalog {
                 hint      = "El robot celebra tu hazaña",
                 delayMs   = 6000L,
                 robotActions = listOf(
+                    RobotAction(RobotAction.Type.TILT_HEAD, "10"),
                     RobotAction(RobotAction.Type.SPEAK,
                         "¡Lo has conseguido! Has escapado usando solo la fuerza de tu mente. " +
                         "Enhorabuena, aventurero."),
-                    RobotAction(RobotAction.Type.TILT_HEAD, "10"),
-                    RobotAction(RobotAction.Type.TURN,      "360"),
+                    // Celebración: mira a un lado y a otro y vuelve al frente.
+                    RobotAction(RobotAction.Type.TURN,      "40"),
+                    RobotAction(RobotAction.Type.WAIT,      "700"),
+                    RobotAction(RobotAction.Type.TURN,      "-80"),
+                    RobotAction(RobotAction.Type.WAIT,      "700"),
+                    RobotAction(RobotAction.Type.TURN,      "40"),
                     RobotAction(RobotAction.Type.TILT_HEAD, "25")
                 )
             )
@@ -319,13 +324,16 @@ object EscapeRoomCatalog {
                 hint      = "El robot celebra la misión",
                 delayMs   = 6000L,
                 robotActions = listOf(
+                    RobotAction(RobotAction.Type.TILT_HEAD, "10"),
                     RobotAction(RobotAction.Type.SPEAK,
                         "Acoplamiento completado. Bienvenido a bordo de la estación, piloto. " +
                         "La misión ha sido un éxito."),
-                    RobotAction(RobotAction.Type.TILT_HEAD, "10"),
-                    RobotAction(RobotAction.Type.TURN,      "90"),
-                    RobotAction(RobotAction.Type.WAIT,      "600"),
-                    RobotAction(RobotAction.Type.TURN,      "-90"),
+                    // Celebración: mira a un lado y a otro y vuelve al frente.
+                    RobotAction(RobotAction.Type.TURN,      "40"),
+                    RobotAction(RobotAction.Type.WAIT,      "700"),
+                    RobotAction(RobotAction.Type.TURN,      "-80"),
+                    RobotAction(RobotAction.Type.WAIT,      "700"),
+                    RobotAction(RobotAction.Type.TURN,      "40"),
                     RobotAction(RobotAction.Type.TILT_HEAD, "25")
                 )
             )
@@ -376,14 +384,14 @@ object EscapeRoomCatalog {
                 narration  = "Un libro de hechizos exige la runa correcta, trazada con " +
                              "puntos y rayas.",
                 hint       = "1 parpadeo = ·      2 parpadeos rápidos = —",
-                // Letras de tres símbolos: más largas de trazar que las del tutorial.
-                letterPool = "RUDKGO".toList(),
+                // Letras de dos símbolos: un escalón por encima del tutorial (E/T de
+                // un símbolo), pero sin la dificultad de las de tres que fallaban mucho.
+                letterPool = "ANIM".toList(),
                 robotActions = listOf(
                     RobotAction(RobotAction.Type.TILT_HEAD, "28"),
                     RobotAction(RobotAction.Type.SPEAK,
-                        "Este grimorio solo se abre con la runa exacta. Las runas de este " +
-                        "castillo son más largas que las que has visto hasta ahora: tres " +
-                        "señales cada una. Tómate tu tiempo, verás el trazo en pantalla.")
+                        "Este grimorio solo se abre con la runa exacta. Cada runa se traza " +
+                        "con dos señales. Tómate tu tiempo, verás el trazo en pantalla.")
                 )
             ),
 
@@ -418,7 +426,7 @@ object EscapeRoomCatalog {
                 narration  = "El atajo era una trampa. Para salir del eco hay que repetir " +
                              "la runa que lo cerró.",
                 hint       = "1 parpadeo = ·      2 parpadeos rápidos = —",
-                letterPool = "RUDK".toList(),
+                letterPool = "AN".toList(),
                 videoResId = com.tfg.temieeg.R.raw.castillo_eco_hechizo,
                 robotActions = listOf(
                     RobotAction(RobotAction.Type.TILT_HEAD, "20"),
@@ -469,11 +477,16 @@ object EscapeRoomCatalog {
                 hint      = "El robot celebra tu victoria",
                 delayMs   = 6000L,
                 robotActions = listOf(
+                    RobotAction(RobotAction.Type.TILT_HEAD, "10"),
                     RobotAction(RobotAction.Type.SPEAK,
                         "El hechizo se ha roto y el castillo te deja marchar. Has demostrado " +
                         "tener una mente serena y valiente."),
-                    RobotAction(RobotAction.Type.TILT_HEAD, "10"),
-                    RobotAction(RobotAction.Type.TURN,      "360"),
+                    // Celebración: mira a un lado y a otro y vuelve al frente.
+                    RobotAction(RobotAction.Type.TURN,      "40"),
+                    RobotAction(RobotAction.Type.WAIT,      "700"),
+                    RobotAction(RobotAction.Type.TURN,      "-80"),
+                    RobotAction(RobotAction.Type.WAIT,      "700"),
+                    RobotAction(RobotAction.Type.TURN,      "40"),
                     RobotAction(RobotAction.Type.TILT_HEAD, "25")
                 )
             )

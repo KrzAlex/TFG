@@ -1,8 +1,6 @@
 package com.tfg.temieeg.robot
 
 import android.content.Context
-import android.net.ConnectivityManager
-import android.net.NetworkCapabilities
 import android.os.Handler
 import android.os.Looper
 import android.speech.tts.TextToSpeech
@@ -234,23 +232,23 @@ class TemiController(private val robot: Robot?, private val appContext: Context)
         }
         if (!robotReady) { log("Robot no listo — usando Android TTS (fallback)"); speakAndroid(text); return }
 
-        if (hasInternet()) {
-            // TTS de Temi con voz y animación (requiere internet)
-            try {
-                robot?.speak(
-                    TtsRequest.create(
-                        speech = text,
-                        isShowOnConversationLayer = false,
-                        showAnimationOnly = false   // false = habla de verdad (con audio)
-                    )
+        // Temi tiene su propio motor TTS y habla tanto online como offline. Antes
+        // se exigía internet "validado" y, cuando fallaba esa comprobación (redes
+        // sin validación, típicas de laboratorio), se caía al TTS de Android con
+        // una voz genérica o en otro idioma. Ahora se usa siempre la voz de Temi
+        // en el robot; Android TTS queda solo como último recurso si la llamada falla.
+        try {
+            robot?.speak(
+                TtsRequest.create(
+                    speech = text,
+                    // false = NO muestra la capa de conversación de Temi sobre la pantalla;
+                    // el texto que habla se enseña en el propio rótulo del juego (arriba).
+                    isShowOnConversationLayer = false,
+                    showAnimationOnly = false   // false = habla de verdad (con audio)
                 )
-            } catch (e: Exception) {
-                log("Error TTS Temi: ${e.message} — usando fallback Android TTS")
-                speakAndroid(text)
-            }
-        } else {
-            // Sin internet → TTS nativo Android (offline)
-            log("Sin internet — usando Android TTS (offline)")
+            )
+        } catch (e: Exception) {
+            log("Error TTS Temi: ${e.message} — usando fallback Android TTS")
             speakAndroid(text)
         }
     }
@@ -262,14 +260,6 @@ class TemiController(private val robot: Robot?, private val appContext: Context)
             return
         }
         androidTts?.speak(text, TextToSpeech.QUEUE_FLUSH, null, "temi_tts")
-    }
-
-    private fun hasInternet(): Boolean {
-        val cm = appContext.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
-        val net = cm.activeNetwork ?: return false
-        val caps = cm.getNetworkCapabilities(net) ?: return false
-        return caps.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET) &&
-               caps.hasCapability(NetworkCapabilities.NET_CAPABILITY_VALIDATED)
     }
 
     /**

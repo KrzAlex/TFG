@@ -178,7 +178,7 @@ class MainActivity : AppCompatActivity() {
     /** Monitor de ruido para la sala Morse (requiere RECORD_AUDIO). */
     private val noiseMonitor by lazy { NoiseMonitor(this) }
     /** true si el usuario ha habilitado el micrófono en Configuración. */
-    private var noiseMicEnabled = false
+    private var noiseMicEnabled = true
 
     /** true mientras se ejecuta el calentamiento de gestos (no se registra log). */
     private var runningWarmup = false
@@ -399,6 +399,11 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
+
+        // Mantener la pantalla encendida: en la escape room se interactúa con
+        // gestos/EEG, no tocando la pantalla, y el reposo por inactividad del Temi
+        // mandaría la app a segundo plano (onStop → se desconecta el MUSE).
+        window.addFlags(android.view.WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
 
         temiController = TemiController(robot, applicationContext)
         sessionLogger  = SessionLogger(this)
@@ -1559,6 +1564,7 @@ class MainActivity : AppCompatActivity() {
         escapeRoomEngine.onRoomChanged = { current, total, title ->
             currentRoomIndex = current
             currentRoomTitle = title
+            savedNarrationBeforeSpeaking = null
 
             // Auto-calibración de nod/shake durante el calentamiento: se capturan
             // picos de giroscopio mientras el usuario practica en la sala de Sí/No.
@@ -1648,13 +1654,13 @@ class MainActivity : AppCompatActivity() {
         }
 
         escapeRoomEngine.onCelebrate    = { temiController.celebrate() }
-        escapeRoomEngine.onTemiSpeak    = { text   -> temiController.speak(text) }
+        escapeRoomEngine.onTemiSpeak    = { text   -> showEscapeSpeech(text); temiController.speak(text) }
         temiController.onTtsEnd         = { escapeRoomEngine.onTtsEnded() }
         temiController.onGoToEnd        = { escapeRoomEngine.onGoToEnded() }
 
         escapeRoomEngine.onRobotAction  = { action ->
             when (action.type) {
-                RobotAction.Type.SPEAK     -> temiController.speak(action.param)
+                RobotAction.Type.SPEAK     -> { showEscapeSpeech(action.param); temiController.speak(action.param) }
                 RobotAction.Type.GOTO      -> temiController.goTo(action.param)
                 RobotAction.Type.TILT_HEAD -> temiController.tiltHead(action.param.toIntOrNull() ?: 0)
                 RobotAction.Type.TURN      -> temiController.turnBy(action.param.toIntOrNull() ?: 0)
@@ -1674,6 +1680,11 @@ class MainActivity : AppCompatActivity() {
             } else {
                 binding.tvEscapeModuleType.setImageResource(moduleIconRes(escapeRoomEngine.currentModuleTypeName))
                 binding.tvEscapeHint.text = savedHintBeforeSpeaking
+                // Restaura la narración de la sala tras la locución del robot.
+                savedNarrationBeforeSpeaking?.let {
+                    binding.tvEscapeNarration.text = it
+                    savedNarrationBeforeSpeaking = null
+                }
             }
         }
 
@@ -1882,6 +1893,21 @@ class MainActivity : AppCompatActivity() {
             .show()
     }
 
+    /** Narración mostrada antes de que el robot empezara a hablar (para restaurarla). */
+    private var savedNarrationBeforeSpeaking: String? = null
+
+    /**
+     * Muestra en el bloque de narración (centrado) el texto que está diciendo el
+     * robot, para que el jugador pueda leerlo. Guarda la narración previa para
+     * restaurarla cuando termine de hablar.
+     */
+    private fun showEscapeSpeech(text: String) {
+        if (savedNarrationBeforeSpeaking == null) {
+            savedNarrationBeforeSpeaking = binding.tvEscapeNarration.text.toString()
+        }
+        binding.tvEscapeNarration.text = text
+    }
+
     /** Reinicia el contador del botón de rescate (se llama al entrar en cada sala). */
     private fun restartSkipOffer() {
         binding.btnEscapeSkip.visibility = View.GONE
@@ -1903,6 +1929,7 @@ class MainActivity : AppCompatActivity() {
         runningWarmup = false
         capturingGestureCalib = false
         pendingLevel = null
+        savedNarrationBeforeSpeaking = null
         currentRoomIndex = -1
         currentRoomTitle = ""
         activeReceiver.blinkDebounceMs          = MuseReceiver.BLINK_DEBOUNCE_DEFAULT_MS

@@ -44,3 +44,15 @@ node_modules/
 CLAUDE.md
 TFG_CONTEXT_CLAUDE_CODE.md
 .claude/
+
+# Copias de seguridad y duplicados (no versionar; muse_share.zip SI se versiona)
+backup_pre_optimizacion.zip
+/libmuse_android.jar
+demo_laboratorio.json
+
+# Datos de sesiones locales
+# Se versionan los registros reales; se excluye el lote del 2026-09-08 y el
+# cuestionario (contienen datos no verificables) y la carpeta de trabajo temporal.
+registros buenos/*2026-09-08*.csv
+registros buenos/Cuestionario_escape_room.csv
+sesiones_temi/

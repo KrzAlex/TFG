@@ -64,6 +64,14 @@ class LevelEditorController(
         val targetState: String = "CALM"
     )
 
+    /** Fila de edición de una pregunta Sí/No: texto, respuesta correcta y saltos opcionales. */
+    private class QRow(
+        val etQ: EditText,
+        val cb: CheckBox,
+        val etY: EditText,   // salto si SÍ (nº de sala 1-N; vacío = sin salto)
+        val etN: EditText    // salto si NO
+    )
+
     private val pendingRoomConfigs = mutableListOf<RoomConfig>()
     private var editingLevelId: String? = null
     private var pendingVideoSlot = -1
@@ -438,9 +446,10 @@ class LevelEditorController(
         }
 
         // ── Constructor visual de preguntas Sí/No ─────────────────────────────
-        val questionRows = mutableListOf<Pair<EditText, CheckBox>>()
+        // Cada pregunta: texto + respuesta correcta (SÍ) + saltos opcionales (nº de sala 1-N).
+        val questionRows = mutableListOf<QRow>()
         if (type == "YESNO") {
-            label("Preguntas (✓ = respuesta SÍ)")
+            label("Preguntas (✓ = respuesta SÍ · saltos opcionales por nº de sala 1-N)")
             val qContainer = LinearLayout(activity).apply {
                 orientation = LinearLayout.VERTICAL
                 layoutParams = LinearLayout.LayoutParams(
@@ -448,29 +457,59 @@ class LevelEditorController(
             }
             view.addView(qContainer)
 
-            fun addQuestionRow(text: String = "", expectedYes: Boolean = true) {
-                val row = LinearLayout(activity).apply {
-                    orientation = LinearLayout.HORIZONTAL
-                    gravity = android.view.Gravity.CENTER_VERTICAL
+            fun addQuestionRow(text: String = "", expectedYes: Boolean = true,
+                               gotoYes: Int? = null, gotoNo: Int? = null) {
+                val block = LinearLayout(activity).apply {
+                    orientation = LinearLayout.VERTICAL
+                    setPadding(0, 10, 0, 10)
                     layoutParams = LinearLayout.LayoutParams(
                         LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT)
+                }
+                // Línea 1: pregunta + SÍ + borrar
+                val row1 = LinearLayout(activity).apply {
+                    orientation = LinearLayout.HORIZONTAL
+                    gravity = android.view.Gravity.CENTER_VERTICAL
                 }
                 val etQ = EditText(activity).apply {
                     hint = "Pregunta"; setText(text)
                     layoutParams = LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f)
                 }
                 val cb = CheckBox(activity).apply { this.text = "SÍ"; isChecked = expectedYes }
+                lateinit var qrow: QRow
                 val btnDel = android.widget.Button(activity).apply {
                     this.text = "✕"
-                    setOnClickListener { qContainer.removeView(row); questionRows.removeAll { it.first === etQ } }
+                    setOnClickListener { qContainer.removeView(block); questionRows.remove(qrow) }
                 }
-                row.addView(etQ); row.addView(cb); row.addView(btnDel)
-                qContainer.addView(row); questionRows.add(etQ to cb)
+                row1.addView(etQ); row1.addView(cb); row1.addView(btnDel)
+                // Línea 2: saltos opcionales (bifurcación)
+                val row2 = LinearLayout(activity).apply {
+                    orientation = LinearLayout.HORIZONTAL
+                    gravity = android.view.Gravity.CENTER_VERTICAL
+                }
+                fun gotoField(labelTxt: String, value: Int?): EditText {
+                    row2.addView(TextView(activity).apply {
+                        this.text = labelTxt; textSize = 12f; setPadding(0, 0, 6, 0)
+                        setTextColor(ContextCompat.getColor(activity, R.color.text_secondary))
+                    })
+                    val et = EditText(activity).apply {
+                        hint = "—"
+                        inputType = android.text.InputType.TYPE_CLASS_NUMBER
+                        if (value != null) setText((value + 1).toString())
+                        layoutParams = LinearLayout.LayoutParams(140, LinearLayout.LayoutParams.WRAP_CONTENT)
+                    }
+                    row2.addView(et); return et
+                }
+                val etY = gotoField("Si SÍ → sala", gotoYes)
+                val etN = gotoField("    Si NO → sala", gotoNo)
+                block.addView(row1); block.addView(row2)
+                qContainer.addView(block)
+                qrow = QRow(etQ, cb, etY, etN)
+                questionRows.add(qrow)
             }
 
             val initQs = existing?.questions?.takeIf { it.isNotEmpty() }
                 ?: listOf(YesNoQuestion("", true))
-            initQs.forEach { q -> addQuestionRow(q.text, q.expectedYes) }
+            initQs.forEach { q -> addQuestionRow(q.text, q.expectedYes, q.gotoOnYes, q.gotoOnNo) }
             view.addView(android.widget.Button(activity).apply {
                 text = "+ Añadir pregunta"
                 setOnClickListener { addQuestionRow() }
@@ -557,8 +596,17 @@ class LevelEditorController(
                         letterPool = extra.uppercase().ifEmpty { "ETISAN" },
                         robotActions = actions, videoPath = existing?.videoPath)
                     "YESNO"        -> {
+                        fun salaIndex(et: EditText): Int? =
+                            et.text.toString().trim().toIntOrNull()?.let { it - 1 }?.takeIf { it >= 0 }
                         val qs = questionRows
-                            .map { (etQ, cb) -> YesNoQuestion(etQ.text.toString().trim(), cb.isChecked) }
+                            .map { qr ->
+                                YesNoQuestion(
+                                    qr.etQ.text.toString().trim(),
+                                    qr.cb.isChecked,
+                                    salaIndex(qr.etY),
+                                    salaIndex(qr.etN)
+                                )
+                            }
                             .filter { it.text.isNotEmpty() }
                         RoomConfig("YESNO", title, narration, hint, questions = qs,
                             robotActions = actions, videoPath = existing?.videoPath)

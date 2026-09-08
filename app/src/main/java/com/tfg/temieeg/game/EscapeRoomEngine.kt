@@ -272,6 +272,10 @@ class EscapeRoomEngine {
 
     // Los eventos de estado mental NO se bloquean: CalmModule y VideoStateModule
     // necesitan la señal continua incluso mientras el robot habla.
+    // El estado mental se entrega siempre al módulo (no se bloquea a nivel de motor).
+    // La pausa "mientras el robot habla" la aplican los propios módulos por tiempo
+    // (calma, estado+vídeo) consultando isRobotSpeaking: ignoran cambios de estado y
+    // detienen su contador durante la locución, en todos los niveles.
     fun onMentalStateUpdate(state: MentalState) { if (running) currentModule?.onMentalState(state) }
 
     // Los gestos discretos SÍ se bloquean durante el habla del robot.
@@ -444,6 +448,9 @@ class EscapeRoomEngine {
         module.onLogEvent               = { type, detail -> onModuleEvent?.invoke(type, detail) }
         module.onStartConcurrentVideo   = onStartConcurrentVideo
         module.onStopConcurrentVideo    = onStopConcurrentVideo
+        // Permite a los módulos por tiempo (calma, estado+vídeo) pausar su contador
+        // mientras el robot habla — en todos los niveles, no solo en el primero.
+        module.isRobotSpeaking          = { temiSpeaking }
     }
 
     private fun complete() {
@@ -540,13 +547,15 @@ class EscapeRoomEngine {
         private const val TAG          = "EscapeRoomEngine"
         /**
          * Ms de margen tras el fin del TTS antes de volver a aceptar gestos BCI.
-         * 1 200 ms da tiempo suficiente para que el eco acústico de los altavoces
-         * de Temi se disipe y no genere parpadeos/mandíbulas falsos en la diadema Muse.
+         * Suficiente para que el eco acústico de los altavoces de Temi se disipe
+         * y no genere parpadeos/mandíbulas falsos en la diadema Muse. Ajustado a
+         * 800 ms (antes 1 200) para que el juego responda antes tras cada locución;
+         * si aparecieran falsos gestos por eco, subir de nuevo.
          */
-        private const val BCI_GRACE_MS = 1_200L
+        private const val BCI_GRACE_MS = 800L
 
         /** Ritmo estimado de habla (ms por caracter) para la duracion minima. */
-        private const val SPEECH_MS_PER_CHAR = 60L
+        private const val SPEECH_MS_PER_CHAR = 55L
         private const val SPEECH_MIN_MS      = 1_200L
         private const val SPEECH_MAX_MS      = 20_000L
         /** Margen sobre la duracion estimada antes de liberar por seguridad. */

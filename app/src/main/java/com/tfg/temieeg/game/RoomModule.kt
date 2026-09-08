@@ -132,6 +132,13 @@ abstract class RoomModule(
      */
     internal var onTemiSpeakDone: (() -> Unit)? = null
 
+    /**
+     * Devuelve true mientras el robot está hablando. Lo inyecta el motor. Los
+     * módulos que cuentan por tiempo (calma, estado+vídeo) lo consultan para
+     * **pausar** su contador mientras Temi habla, en todos los niveles.
+     */
+    internal var isRobotSpeaking: () -> Boolean = { false }
+
     protected val handler = Handler(Looper.getMainLooper())
 
     /** Llamado por el motor justo antes de mostrar la sala. */
@@ -185,6 +192,8 @@ class CalmModule(
     private val calmTick = object : Runnable {
         override fun run() {
             if (!tickActive) return
+            // Pausa mientras el robot habla: no avanza el contador ni cambia el estado.
+            if (isRobotSpeaking()) { handler.postDelayed(this, 1000L); return }
             calmSeconds++
             onHintChanged?.invoke("$calmSeconds / $secondsRequired s 🧘")
             if (calmSeconds >= secondsRequired) {
@@ -212,7 +221,8 @@ class CalmModule(
     }
 
     override fun onMentalState(state: MentalState) {
-        if (completed) return   // sala ya superada: ignorar el resto de muestras
+        if (completed) return          // sala ya superada: ignorar el resto de muestras
+        if (isRobotSpeaking()) return  // pausa mientras el robot habla: no arranca ni reinicia
         if (state == MentalState.CALM) {
             if (!tickActive) {
                 tickActive = true
@@ -256,8 +266,10 @@ class MorseModule(
     hintImagePath: String? = null
 ) : RoomModule(title, narration, hint, videoResId, videoPath, robotActions, hintImagePath) {
 
-    // dashWindowMs subido a 500 ms: más tiempo para hacer el doble parpadeo (raya)
-    private val decoder          = MorseDecoder(dashWindowMs = 500L)
+    // Ventanas más tolerantes: 600 ms para el doble parpadeo (raya) y 2200 ms de
+    // silencio antes de cerrar la letra, para no fallar por cerrar antes de tiempo
+    // en letras de varios símbolos (era la causa de muchos fallos en el Castillo).
+    private val decoder          = MorseDecoder(dashWindowMs = 600L, letterGapMs = 2200L)
     private var targetLetter     = ' '
     private var lastNoiseWarning = 0L
 
@@ -297,6 +309,11 @@ class MorseModule(
 
     private fun pickNewLetter() {
         targetLetter = letterPool.random()
+        announceLetter()
+    }
+
+    /** Anuncia la letra objetivo ACTUAL (sin elegir una nueva): pista, log y voz. */
+    private fun announceLetter() {
         // Se muestra tambien el patron de puntos y rayas: obligar a abrir el
         // menu de ayuda en cada letra rompia el ritmo del juego.
         onHintChanged?.invoke(hintFor(targetLetter))
@@ -328,12 +345,13 @@ class MorseModule(
         } else {
             val code = MorseDecoder.spacedCodeFor(targetLetter)
             onFeedback?.invoke(
-                if (code != null) "❌ Era «$targetLetter»  ($code) — inténtalo de nuevo."
-                else              "❌ Era «$targetLetter» — inténtalo de nuevo.",
+                if (code != null) "❌ La letra es «$targetLetter»  ($code) — inténtalo de nuevo."
+                else              "❌ La letra es «$targetLetter» — inténtalo de nuevo.",
                 false
             )
-            speakSilenced("No es correcto. La letra era $targetLetter. Inténtalo de nuevo.")
-            handler.postDelayed(::pickNewLetter, 1800L)
+            speakSilenced("No es correcto. La letra sigue siendo $targetLetter. Inténtalo de nuevo.")
+            // Repite la MISMA letra (no elige una nueva): antes cambiaba sola al fallar.
+            handler.postDelayed(::announceLetter, 1800L)
         }
     }
 
@@ -650,6 +668,8 @@ class VideoStateModule(
     private val tick = object : Runnable {
         override fun run() {
             if (!tickActive) return
+            // Pausa mientras el robot habla, igual que en la sala de calma.
+            if (isRobotSpeaking()) { handler.postDelayed(this, 1000L); return }
             seconds++
             val label = when (targetState) {
                 MentalState.CALM      -> "calma 🧘"
@@ -694,6 +714,7 @@ class VideoStateModule(
 
     override fun onMentalState(state: MentalState) {
         if (completed) return                // sala ya superada
+        if (isRobotSpeaking()) return        // pausa mientras el robot habla
         val target = targetState ?: return   // modo libre: ignorar estado EEG
         if (state == target) {
             if (!tickActive) { tickActive = true; handler.post(tick) }
